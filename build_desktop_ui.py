@@ -1,4 +1,20 @@
-<!DOCTYPE html>
+# -*- coding: utf-8 -*-
+"""
+CleanFlow Pro - Windows 11 Fluent 2 Consumer Desktop Interface Generator
+Built according to local APP_Studio & frontend-design & winui specifications.
+Strict Rules:
+- NO EMOJI IN CODE OR UI.
+- Genuine Windows 11 Fluent 2 Desktop Software Vernacular:
+  * Titlebar with drag region, disk switcher, window controls
+  * NavigationView sidebar with active indicator pills and badge counts
+  * Storage Ribbon & Health Hero (boldness in one place)
+  * High-density desktop data tables with instant filtering, sorting, batch actions
+  * Dedicated workspaces: Smart Clean, Junction Migration, Giant Files Radar, Database Vacuum, Custom Rules
+  * Native WinUI ContentDialog modals, InfoBar banners, and Toast notifications
+- Zero runtime dependencies, completely self-contained offline HTML.
+"""
+
+HTML_CONTENT = r'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -2594,3 +2610,11 @@
   </script>
 </body>
 </html>
+'''
+
+if __name__ == '__main__':
+    import os
+    target_path = os.path.join(os.path.dirname(__file__), 'src', 'ui.html')
+    with open(target_path, 'w', encoding='utf-8') as f:
+        f.write(HTML_CONTENT)
+    print(f"Generated Fluent 2 Desktop UI: {target_path} ({len(HTML_CONTENT)} bytes)")

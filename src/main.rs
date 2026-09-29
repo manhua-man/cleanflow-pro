@@ -1,4 +1,4 @@
-#![cfg_attr(not(test), windows_subsystem = "windows")]
+// #![cfg_attr(not(test), windows_subsystem = "windows")]
 
 use cleanflow::rules::RuleConfig;
 use cleanflow::scanner::scan_all;
