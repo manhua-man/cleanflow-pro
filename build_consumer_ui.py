@@ -1,4 +1,14 @@
-<!DOCTYPE html>
+# -*- coding: utf-8 -*-
+"""
+Generator for CleanFlow Pro Consumer-Grade Frontend Design.
+Strict Rules:
+- NO EMOJI ANYWHERE.
+- Premium consumer-grade aesthetics: modern glassmorphism, soft glowing highlights,
+  friendly human copywriting, clear visual hierarchy, comfortable font sizes.
+- Zero dependencies, completely offline, self-contained single HTML.
+"""
+
+HTML_CONTENT = r'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -2578,3 +2588,9 @@
   </script>
 </body>
 </html>
+'''
+
+if __name__ == "__main__":
+    with open("src/ui.html", "w", encoding="utf-8") as f:
+        f.write(HTML_CONTENT.strip())
+    print("Successfully generated consumer-grade src/ui.html!")
