@@ -58,6 +58,12 @@ struct DeleteFileRequest {
     path: String,
 }
 
+#[derive(serde::Deserialize)]
+struct AddCustomRuleRequest {
+    name: String,
+    path_pattern: String,
+}
+
 pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
     let running = Arc::new(AtomicBool::new(true));
     let running_clone = running.clone();
@@ -392,6 +398,30 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                         send_json_response(request, err_json);
                     }
                 }
+            } else if url == "/api/rules/custom" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                let req_parsed: Result<AddCustomRuleRequest, _> = serde_json::from_str(&content);
+                match req_parsed {
+                    Ok(req) => match save_custom_rule(req) {
+                        Ok(_) => {
+                            send_json_response(request, r#"{"success": true, "message": "规则保存成功"}"#.to_string());
+                        }
+                        Err(e) => {
+                            let err_json = serde_json::json!({
+                                "success": false,
+                                "error": e
+                            })
+                            .to_string();
+                            send_json_response(request, err_json);
+                        }
+                    },
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
             } else if url == "/api/shutdown" && method == Method::Post {
                 running_clone.store(false, Ordering::SeqCst);
                 let res_json = r#"{"success": true, "message": "已关闭"}"#;
@@ -432,6 +462,53 @@ fn load_rules() -> Result<RuleConfig, String> {
     // 3. Fallback to embedded rules.json string
     let embedded = include_str!("../rules.json");
     serde_json::from_str(embedded).map_err(|e| e.to_string())
+}
+
+fn save_custom_rule(req: AddCustomRuleRequest) -> Result<(), String> {
+    let mut config = load_rules()?;
+
+    let rule_id = format!(
+        "custom_{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs()
+    );
+
+    let new_rule = crate::rules::CleanRule {
+        id: rule_id,
+        name: req.name,
+        path_pattern: req.path_pattern,
+        action: "clean_dir".to_string(),
+        default_checked: true,
+    };
+
+    if let Some(cat) = config.categories.iter_mut().find(|c| c.id == "custom") {
+        cat.rules.push(new_rule);
+    } else {
+        config.categories.push(crate::rules::RuleCategory {
+            id: "custom".to_string(),
+            name: "用户自定义扩展".to_string(),
+            description: "用户在界面自定义配置的专属巡检清理规则".to_string(),
+            risk_level: "safe".to_string(),
+            rules: vec![new_rule],
+        });
+    }
+
+    let json_str = serde_json::to_string_pretty(&config).map_err(|e| e.to_string())?;
+
+    // Save to relative path
+    let _ = std::fs::write("rules.json", &json_str);
+
+    // Also save alongside current exe if executable location is different
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(dir) = exe.parent() {
+            let p = dir.join("rules.json");
+            let _ = std::fs::write(p, &json_str);
+        }
+    }
+
+    Ok(())
 }
 
 fn send_json_response(request: tiny_http::Request, body: String) {

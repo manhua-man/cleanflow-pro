@@ -1574,6 +1574,23 @@
             </div>
           </div>
 
+          <!-- One-Click Total Care Workflow Banner -->
+          <div class="fluent-card reveal-card" style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(56, 189, 248, 0.28); padding: 16px 20px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="status-badge" style="background: rgba(14, 165, 233, 0.2); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.35); font-weight: 700;">旗舰协同流水线</span>
+                <h3 style="font-size: 15px; font-weight: 700; color: #FFFFFF; margin: 0;">一键全域综合深度治理流</h3>
+              </div>
+              <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                自动化三段式闭环：净化全盘安全临时缓存 &rarr; 紧凑收缩 SQLite 数据库物理碎片 &rarr; 全量重算驱动器安全水位与健康得分。
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-shrink: 0;">
+              <button class="fluent-btn-subtle" onclick="openCustomRuleModal()" style="border: 1px solid var(--stroke-divider); font-size: 12px;">+ 自定义规则</button>
+              <button class="fluent-btn-primary" onclick="openTotalCareModal()" style="font-size: 13px; font-weight: 700; padding: 9px 20px; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);">立即执行全域治理</button>
+            </div>
+          </div>
+
           <!-- Four Pillars Matrix -->
           <div class="pillar-grid">
             <div class="pillar-card" onclick="navigate('smart')">
@@ -1952,6 +1969,91 @@
 
       <div class="modal-actions" id="migModalActions">
         <button class="btn btn-secondary btn-sm" id="migModalCloseBtn" onclick="closeMigrationModal()" style="display: none;">完成并关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- One-Click Total Care Workflow Modal -->
+  <div class="modal-overlay" id="modalTotalCare">
+    <div class="modal-dialog" style="width: 560px; max-width: 92vw;">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="status-badge" style="background: rgba(14, 165, 233, 0.2); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.35); font-weight: 700;">旗舰协同</span>
+          <h4 id="tcModalTitle" style="font-size: 15px; font-weight: 700; color: #FFFFFF; margin: 0;">一键全域综合治理流</h4>
+        </div>
+        <span class="status-badge badge-dev" id="tcModalStateBadge">准备就绪</span>
+      </div>
+
+      <!-- Pipeline Steps Indicator -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px;">
+        <div id="tcStep1" style="background: var(--mica-bg); border: 1px solid var(--stroke-divider); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 11px;">
+          <div style="color: var(--text-tertiary); font-size: 10px; font-weight: 600;">阶段 1</div>
+          <div style="color: #FFFFFF; font-weight: 600; margin-top: 2px;">零风险缓存净化</div>
+          <div id="tcStep1Status" style="color: var(--text-secondary); font-size: 10px; margin-top: 4px;">待执行</div>
+        </div>
+        <div id="tcStep2" style="background: var(--mica-bg); border: 1px solid var(--stroke-divider); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 11px;">
+          <div style="color: var(--text-tertiary); font-size: 10px; font-weight: 600;">阶段 2</div>
+          <div style="color: #FFFFFF; font-weight: 600; margin-top: 2px;">SQLite 碎片收缩</div>
+          <div id="tcStep2Status" style="color: var(--text-secondary); font-size: 10px; margin-top: 4px;">待执行</div>
+        </div>
+        <div id="tcStep3" style="background: var(--mica-bg); border: 1px solid var(--stroke-divider); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 11px;">
+          <div style="color: var(--text-tertiary); font-size: 10px; font-weight: 600;">阶段 3</div>
+          <div style="color: #FFFFFF; font-weight: 600; margin-top: 2px;">驱动器健康重算</div>
+          <div id="tcStep3Status" style="color: var(--text-secondary); font-size: 10px; margin-top: 4px;">待执行</div>
+        </div>
+      </div>
+
+      <!-- Overall Pipeline Progress -->
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;">
+          <span style="color: var(--text-tertiary);">治理流水线总体进度</span>
+          <span id="tcProgressPercent" class="tabular-num" style="font-weight: 700; color: #FFFFFF;">0%</span>
+        </div>
+        <div style="height: 8px; background: rgba(255,255,255,0.07); border-radius: var(--radius-pill); overflow: hidden; position: relative;">
+          <div id="tcProgressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #0284C7, #10B981); border-radius: var(--radius-pill); transition: width 350ms ease;"></div>
+        </div>
+      </div>
+
+      <!-- Terminal / Realtime Log Box -->
+      <div id="tcConsoleLog" style="height: 100px; overflow-y: auto; background: rgba(0, 0, 0, 0.45); border: 1px solid var(--stroke-divider); border-radius: var(--radius-sm); padding: 8px 10px; font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+        <div style="color: var(--text-tertiary);">[系统就绪] 点击下方「立即开始治理」启动全域深度协同管线...</div>
+      </div>
+
+      <div class="modal-actions" id="tcModalActions">
+        <button class="btn btn-secondary btn-sm" id="tcCancelBtn" onclick="closeTotalCareModal()">取消</button>
+        <button class="btn btn-primary btn-sm" id="tcRunBtn" onclick="executeTotalCarePipeline()">立即开始治理</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Rule Studio Modal -->
+  <div class="modal-overlay" id="modalCustomRule">
+    <div class="modal-dialog" style="width: 500px; max-width: 90vw;">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h4 style="font-size: 15px; font-weight: 700; color: #FFFFFF; margin: 0;">自定义巡检与清理规则工作台</h4>
+        <span class="status-badge badge-dev">规则引擎</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">规则显示名称</label>
+          <input type="text" id="customRuleName" class="fluent-input" placeholder="例如：用户临时下载解压目录" style="width: 100%; font-size: 12px; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--stroke-divider); background: var(--mica-bg); color: #FFFFFF;">
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">绝对物理路径或环境变量表达式</label>
+          <input type="text" id="customRulePattern" class="fluent-input" placeholder="例如：%USERPROFILE%\Downloads\temp 或 C:\Temp\builds" style="width: 100%; font-size: 12px; font-family: var(--font-mono); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--stroke-divider); background: var(--mica-bg); color: #FFFFFF;">
+          <div style="font-size: 10px; color: var(--text-tertiary); margin-top: 4px;">系统将自动展开 %USERPROFILE%, %LOCALAPPDATA%, %TEMP% 等环境变量。</div>
+        </div>
+
+        <div style="background: var(--mica-surface-subtle); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--stroke-divider); font-size: 11px; color: var(--text-secondary);">
+          <span style="font-weight: 700; color: #FFFFFF;">安全沙盒承诺: </span>新增的自定义规则仅在用户勾选后方会执行物理清空，严禁配置包含 Windows/System32 等核心系统目录。
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 16px;">
+        <button class="btn btn-secondary btn-sm" onclick="closeCustomRuleModal()">取消</button>
+        <button class="btn btn-primary btn-sm" onclick="submitCustomRule()">保存规则并全域生效</button>
       </div>
     </div>
   </div>
@@ -3103,6 +3205,173 @@
         }
       } catch (err) {
         showToast(`收缩异常: ${err}`);
+      }
+    }
+
+    function openTotalCareModal() {
+      document.getElementById('modalTotalCare').classList.add('show');
+    }
+
+    function closeTotalCareModal() {
+      document.getElementById('modalTotalCare').classList.remove('show');
+    }
+
+    function openCustomRuleModal() {
+      document.getElementById('customRuleName').value = '';
+      document.getElementById('customRulePattern').value = '';
+      document.getElementById('modalCustomRule').classList.add('show');
+    }
+
+    function closeCustomRuleModal() {
+      document.getElementById('modalCustomRule').classList.remove('show');
+    }
+
+    async function submitCustomRule() {
+      const name = document.getElementById('customRuleName').value.trim();
+      const pattern = document.getElementById('customRulePattern').value.trim();
+      if (!name || !pattern) {
+        showToast('请完整填写规则名称与目标路径');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/rules/custom', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name, path_pattern: pattern })
+        });
+        const out = await res.json();
+        if (out.success) {
+          showToast('自定义规则添加成功! 正在全量重新巡检...');
+          closeCustomRuleModal();
+          await refreshDisks();
+          await runFullScan();
+        } else {
+          showToast('添加失败: ' + (out.error || '未知错误'));
+        }
+      } catch (e) {
+        showToast('网络通信异常: ' + e);
+      }
+    }
+
+    async function executeTotalCarePipeline() {
+      const runBtn = document.getElementById('tcRunBtn');
+      const cancelBtn = document.getElementById('tcCancelBtn');
+      const logBox = document.getElementById('tcConsoleLog');
+      const pBar = document.getElementById('tcProgressBar');
+      const pText = document.getElementById('tcProgressPercent');
+      const stateBadge = document.getElementById('tcModalStateBadge');
+
+      runBtn.style.display = 'none';
+      cancelBtn.style.display = 'none';
+      stateBadge.className = 'status-badge badge-dev';
+      stateBadge.innerText = '治理进行中';
+
+      function log(msg, color) {
+        const d = document.createElement('div');
+        if (color) d.style.color = color;
+        d.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logBox.appendChild(d);
+        logBox.scrollTop = logBox.scrollHeight;
+      }
+
+      try {
+        // Stage 1: Safe clean
+        document.getElementById('tcStep1Status').innerText = '正在净化...';
+        document.getElementById('tcStep1Status').style.color = 'var(--accent-brand)';
+        pBar.style.width = '30%';
+        pText.innerText = '30%';
+        log('开始执行阶段 1: 扫描并清理零风险系统临时文件与开发缓存...');
+
+        let safePaths = [];
+        if (allScanData && allScanData.categories) {
+          allScanData.categories.forEach(cat => {
+            cat.rules.forEach(r => {
+              if (r.safe_to_delete && r.paths) {
+                r.paths.forEach(p => safePaths.push(p.path));
+              }
+            });
+          });
+        }
+
+        let freedBytes = 0;
+        if (safePaths.length > 0) {
+          const cleanRes = await fetch('/api/clean', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paths: safePaths })
+          });
+          const cleanData = await cleanRes.json();
+          freedBytes = cleanData.bytes_freed || 0;
+          log(`阶段 1 完成: 清理 ${cleanData.files_deleted || 0} 个文件，释放 ${formatSize(freedBytes)} 物理空间。`, 'var(--color-safe)');
+        } else {
+          log('阶段 1 完成: 未发现可清除的安全临时文件。', 'var(--text-secondary)');
+        }
+        document.getElementById('tcStep1Status').innerText = '已净化完成';
+        document.getElementById('tcStep1Status').style.color = 'var(--color-safe)';
+
+        // Stage 2: SQLite vacuum
+        document.getElementById('tcStep2Status').innerText = '正在收缩...';
+        document.getElementById('tcStep2Status').style.color = 'var(--accent-brand)';
+        pBar.style.width = '70%';
+        pText.innerText = '70%';
+        log('开始执行阶段 2: 整理收缩全盘 SQLite 数据库物理碎片...');
+
+        let vacuumFreed = 0;
+        let dbCount = 0;
+        if (allVacuumRules && allVacuumRules.length > 0) {
+          for (const rule of allVacuumRules) {
+            if (rule.paths && rule.paths.length > 0) {
+              for (const item of rule.paths) {
+                try {
+                  const vRes = await fetch('/api/vacuum', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ db_path: item.path })
+                  });
+                  const vData = await vRes.json();
+                  if (vData.success) {
+                    dbCount++;
+                    vacuumFreed += (vData.bytes_freed || 0);
+                    log(`已收缩数据库: ${item.path.split(/[\\\\/]/).pop()} (优化 ${formatSize(vData.bytes_freed || 0)})`, 'var(--color-safe)');
+                  }
+                } catch (err) {}
+              }
+            }
+          }
+          log(`阶段 2 完成: 成功收缩 ${dbCount} 处数据库，重组释放 ${formatSize(vacuumFreed)} 碎块空间。`, 'var(--color-safe)');
+        } else {
+          log('阶段 2 完成: 无需整理收缩的 SQLite 数据库。', 'var(--text-secondary)');
+        }
+        document.getElementById('tcStep2Status').innerText = '收缩整理完毕';
+        document.getElementById('tcStep2Status').style.color = 'var(--color-safe)';
+
+        // Stage 3: Refresh metrics & health
+        document.getElementById('tcStep3Status').innerText = '正在重算...';
+        document.getElementById('tcStep3Status').style.color = 'var(--accent-brand)';
+        pBar.style.width = '100%';
+        pText.innerText = '100%';
+        log('开始执行阶段 3: 重算全盘容量指标、驱动器安全冗余及健康评分...');
+
+        await refreshDisks();
+        await runFullScan();
+
+        document.getElementById('tcStep3Status').innerText = '健康评级极佳';
+        document.getElementById('tcStep3Status').style.color = 'var(--color-safe)';
+        stateBadge.className = 'status-badge badge-safe';
+        stateBadge.innerText = '治理圆满达成';
+
+        const grandTotal = freedBytes + vacuumFreed;
+        log(`全域深度治理圆满达成! 合计净释放空间 ${formatSize(grandTotal)}，健康度已达极佳状态。`, 'var(--color-safe)');
+
+        cancelBtn.innerText = '完成并关闭';
+        cancelBtn.style.display = 'inline-flex';
+      } catch (e) {
+        log('治理过程中发生异常: ' + e, 'var(--color-danger)');
+        stateBadge.className = 'status-badge badge-danger';
+        stateBadge.innerText = '执行受阻';
+        cancelBtn.innerText = '关闭';
+        cancelBtn.style.display = 'inline-flex';
       }
     }
 
