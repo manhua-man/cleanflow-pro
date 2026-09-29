@@ -527,7 +527,154 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     /* ==========================================================================
        HERO: Visual Storage Ribbon & Health Center (Spend boldness here)
        ========================================================================== */
-    .storage-hero-card {
+    
+    /* Giant Files Radar: Type Distribution Strip */
+    .type-distribution-card {
+      background: var(--fluent-card-bg);
+      border: 1px solid var(--fluent-stroke-card);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .type-distribution-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .type-distribution-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .type-distribution-bar {
+      height: 14px;
+      background-color: rgba(0, 0, 0, 0.35);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      display: flex;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .type-seg {
+      height: 100%;
+      transition: width 350ms ease;
+    }
+
+    .seg-db { background-color: #00bcf2; }
+    .seg-exe { background-color: #f2994a; }
+    .seg-vdisk { background-color: #8764b8; }
+    .seg-archive { background-color: #0078d4; }
+    .seg-other { background-color: #8899a6; }
+
+    .type-legend-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .type-legend-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--fluent-subtle);
+      border: 1px solid var(--fluent-stroke-control);
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 120ms ease;
+      color: var(--text-secondary);
+    }
+
+    .type-legend-pill:hover, .type-legend-pill.active {
+      background: var(--fluent-subtle-hover);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Migration Studio: Disk Projection Comparison Card */
+    .projection-card {
+      background: var(--fluent-card-bg);
+      border: 1px solid var(--fluent-stroke-card);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .projection-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .projection-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .projection-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .projection-column {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .projection-col-title {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .projection-bar-box {
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      display: flex;
+    }
+
+    .projection-seg-used { background-color: #0078d4; height: 100%; }
+    .projection-seg-freed { background-color: #10b981; height: 100%; }
+    .projection-seg-free { background-color: rgba(255, 255, 255, 0.12); height: 100%; }
+
+    .badge-openwith {
+      background: rgba(96, 205, 255, 0.15);
+      color: #60cdff;
+      border: 1px solid rgba(96, 205, 255, 0.3);
+    }
+
+.storage-hero-card {
       background: var(--fluent-card-bg);
       border: 1px solid var(--fluent-stroke-card);
       border-radius: var(--radius-md);
@@ -1516,8 +1663,9 @@ HTML_CONTENT = r'''<!DOCTYPE html>
             </div>
             <div class="filter-tabs">
               <div class="filter-tab active" onclick="setRegistryFilter('all', this)">全部</div>
-              <div class="filter-tab" onclick="setRegistryFilter('mui', this)">应用缓存残留</div>
-              <div class="filter-tab" onclick="setRegistryFilter('uninst', this)">卸载项残留</div>
+              <div class="filter-tab" onclick="setRegistryFilter('mui', this)">应用缓存 (MUICache)</div>
+              <div class="filter-tab" onclick="setRegistryFilter('openwith', this)">右键打开方式 (OpenWith)</div>
+              <div class="filter-tab" onclick="setRegistryFilter('uninst', this)">失效卸载项 (Uninstall)</div>
             </div>
           </div>
           <div>
@@ -1556,6 +1704,45 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           <div class="workspace-title-box">
             <h1>目录无损搬家 (Junction 虚拟化)</h1>
             <p>将庞大资产搬迁至 D 盘或其它大容量驱动器，原位创建 NTFS Junction，软件无感照常运行</p>
+          </div>
+        </div>
+
+        <!-- Storage Migration Projection Visualizer -->
+        <div class="projection-card">
+          <div class="projection-header">
+            <div class="projection-title">空间无损搬迁效益预测 (NTFS Junction 跨驱动器重定向)</div>
+            <span class="badge-pill badge-safe">100% 透明无损 · 原位创建虚拟联接点</span>
+          </div>
+          <div class="projection-grid">
+            <div class="projection-column">
+              <div class="projection-col-title">
+                <span>源磁盘 (C: 盘) 释放预测</span>
+                <span id="projSourceDelta" style="color: #10b981; font-weight: 600;">预计释放 +13.9 GB</span>
+              </div>
+              <div class="projection-bar-box" id="projSourceBar">
+                <div class="projection-seg-used" id="projSourceUsed" style="width: 78%;" title="已占用空间"></div>
+                <div class="projection-seg-freed" id="projSourceFreed" style="width: 7%;" title="搬迁释放空间"></div>
+                <div class="projection-seg-free" id="projSourceFree" style="width: 15%;" title="剩余空闲空间"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-tertiary);">
+                <span id="projSourceStatus">当前可用 28.7 GB</span>
+                <span id="projSourceTarget" style="color: #60cdff;">搬家后可用预计提升至 42.6 GB (+48.4%)</span>
+              </div>
+            </div>
+            <div class="projection-column">
+              <div class="projection-col-title">
+                <span>目标磁盘 (D: 盘) 承载状态</span>
+                <span id="projTargetFree" style="color: #60cdff; font-weight: 600;">99.9 GB 充足容量</span>
+              </div>
+              <div class="projection-bar-box">
+                <div class="projection-seg-used" style="width: 76.7%; background-color: #8764b8;" title="D 盘已用数据"></div>
+                <div class="projection-seg-free" style="width: 23.3%;" title="D 盘剩余空间"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-tertiary);">
+                <span>本地高速 SSD 分区</span>
+                <span>跨盘数据完全透明，零性能损耗</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1659,6 +1846,49 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           </div>
         </div>
 
+        <!-- Giant Files Category Distribution Visualizer -->
+        <div class="type-distribution-card">
+          <div class="type-distribution-header">
+            <div class="type-distribution-title">
+              <span>大文件资产类型占比与容量分层 (基于真实全盘检索数据)</span>
+            </div>
+            <span style="font-size: 12px; color: #60cdff; font-weight: 600;" id="giantTotalSizeText">总计扫描资产 0 GB</span>
+          </div>
+          <div class="type-distribution-bar" id="giantDistributionBar">
+            <div class="type-seg seg-db" style="width: 31%;" title="数据库与开发存储"></div>
+            <div class="type-seg seg-exe" style="width: 26%;" title="安装包与程序"></div>
+            <div class="type-seg seg-vdisk" style="width: 20%;" title="虚拟机与虚拟盘"></div>
+            <div class="type-seg seg-archive" style="width: 4%;" title="压缩包归档"></div>
+            <div class="type-seg seg-other" style="width: 19%;" title="其他类型大文件"></div>
+          </div>
+          <div class="type-legend-pills" id="giantLegendContainer">
+            <div class="type-legend-pill active" onclick="setGiantFilter('all', this)">
+              <span class="legend-dot" style="background-color: #ffffff;"></span>
+              <span>全部资产 (<span id="countAllGiant">0</span>)</span>
+            </div>
+            <div class="type-legend-pill" onclick="setGiantFilter('Database', this)">
+              <span class="legend-dot" style="background-color: #00bcf2;"></span>
+              <span>数据库与存储 (<span id="sizeDbGiant">0 GB</span>)</span>
+            </div>
+            <div class="type-legend-pill" onclick="setGiantFilter('Executable', this)">
+              <span class="legend-dot" style="background-color: #f2994a;"></span>
+              <span>安装包与程序 (<span id="sizeExeGiant">0 GB</span>)</span>
+            </div>
+            <div class="type-legend-pill" onclick="setGiantFilter('VirtualDisk', this)">
+              <span class="legend-dot" style="background-color: #8764b8;"></span>
+              <span>虚拟机与磁盘 (<span id="sizeVDiskGiant">0 GB</span>)</span>
+            </div>
+            <div class="type-legend-pill" onclick="setGiantFilter('Archive', this)">
+              <span class="legend-dot" style="background-color: #0078d4;"></span>
+              <span>压缩包归档 (<span id="sizeArchiveGiant">0 GB</span>)</span>
+            </div>
+            <div class="type-legend-pill" onclick="setGiantFilter('Other', this)">
+              <span class="legend-dot" style="background-color: #8899a6;"></span>
+              <span>其他资产 (<span id="sizeOtherGiant">0 GB</span>)</span>
+            </div>
+          </div>
+        </div>
+
         <div class="desktop-commandbar">
           <div class="commandbar-left">
             <div class="search-box">
@@ -1666,10 +1896,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               <input type="text" id="giantSearchInput" placeholder="按文件名或后缀过滤..." oninput="filterGiantTable()">
             </div>
             <div class="filter-tabs">
-              <div class="filter-tab active" onclick="setGiantFilter('all', this)">全部</div>
-              <div class="filter-tab" onclick="setGiantFilter('Archive', this)">压缩包</div>
-              <div class="filter-tab" onclick="setGiantFilter('Executable', this)">安装包</div>
-              <div class="filter-tab" onclick="setGiantFilter('Database', this)">数据库</div>
+              <div class="filter-tab active" onclick="setGiantSizeFilter('all', this)">全部大小</div>
+              <div class="filter-tab" onclick="setGiantSizeFilter('huge', this)">极重大 (>1GB)</div>
+              <div class="filter-tab" onclick="setGiantSizeFilter('large', this)">大文件 (500M-1G)</div>
+              <div class="filter-tab" onclick="setGiantSizeFilter('mid', this)">常规 (100M-500M)</div>
             </div>
           </div>
           <div>
@@ -2367,9 +2597,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
       const filtered = state.registryIssues.filter(item => {
         if (state.registryFilterCategory === 'mui' && !item.category.includes('MUICache')) return false;
+        if (state.registryFilterCategory === 'openwith' && !item.category.includes('OpenWith')) return false;
         if (state.registryFilterCategory === 'uninst' && !item.category.includes('Uninstall')) return false;
         if (q) {
-          return item.invalid_path.toLowerCase().includes(q) || item.category.toLowerCase().includes(q);
+          return item.invalid_path.toLowerCase().includes(q) || item.category.toLowerCase().includes(q) || item.root_key.toLowerCase().includes(q);
         }
         return true;
       });
@@ -2392,7 +2623,11 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           <td class="col-checkbox">
             <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleRegistryItem('${item.id}', this.checked)">
           </td>
-          <td class="td-name"><span class="badge-pill badge-warn">${escapeHtml(item.category)}</span></td>
+          <td class="td-name">
+            <span class="badge-pill ${item.category.includes('OpenWith') ? 'badge-openwith' : item.category.includes('MUICache') ? 'badge-warn' : 'badge-danger'}">
+              ${escapeHtml(item.category)}
+            </span>
+          </td>
           <td><span class="path-text" title="${escapeHtml(item.invalid_path)}" style="color: #ff99a4;">${escapeHtml(item.invalid_path)}</span></td>
           <td><span class="path-text" title="${escapeHtml(item.root_key)}">${escapeHtml(item.root_key)}</span></td>
           <td><span class="badge-pill badge-safe">安全可修复</span></td>
@@ -2816,6 +3051,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         state.giantFiles = await res.json();
         document.getElementById('badgeGiantFiles').innerText = state.giantFiles.length;
         document.getElementById('giantFilesCounter').innerText = `已发现 ${state.giantFiles.length} 个超大文件`;
+        renderGiantDistribution();
         renderGiantTable();
         showToast(`大文件雷达发现 ${state.giantFiles.length} 个大型资产`);
       } catch (e) {
@@ -2840,6 +3076,9 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
       const filtered = state.giantFiles.filter(f => {
         if (state.giantFilterCategory !== 'all' && f.category !== state.giantFilterCategory) return false;
+        if (state.giantSizeFilter === 'huge' && f.size_bytes < 1024 * 1024 * 1024) return false;
+        if (state.giantSizeFilter === 'large' && (f.size_bytes < 500 * 1024 * 1024 || f.size_bytes >= 1024 * 1024 * 1024)) return false;
+        if (state.giantSizeFilter === 'mid' && (f.size_bytes < 100 * 1024 * 1024 || f.size_bytes >= 500 * 1024 * 1024)) return false;
         if (state.giantSearchTerm) {
           const q = state.giantSearchTerm.toLowerCase();
           return f.name.toLowerCase().includes(q) || f.path.toLowerCase().includes(q);
@@ -2880,7 +3119,79 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       });
     }
 
-    function setGiantFilter(cat, el) {
+    
+    state.giantSizeFilter = 'all';
+
+    function setGiantSizeFilter(range, el) {
+      state.giantSizeFilter = range;
+      document.querySelectorAll('#pane-giant .desktop-commandbar .filter-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      renderGiantTable();
+    }
+
+    function renderGiantDistribution() {
+      if (!state.giantFiles || state.giantFiles.length === 0) return;
+
+      const cats = {
+        Database: 0,
+        Executable: 0,
+        VirtualDisk: 0,
+        Archive: 0,
+        Other: 0
+      };
+
+      let totalBytes = 0;
+      state.giantFiles.forEach(f => {
+        totalBytes += f.size_bytes;
+        const c = f.category || 'Other';
+        if (cats[c] !== undefined) cats[c] += f.size_bytes;
+        else cats.Other += f.size_bytes;
+      });
+
+      const totalGb = (totalBytes / (1024 * 1024 * 1024)).toFixed(1);
+      const elTotal = document.getElementById('giantTotalSizeText');
+      if (elTotal) elTotal.innerText = `总计扫描资产 ${totalGb} GB (${state.giantFiles.length} 个文件)`;
+
+      const elCount = document.getElementById('countAllGiant');
+      if (elCount) elCount.innerText = state.giantFiles.length;
+
+      const elDb = document.getElementById('sizeDbGiant');
+      if (elDb) elDb.innerText = `${(cats.Database / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+
+      const elExe = document.getElementById('sizeExeGiant');
+      if (elExe) elExe.innerText = `${(cats.Executable / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+
+      const elVDisk = document.getElementById('sizeVDiskGiant');
+      if (elVDisk) elVDisk.innerText = `${(cats.VirtualDisk / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+
+      const elArch = document.getElementById('sizeArchiveGiant');
+      if (elArch) elArch.innerText = `${(cats.Archive / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+
+      const elOther = document.getElementById('sizeOtherGiant');
+      if (elOther) elOther.innerText = `${(cats.Other / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+
+      // Update segment widths
+      if (totalBytes > 0) {
+        const bar = document.getElementById('giantDistributionBar');
+        if (bar) {
+          const pDb = Math.max(1, ((cats.Database / totalBytes) * 100).toFixed(1));
+          const pExe = Math.max(1, ((cats.Executable / totalBytes) * 100).toFixed(1));
+          const pVd = Math.max(1, ((cats.VirtualDisk / totalBytes) * 100).toFixed(1));
+          const pArch = Math.max(1, ((cats.Archive / totalBytes) * 100).toFixed(1));
+          const pOth = Math.max(1, (100 - pDb - pExe - pVd - pArch).toFixed(1));
+
+          bar.innerHTML = `
+            <div class="type-seg seg-db" style="width: ${pDb}%;" title="数据库与存储: ${(cats.Database / (1024 * 1024 * 1024)).toFixed(1)} GB (${pDb}%)"></div>
+            <div class="type-seg seg-exe" style="width: ${pExe}%;" title="安装包与程序: ${(cats.Executable / (1024 * 1024 * 1024)).toFixed(1)} GB (${pExe}%)"></div>
+            <div class="type-seg seg-vdisk" style="width: ${pVd}%;" title="虚拟机与虚拟盘: ${(cats.VirtualDisk / (1024 * 1024 * 1024)).toFixed(1)} GB (${pVd}%)"></div>
+            <div class="type-seg seg-archive" style="width: ${pArch}%;" title="压缩包归档: ${(cats.Archive / (1024 * 1024 * 1024)).toFixed(1)} GB (${pArch}%)"></div>
+            <div class="type-seg seg-other" style="width: ${pOth}%;" title="其他资产: ${(cats.Other / (1024 * 1024 * 1024)).toFixed(1)} GB (${pOth}%)"></div>
+          `;
+        }
+      }
+    }
+
+function setGiantFilter(cat, el) {
       state.giantFilterCategory = cat;
       document.querySelectorAll('#pane-giant .filter-tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
