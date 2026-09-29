@@ -307,7 +307,11 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       cursor: pointer;
       font-size: 12.5px;
       font-weight: 500;
-      transition: background-color 120ms ease, color 120ms ease;
+      transition: background-color 140ms ease, color 140ms ease, transform 100ms ease;
+    }
+
+    .nav-item:active {
+      transform: scale(0.985);
     }
 
     .nav-item:hover {
@@ -432,6 +436,18 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
     .workspace-pane.active {
       display: flex;
+      animation: fluentPaneIn 220ms cubic-bezier(0.1, 0.9, 0.2, 1.0);
+    }
+
+    @keyframes fluentPaneIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* Header Bar within Workspace */
@@ -779,12 +795,14 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       display: flex;
       flex-direction: column;
       gap: 6px;
-      transition: border-color 150ms ease, background-color 150ms ease;
+      transition: border-color 180ms ease, background-color 180ms ease, transform 180ms cubic-bezier(0.1, 0.9, 0.2, 1.0), box-shadow 180ms ease;
     }
 
     .reclaim-tile:hover {
       background: var(--fluent-subtle-hover);
-      border-color: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.22);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
     }
 
     .tile-header {
@@ -1252,17 +1270,18 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     }
 
     .toast-message {
-      background-color: #2e2e2e;
+      background: rgba(30, 38, 52, 0.92);
+      backdrop-filter: blur(20px) saturate(140%);
       border: 1px solid rgba(255, 255, 255, 0.16);
       border-radius: var(--radius-sm);
-      padding: 10px 16px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      padding: 10px 18px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(96, 205, 255, 0.2);
       display: flex;
       align-items: center;
       gap: 10px;
       font-size: 12.5px;
       color: #ffffff;
-      animation: toastSlide 160ms var(--motion-timing);
+      animation: toastSlide 220ms cubic-bezier(0.1, 0.9, 0.2, 1.0);
       pointer-events: auto;
     }
 
