@@ -1360,6 +1360,30 @@
             </div>
           </div>
 
+          <!-- Custom Folder Migration Box -->
+          <div class="consumer-card" style="background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.25); padding: 18px 22px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="feature-icon-box" style="background: var(--color-junction-subtle); color: var(--color-junction); width: 34px; height: 34px;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>
+                </div>
+                <div>
+                  <h4 style="font-size: 14px; font-weight: 700; color: #FFFFFF; margin: 0;">搬迁任意指定目录到外部磁盘</h4>
+                  <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">输入任意 C 盘大型应用、游戏或工程目录，一键安全转移，释放空间。</div>
+                </div>
+              </div>
+              <span class="badge badge-junction">自定义搬家</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 140px auto; gap: 10px; align-items: center;">
+              <input type="text" id="customMigrateSrc" placeholder="输入要搬迁的源目录完整路径，如 C:\MyBigData 或 C:\Games\Assets" style="width: 100%; font-size: 13px; font-family: var(--font-mono); padding: 9px 14px; border-radius: var(--radius-md); border: 1px solid var(--stroke-base); background: rgba(0,0,0,0.35); color: #FFFFFF;">
+              <select id="customMigrateTargetDrive" style="width: 100%; height: 38px; font-size: 13px; padding: 0 10px; border-radius: var(--radius-md); border: 1px solid var(--stroke-base); background: #131929; color: #FFFFFF; cursor: pointer;">
+                <option value="D">搬至 D: 盘</option>
+                <option value="E">搬至 E: 盘</option>
+              </select>
+              <button class="btn btn-primary" onclick="submitCustomFolderMigrate()">立即开始搬家</button>
+            </div>
+          </div>
+
           <!-- Cards Grid for Common Large Folders -->
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;" id="migrateCardsGrid">
             <!-- Dynamically populated with Android AVD, WeChat Files, npm-cache, etc. -->
@@ -1953,6 +1977,24 @@
       });
     }
 
+    function showCelebrationCard(freedBytes, fileCount = 0) {
+      const headline = document.getElementById('heroHeadlineText');
+      const badge = document.getElementById('heroStatusBadge');
+      const scoreEl = document.getElementById('healthScoreBig');
+      const circle = document.getElementById('healthMeterCircle');
+
+      if (scoreEl) scoreEl.innerText = '99';
+      if (circle) circle.style.strokeDashoffset = '5';
+      if (badge) {
+        badge.className = 'badge badge-safe';
+        badge.innerText = '系统盘已焕然一新 · 运行极佳';
+      }
+      if (headline) {
+        headline.innerText = `太棒了！已成功释放 ${formatSize(freedBytes)} 宝贵空间`;
+      }
+      showToast(`已成功为系统盘减负 ${formatSize(freedBytes)}!`);
+    }
+
     async function dispatchClean(paths) {
       try {
         const res = await fetch('/api/clean', {
@@ -1962,7 +2004,7 @@
         });
         const out = await res.json();
         if (out.success) {
-          showToast(`清理完成! 成功释放 ${formatSize(out.bytes_freed)} 空间`);
+          showCelebrationCard(out.bytes_freed, out.files_deleted);
           await refreshDisks();
           await runFullScan();
         } else {
@@ -2002,20 +2044,30 @@
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--stroke-base); padding-top: 12px; margin-top: auto;">
               <button class="btn btn-secondary btn-sm" onclick="revealExplorer('${pathStr.replace(/\\/g, '\\\\')}')">在文件夹中查看</button>
-              <button class="btn btn-primary btn-sm" onclick="confirmMigrate('${pathStr.replace(/\\/g, '\\\\')}')">一键搬家到 D 盘</button>
+              <button class="btn btn-primary btn-sm" onclick="confirmMigrate('${pathStr.replace(/\\/g, '\\\\')}', 'D')">一键搬家到 D 盘</button>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    function confirmMigrate(src) {
+    function submitCustomFolderMigrate() {
+      const src = document.getElementById('customMigrateSrc').value.trim();
+      const drive = document.getElementById('customMigrateTargetDrive').value || 'D';
+      if (!src) {
+        showToast('请输入要搬迁的源目录完整路径');
+        return;
+      }
+      confirmMigrate(src, drive);
+    }
+
+    function confirmMigrate(src, targetDrive = 'D') {
       if (!src) {
         showToast('路径不存在');
         return;
       }
-      promptModal('确认搬家到 D 盘？', `将把 ${src} 搬往 D 盘。传输完毕后将保留透明快捷入口，软件使用体验完全一致。`, () => {
-        executeMigration(src, 'D');
+      promptModal(`确认搬家到 ${targetDrive} 盘？`, `将把 ${src} 搬往 ${targetDrive} 盘。传输完毕后将保留透明快捷入口，软件使用体验完全一致。`, () => {
+        executeMigration(src, targetDrive);
       });
     }
 
@@ -2495,6 +2547,7 @@
 
         const grandTotal = freedBytes + vacuumFreed;
         log(`全域深度体检与净化圆满达成! 合计净释放空间 ${formatSize(grandTotal)}，健康度已达极佳状态。`, 'var(--color-safe)');
+        showCelebrationCard(grandTotal);
 
         cancelBtn.innerText = '完成并关闭';
         cancelBtn.style.display = 'inline-flex';
