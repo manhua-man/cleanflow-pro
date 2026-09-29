@@ -34,8 +34,10 @@ pub fn launch_app_window(port: u16) {
     let app_arg = format!("--app={}", url);
 
     if let Some(edge_bin) = find_edge_path() {
+        let profile_dir = std::env::temp_dir().join("cleanflow_edge_profile");
         let mut cmd = Command::new(edge_bin);
         cmd.arg(&app_arg)
+            .arg(format!("--user-data-dir={}", profile_dir.to_string_lossy()))
             .arg("--window-size=1260,820");
 
         if let Ok(_) = cmd.spawn() {
