@@ -246,7 +246,7 @@
 
     /* NavigationView Sidebar */
     .navigation-view {
-      width: 230px;
+      width: 236px;
       background-color: var(--fluent-mica-alt);
       border-right: 1px solid var(--fluent-stroke-divider);
       display: flex;
@@ -254,6 +254,7 @@
       justify-content: space-between;
       padding: 12px 8px;
       flex-shrink: 0;
+      overflow-y: auto;
     }
 
     .nav-group-title {
@@ -277,7 +278,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 12px;
+      padding: 7px 12px;
       border-radius: var(--radius-sm);
       color: var(--text-secondary);
       cursor: pointer;
@@ -337,6 +338,8 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      margin-top: 12px;
+      flex-shrink: 0;
     }
 
     .sidebar-footer-top {
@@ -594,7 +597,7 @@
     /* Reclaimable Category Tiles */
     .reclaim-tiles-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 12px;
     }
 
@@ -881,7 +884,7 @@
     }
 
     /* ==========================================================================
-       Junction Migration Studio UI
+       Junction Migration & Registry Studio UI
        ========================================================================== */
     .migration-banner {
       background: linear-gradient(135deg, rgba(135, 100, 184, 0.15) 0%, rgba(0, 120, 212, 0.15) 100%);
@@ -1146,7 +1149,7 @@
     <!-- Fluent NavigationView Sidebar -->
     <nav class="navigation-view">
       <div class="nav-top-block">
-        <div class="nav-group-title">核心空间管理</div>
+        <div class="nav-group-title">核心空间治理</div>
         <ul class="nav-list">
           <li class="nav-item active" onclick="switchTab('overview')">
             <div class="nav-item-left">
@@ -1161,6 +1164,20 @@
               <span>开发与编译缓存</span>
             </div>
             <span class="nav-badge" id="badgeDevCache">--</span>
+          </li>
+          <li class="nav-item" onclick="switchTab('browser')">
+            <div class="nav-item-left">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></span>
+              <span>浏览器深度专清</span>
+            </div>
+            <span class="nav-badge" id="badgeBrowser">--</span>
+          </li>
+          <li class="nav-item" onclick="switchTab('registry')">
+            <div class="nav-item-left">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-1 8h-3v3h-2v-3h-3v-2h3v-3h2v3h3v2z"/></svg></span>
+              <span>注册表冗余修复</span>
+            </div>
+            <span class="nav-badge" id="badgeRegistry">扫描</span>
           </li>
           <li class="nav-item" onclick="switchTab('migration')">
             <div class="nav-item-left">
@@ -1278,6 +1295,14 @@
           </div>
           <div class="reclaim-tile">
             <div class="tile-header">
+              <span>浏览器与网络缓存</span>
+              <span class="badge-pill badge-safe">日常垃圾</span>
+            </div>
+            <div class="tile-size" id="tileBrowserSize">0 MB</div>
+            <div class="tile-subtext">Edge、Chrome 离线页面与代码缓存</div>
+          </div>
+          <div class="reclaim-tile">
+            <div class="tile-header">
               <span>系统与软件临时项</span>
               <span class="badge-pill badge-safe">安全</span>
             </div>
@@ -1306,11 +1331,12 @@
         <div class="desktop-commandbar">
           <div class="commandbar-left">
             <div class="search-box">
-              <span class="icon search-icon"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 11.99 14 9.5 14z"/></svg></span>
+              <span class="icon search-icon"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
               <input type="text" id="overviewSearchInput" placeholder="过滤项目或路径..." oninput="filterOverviewTable()">
             </div>
             <div class="filter-tabs">
               <div class="filter-tab active" onclick="setOverviewCategoryFilter('all', this)">全部</div>
+              <div class="filter-tab" onclick="setOverviewCategoryFilter('browser', this)">浏览器缓存</div>
               <div class="filter-tab" onclick="setOverviewCategoryFilter('dev', this)">开发缓存</div>
               <div class="filter-tab" onclick="setOverviewCategoryFilter('system', this)">系统应用</div>
               <div class="filter-tab" onclick="setOverviewCategoryFilter('db', this)">数据库</div>
@@ -1380,7 +1406,127 @@
       </section>
 
       <!-- ====================================================================
-           WORKSPACE 3: Junction Migration Studio
+           WORKSPACE 3: Browser Hygiene & Cache (NEW)
+           ==================================================================== -->
+      <section class="workspace-pane" id="pane-browser">
+        <div class="workspace-header">
+          <div class="workspace-title-box">
+            <h1>主流浏览器深度专清</h1>
+            <p>安全清理 Edge、Chrome、360 等浏览器的离线网页媒体与编译代码缓存，不影响历史记录、密码与书签</p>
+          </div>
+          <div class="workspace-controls">
+            <button class="btn btn-primary" onclick="cleanCategoryItems('browser_cache')">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
+              <span>一键清理浏览器缓存</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="desktop-commandbar">
+          <div class="commandbar-left">
+            <div class="search-box">
+              <span class="icon search-icon"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
+              <input type="text" id="browserSearchInput" placeholder="按浏览器名称或路径过滤..." oninput="renderBrowserTable()">
+            </div>
+          </div>
+          <div>
+            <span style="font-size: 12px; color: var(--text-tertiary);" id="browserTableCounter">就绪</span>
+          </div>
+        </div>
+
+        <div class="data-grid-container">
+          <table class="data-grid">
+            <thead>
+              <tr>
+                <th class="col-checkbox"><input type="checkbox" checked onchange="toggleBrowserAll(this.checked)"></th>
+                <th>浏览器 / 缓存类型</th>
+                <th>磁盘物理路径</th>
+                <th style="text-align: right;">占用体积</th>
+                <th>文件数</th>
+                <th style="text-align: center;">操作</th>
+              </tr>
+            </thead>
+            <tbody id="browserTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           WORKSPACE 4: Registry Cleaner & Redundant Keys (NEW)
+           ==================================================================== -->
+      <section class="workspace-pane" id="pane-registry">
+        <div class="workspace-header">
+          <div class="workspace-title-box">
+            <h1>注册表冗余与失效残留修复</h1>
+            <p>智能排查已卸载软件的历史残留键、无效卸载项及失效 MUICache，修复前自动生成 .reg 可回滚备份</p>
+          </div>
+          <div class="workspace-controls">
+            <button class="btn btn-secondary" onclick="loadRegistryIssues()">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
+              <span>重新扫描注册表</span>
+            </button>
+            <button class="btn btn-primary" id="btnCleanRegistry" onclick="executeCleanRegistry()">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+              <span id="btnCleanRegistryLabel">一键安全修复选中项</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="migration-banner" style="background: linear-gradient(135deg, rgba(0, 120, 212, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%); border-color: rgba(96, 205, 255, 0.3);">
+          <div class="migration-banner-text">
+            <h3>注册表无损安全机制</h3>
+            <p>每次执行修复前，系统会自动在临时目录下生成标准 Windows .reg 格式备份文件。如需还原，只需双击备份文件即可完全回退。</p>
+          </div>
+          <button class="btn btn-secondary" onclick="openRegistryBackupFolder()">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg></span>
+            <span>浏览备份目录</span>
+          </button>
+        </div>
+
+        <div class="desktop-commandbar">
+          <div class="commandbar-left">
+            <div class="search-box">
+              <span class="icon search-icon"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
+              <input type="text" id="registrySearchInput" placeholder="按路径或软件名过滤..." oninput="renderRegistryTable()">
+            </div>
+            <div class="filter-tabs">
+              <div class="filter-tab active" onclick="setRegistryFilter('all', this)">全部</div>
+              <div class="filter-tab" onclick="setRegistryFilter('mui', this)">应用缓存残留</div>
+              <div class="filter-tab" onclick="setRegistryFilter('uninst', this)">卸载项残留</div>
+            </div>
+          </div>
+          <div>
+            <span style="font-size: 12px; color: var(--text-tertiary);" id="registryCounter">准备就绪</span>
+          </div>
+        </div>
+
+        <div class="data-grid-container">
+          <table class="data-grid">
+            <thead>
+              <tr>
+                <th class="col-checkbox"><input type="checkbox" id="selectAllRegistryCheckbox" onchange="toggleSelectAllRegistry(this.checked)" checked></th>
+                <th>问题类型</th>
+                <th>失效引用的物理路径</th>
+                <th>注册表底层键路径</th>
+                <th>安全等级</th>
+                <th style="text-align: center;">操作</th>
+              </tr>
+            </thead>
+            <tbody id="registryTableBody">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 30px; color: var(--text-tertiary);">
+                  正在扫描注册表失效项...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           WORKSPACE 5: Junction Migration Studio
            ==================================================================== -->
       <section class="workspace-pane" id="pane-migration">
         <div class="workspace-header">
@@ -1474,7 +1620,7 @@
       </section>
 
       <!-- ====================================================================
-           WORKSPACE 4: Giant Files Radar
+           WORKSPACE 6: Giant Files Radar
            ==================================================================== -->
       <section class="workspace-pane" id="pane-giant">
         <div class="workspace-header">
@@ -1531,7 +1677,7 @@
       </section>
 
       <!-- ====================================================================
-           WORKSPACE 5: Database Vacuum (SQLite)
+           WORKSPACE 7: Database Vacuum (SQLite)
            ==================================================================== -->
       <section class="workspace-pane" id="pane-vacuum">
         <div class="workspace-header">
@@ -1560,7 +1706,7 @@
       </section>
 
       <!-- ====================================================================
-           WORKSPACE 6: Custom Rules Studio
+           WORKSPACE 8: Custom Rules Studio
            ==================================================================== -->
       <section class="workspace-pane" id="pane-rules">
         <div class="workspace-header">
@@ -1641,10 +1787,13 @@
       disks: [],
       scanReport: null,
       selectedPaths: new Set(),
+      registryIssues: [],
+      selectedRegistryIds: new Set(),
       giantFiles: [],
       activeJunctions: [],
       overviewFilterCategory: 'all',
       overviewSearchTerm: '',
+      registryFilterCategory: 'all',
       giantFilterCategory: 'all',
       giantSearchTerm: '',
       migrationPollTimer: null
@@ -1700,14 +1849,12 @@
       const navItems = document.querySelectorAll('.nav-item');
       if (tabId === 'overview') navItems[0].classList.add('active');
       else if (tabId === 'devcache') navItems[1].classList.add('active');
-      else if (tabId === 'migration') {
-        navItems[2].classList.add('active');
-        loadActiveJunctions();
-        renderPresetMigrationTable();
-      }
-      else if (tabId === 'giant') { navItems[3].classList.add('active'); if (state.giantFiles.length === 0) loadGiantFiles(); }
-      else if (tabId === 'vacuum') { navItems[4].classList.add('active'); }
-      else if (tabId === 'rules') { navItems[5].classList.add('active'); }
+      else if (tabId === 'browser') { navItems[2].classList.add('active'); renderBrowserTable(); }
+      else if (tabId === 'registry') { navItems[3].classList.add('active'); if (state.registryIssues.length === 0) loadRegistryIssues(); }
+      else if (tabId === 'migration') { navItems[4].classList.add('active'); loadActiveJunctions(); renderPresetMigrationTable(); }
+      else if (tabId === 'giant') { navItems[5].classList.add('active'); if (state.giantFiles.length === 0) loadGiantFiles(); }
+      else if (tabId === 'vacuum') { navItems[6].classList.add('active'); }
+      else if (tabId === 'rules') { navItems[7].classList.add('active'); }
     }
 
     // Refresh Disks
@@ -1774,14 +1921,14 @@
 
     // Run Full Scan
     async function runScan() {
-      showToast('正在快速体检 C 盘存储...');
+      showToast('正在快速体检 C 盘存储与系统缓存...');
       document.getElementById('btnOneClickClean').disabled = true;
       document.getElementById('overviewTableBody').innerHTML = `
         <tr>
           <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-secondary);">
             <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
               <span class="icon" style="color: #60cdff; transform: scale(1.5);"><svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg></span>
-              <span>正在多线程深度索引系统临时、开发缓存与大文件...</span>
+              <span>正在深度索引浏览器缓存、开发包及系统临时项...</span>
             </div>
           </td>
         </tr>
@@ -1808,10 +1955,12 @@
 
         renderOverviewTable();
         renderDevCacheTable();
+        renderBrowserTable();
         renderVacuumTable();
         renderPresetMigrationTable();
         updateOverviewMetrics();
         updateStorageRibbon();
+        loadRegistryIssues();
         showToast('体检完成，已定位可释放空间');
       } catch (e) {
         showToast('扫描发生错误: ' + e.message);
@@ -1825,6 +1974,7 @@
       if (!state.scanReport || !state.scanReport.categories) return;
 
       let devTotal = 0;
+      let browserTotal = 0;
       let sysTotal = 0;
       let migrateTotal = 0;
       let dbTotal = 0;
@@ -1832,22 +1982,25 @@
 
       state.scanReport.categories.forEach(cat => {
         if (cat.id === 'dev_cache') devTotal += cat.total_size_bytes;
+        else if (cat.id === 'browser_cache') browserTotal += cat.total_size_bytes;
         else if (cat.id === 'sys_temp' || cat.id === 'office_chat' || cat.id === 'ai_tools') sysTotal += cat.total_size_bytes;
         else if (cat.id === 'migration_targets') migrateTotal += cat.total_size_bytes;
         else if (cat.id === 'sqlite_optimize') dbTotal += cat.total_size_bytes;
       });
 
-      cleanableTotal = devTotal + sysTotal + dbTotal;
+      cleanableTotal = devTotal + browserTotal + sysTotal + dbTotal;
 
       const cleanableGB = (cleanableTotal / (1024**3)).toFixed(1);
       document.getElementById('heroCleanableFigure').innerText = cleanableGB;
-      document.getElementById('heroCleanableDesc').innerText = `已就绪 ${formatBytes(cleanableTotal)}，包含开发包与临时垃圾`;
+      document.getElementById('heroCleanableDesc').innerText = `已就绪 ${formatBytes(cleanableTotal)}，包含浏览器、开发包与临时垃圾`;
       document.getElementById('btnOneClickCleanLabel').innerText = `一键快速清理 (${formatBytes(cleanableTotal)})`;
 
       document.getElementById('badgeCleanable').innerText = formatBytes(cleanableTotal);
       document.getElementById('badgeDevCache').innerText = formatBytes(devTotal);
+      document.getElementById('badgeBrowser').innerText = formatBytes(browserTotal);
 
       document.getElementById('tileDevSize').innerText = formatBytes(devTotal);
+      document.getElementById('tileBrowserSize').innerText = formatBytes(browserTotal);
       document.getElementById('tileSysSize').innerText = formatBytes(sysTotal);
       document.getElementById('tileMigrateSize').innerText = formatBytes(migrateTotal);
       document.getElementById('tileDbSize').innerText = formatBytes(dbTotal);
@@ -1882,6 +2035,7 @@
 
       // Filter by search and tab
       const filtered = allMatchedItems.filter(item => {
+        if (state.overviewFilterCategory === 'browser' && item.categoryId !== 'browser_cache') return false;
         if (state.overviewFilterCategory === 'dev' && item.categoryId !== 'dev_cache') return false;
         if (state.overviewFilterCategory === 'system' && item.categoryId !== 'sys_temp' && item.categoryId !== 'office_chat') return false;
         if (state.overviewFilterCategory === 'db' && item.categoryId !== 'sqlite_optimize') return false;
@@ -1996,6 +2150,50 @@
       renderOverviewTable();
     }
 
+    // Clean Category Items Helper
+    function cleanCategoryItems(catId) {
+      const pathsToClean = [];
+      if (state.scanReport) {
+        const cat = state.scanReport.categories.find(c => c.id === catId);
+        if (cat) {
+          cat.rules.forEach(r => {
+            r.matched_paths.forEach(mp => {
+              if (mp.size_bytes > 0) pathsToClean.push(mp.path);
+            });
+          });
+        }
+      }
+
+      if (pathsToClean.length === 0) {
+        showToast('当前分类暂无可清理项目');
+        return;
+      }
+
+      openConfirmModal(
+        '专项清理确认',
+        `即将清理该分类下的 ${pathsToClean.length} 个缓存目录，确认继续吗？`,
+        async () => {
+          closeConfirmModal();
+          showToast('正在清理...');
+          try {
+            const res = await fetch('/api/clean', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ paths: pathsToClean })
+            });
+            const data = await res.json();
+            if (data.success) {
+              showToast(`清理成功，释放 ${formatBytes(data.bytes_freed)}`);
+              runScan();
+              refreshDisks();
+            }
+          } catch (e) {
+            showToast('请求异常: ' + e.message);
+          }
+        }
+      );
+    }
+
     // Execute Clean Selected
     function executeCleanSelected() {
       if (state.selectedPaths.size === 0) {
@@ -2069,6 +2267,190 @@
       } catch (e) {
         showToast('打开失败: ' + e.message);
       }
+    }
+
+    // ========================================================================
+    // Browser Hygiene Table (NEW)
+    // ========================================================================
+    function renderBrowserTable() {
+      const tbody = document.getElementById('browserTableBody');
+      tbody.innerHTML = '';
+      if (!state.scanReport) return;
+
+      const browserCat = state.scanReport.categories.find(c => c.id === 'browser_cache');
+      if (!browserCat || !browserCat.rules) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--text-tertiary);">暂无浏览器缓存记录</td></tr>`;
+        return;
+      }
+
+      const q = (document.getElementById('browserSearchInput')?.value || '').toLowerCase();
+      let matchedCount = 0;
+
+      browserCat.rules.forEach(rule => {
+        rule.matched_paths.forEach(mp => {
+          if (q && !rule.name.toLowerCase().includes(q) && !mp.path.toLowerCase().includes(q)) return;
+          matchedCount++;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="col-checkbox"><input type="checkbox" checked></td>
+            <td class="td-name">${escapeHtml(rule.name)}</td>
+            <td><span class="path-text">${escapeHtml(mp.path)}</span></td>
+            <td style="text-align: right; font-family: var(--font-mono); font-weight: 600; color: #ffffff;">${formatBytes(mp.size_bytes)}</td>
+            <td style="color: var(--text-tertiary);">${mp.file_count} 文件</td>
+            <td style="text-align: center;">
+              <div class="table-actions" style="justify-content: center;">
+                <button class="icon-action-btn" title="定位目录" onclick="revealInExplorer('${escapeHtml(mp.path)}')">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+                </button>
+                <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="cleanSinglePath('${escapeHtml(mp.path)}')">清理</button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+
+      document.getElementById('browserTableCounter').innerText = `已检测到 ${matchedCount} 处浏览器缓存`;
+    }
+
+    function toggleBrowserAll(checked) {
+      document.querySelectorAll('#browserTableBody input[type="checkbox"]').forEach(c => c.checked = checked);
+    }
+
+    // ========================================================================
+    // Registry Cleaner (NEW)
+    // ========================================================================
+    async function loadRegistryIssues() {
+      document.getElementById('registryTableBody').innerHTML = `
+        <tr><td colspan="6" style="text-align: center; padding: 30px; color: var(--text-secondary);">正在深度排查无效卸载信息与死链应用缓存...</td></tr>
+      `;
+      try {
+        const res = await fetch('/api/registry/scan');
+        if (!res.ok) throw new Error('扫描注册表失败');
+        state.registryIssues = await res.json();
+        state.selectedRegistryIds = new Set(state.registryIssues.map(i => i.id));
+        document.getElementById('badgeRegistry').innerText = state.registryIssues.length;
+        renderRegistryTable();
+      } catch (e) {
+        showToast('读取注册表失败: ' + e.message);
+      }
+    }
+
+    function renderRegistryTable() {
+      const tbody = document.getElementById('registryTableBody');
+      tbody.innerHTML = '';
+
+      const q = (document.getElementById('registrySearchInput')?.value || '').toLowerCase();
+
+      const filtered = state.registryIssues.filter(item => {
+        if (state.registryFilterCategory === 'mui' && !item.category.includes('MUICache')) return false;
+        if (state.registryFilterCategory === 'uninst' && !item.category.includes('Uninstall')) return false;
+        if (q) {
+          return item.invalid_path.toLowerCase().includes(q) || item.category.toLowerCase().includes(q);
+        }
+        return true;
+      });
+
+      document.getElementById('registryCounter').innerText = `发现 ${filtered.length} 处冗余项目`;
+      document.getElementById('btnCleanRegistryLabel').innerText = `一键安全修复 (${state.selectedRegistryIds.size} 项)`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr><td colspan="6" style="text-align: center; padding: 30px; color: var(--text-tertiary);">未发现注册表失效项目，系统配置健康干净</td></tr>
+        `;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const tr = document.createElement('tr');
+        const isChecked = state.selectedRegistryIds.has(item.id);
+
+        tr.innerHTML = `
+          <td class="col-checkbox">
+            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleRegistryItem('${item.id}', this.checked)">
+          </td>
+          <td class="td-name"><span class="badge-pill badge-warn">${escapeHtml(item.category)}</span></td>
+          <td><span class="path-text" title="${escapeHtml(item.invalid_path)}" style="color: #ff99a4;">${escapeHtml(item.invalid_path)}</span></td>
+          <td><span class="path-text" title="${escapeHtml(item.root_key)}">${escapeHtml(item.root_key)}</span></td>
+          <td><span class="badge-pill badge-safe">安全可修复</span></td>
+          <td style="text-align: center;">
+            <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="cleanSingleRegistryItem('${item.id}')">修复</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function toggleRegistryItem(id, checked) {
+      if (checked) state.selectedRegistryIds.add(id);
+      else state.selectedRegistryIds.delete(id);
+      document.getElementById('btnCleanRegistryLabel').innerText = `一键安全修复 (${state.selectedRegistryIds.size} 项)`;
+    }
+
+    function toggleSelectAllRegistry(checked) {
+      state.selectedRegistryIds.clear();
+      if (checked) {
+        state.registryIssues.forEach(i => state.selectedRegistryIds.add(i.id));
+      }
+      renderRegistryTable();
+    }
+
+    function setRegistryFilter(cat, el) {
+      state.registryFilterCategory = cat;
+      document.querySelectorAll('#pane-registry .filter-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      renderRegistryTable();
+    }
+
+    function executeCleanRegistry() {
+      if (state.selectedRegistryIds.size === 0) {
+        showToast('请先勾选需要修复的注册表项');
+        return;
+      }
+
+      openConfirmModal(
+        '注册表修复确认',
+        `即将安全修复选中的 ${state.selectedRegistryIds.size} 个无效注册表残留条目。<br><br><strong>系统将自动在修复前导出 .reg 完整回滚备份</strong>，确保 100% 安全无后顾之忧。`,
+        async () => {
+          closeConfirmModal();
+          showToast('正在导出备份并执行安全修复...');
+          try {
+            const res = await fetch('/api/registry/clean', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ids: Array.from(state.selectedRegistryIds) })
+            });
+            const data = await res.json();
+            if (data.success) {
+              showToast(`成功修复 ${data.items_cleaned} 处残留，备份已生成！`);
+              loadRegistryIssues();
+            } else {
+              showToast('部分项目处理遇到错误: ' + (data.errors ? data.errors.join('; ') : '未知错误'));
+            }
+          } catch (e) {
+            showToast('请求异常: ' + e.message);
+          }
+        }
+      );
+    }
+
+    function cleanSingleRegistryItem(id) {
+      fetch('/api/registry/clean', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [id] })
+      }).then(r => r.json()).then(data => {
+        showToast('已修复该项');
+        loadRegistryIssues();
+      });
+    }
+
+    function openRegistryBackupFolder() {
+      fetch('/api/reveal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: 'C:\\Users\\EDY\\AppData\\Local\\Temp\\cleanflow_registry_backups' })
+      }).then(() => showToast('已在资源管理器中打开备份文件夹'));
     }
 
     // ========================================================================

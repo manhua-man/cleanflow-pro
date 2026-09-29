@@ -81,6 +81,56 @@
       ]
     },
     {
+      "id": "browser_cache",
+      "name": "主流浏览器深度专清",
+      "description": "Microsoft Edge、Google Chrome、360浏览器及 Firefox 产生的离线网络缓存与代码缓存",
+      "risk_level": "safe",
+      "rules": [
+        {
+          "id": "edge_web_cache",
+          "name": "Microsoft Edge 网页与离线媒体缓存",
+          "path_pattern": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\Default\\Cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "edge_code_cache",
+          "name": "Microsoft Edge JS/WASM 编译代码缓存",
+          "path_pattern": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\Default\\Code Cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "edge_crashpad",
+          "name": "Microsoft Edge 崩溃转储日志",
+          "path_pattern": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\Crashpad",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "chrome_web_cache",
+          "name": "Google Chrome 网页与音视频缓存",
+          "path_pattern": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Default\\Cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "chrome_code_cache",
+          "name": "Google Chrome 编译代码缓存",
+          "path_pattern": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Default\\Code Cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "se360_cache",
+          "name": "360 安全浏览器网页缓存",
+          "path_pattern": "%APPDATA%\\360se6\\User Data\\Default\\Cache",
+          "action": "clear_content",
+          "default_checked": true
+        }
+      ]
+    },
+    {
       "id": "dev_cache",
       "name": "现代开发与包管理器缓存",
       "description": "前端/后端/移动端/游戏引擎构建下载的离线依赖包与沙箱环境",

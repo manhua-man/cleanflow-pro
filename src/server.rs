@@ -422,6 +422,36 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                         send_json_response(request, err_json);
                     }
                 }
+            } else if url == "/api/registry/scan" && method == Method::Get {
+                let issues = crate::registry::scan_registry_issues();
+                let json = serde_json::to_string(&issues).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/registry/clean" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct RegistryCleanReq {
+                    ids: Vec<String>,
+                }
+
+                let req_parsed: Result<RegistryCleanReq, _> = serde_json::from_str(&content);
+                match req_parsed {
+                    Ok(req) => {
+                        let all_issues = crate::registry::scan_registry_issues();
+                        let targets: Vec<_> = all_issues
+                            .into_iter()
+                            .filter(|i| req.ids.contains(&i.id))
+                            .collect();
+                        let result = crate::registry::clean_registry_issues(&targets);
+                        let json = serde_json::to_string(&result).unwrap_or_else(|_| "{}".to_string());
+                        send_json_response(request, json);
+                    }
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
             } else if url == "/api/shutdown" && method == Method::Post {
                 running_clone.store(false, Ordering::SeqCst);
                 let res_json = r#"{"success": true, "message": "已关闭"}"#;
