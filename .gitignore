@@ -1,0 +1,11 @@
+/target
+**/*.rs.bk
+*.exe
+*.pdb
+*.log
+*.tmp
+err.txt
+out.txt
+test_sqlite.ps1
+.idea/
+.vscode/

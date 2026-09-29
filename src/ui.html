@@ -1,0 +1,2939 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CleanFlow 净流 - Windows 资产治理 Pro</title>
+  <style>
+    /* CleanFlow Windows 11 Fluent & Nordic Mica Design System */
+    :root {
+      --mica-bg: #0D1117;
+      --mica-sidebar: #131822;
+      --mica-surface: #181F2C;
+      --mica-surface-raised: #1F2839;
+      --mica-surface-subtle: #111622;
+      
+      --stroke-divider: rgba(255, 255, 255, 0.07);
+      --stroke-card: rgba(255, 255, 255, 0.09);
+      --stroke-highlight: rgba(255, 255, 255, 0.14);
+      --stroke-focus: #0EA5E9;
+      
+      --text-title: #FFFFFF;
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-tertiary: #64748B;
+      --text-disabled: #475569;
+      
+      --accent-brand: #0284C7;
+      --accent-brand-hover: #0369A1;
+      --accent-brand-subtle: rgba(2, 132, 199, 0.15);
+      
+      --color-safe: #10B981;
+      --color-safe-hover: #059669;
+      --color-safe-subtle: rgba(16, 185, 129, 0.14);
+      --color-safe-border: rgba(16, 185, 129, 0.28);
+      
+      --color-dev: #38BDF8;
+      --color-dev-subtle: rgba(56, 189, 248, 0.14);
+      --color-dev-border: rgba(56, 189, 248, 0.28);
+      
+      --color-junction: #8B5CF6;
+      --color-junction-hover: #7C3AED;
+      --color-junction-subtle: rgba(139, 92, 246, 0.14);
+      --color-junction-border: rgba(139, 92, 246, 0.28);
+      
+      --color-warning: #F59E0B;
+      --color-warning-subtle: rgba(245, 158, 11, 0.14);
+      --color-warning-border: rgba(245, 158, 11, 0.28);
+      
+      --color-danger: #F43F5E;
+      --color-danger-hover: #E11D48;
+      --color-danger-subtle: rgba(244, 63, 94, 0.14);
+      --color-danger-border: rgba(244, 63, 94, 0.28);
+      
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 10px;
+      --radius-pill: 9999px;
+      
+      --font-ui: "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei UI", sans-serif;
+      --font-mono: "Cascadia Code", "Consolas", monospace;
+      
+      --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration-fast: 120ms;
+      --duration-normal: 220ms;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-ui);
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--mica-bg);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .tabular-num {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-pill);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    /* 1. Integrated Native Window Title Bar */
+    .titlebar {
+      height: 38px;
+      background-color: var(--mica-bg);
+      border-bottom: 1px solid var(--stroke-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px 0 16px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .titlebar-drag-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      height: 100%;
+    }
+
+    .app-icon-badge {
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, #0284C7 0%, #10B981 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .app-icon-badge svg {
+      width: 12px;
+      height: 12px;
+      stroke: #FFFFFF;
+      stroke-width: 2.4;
+      fill: none;
+    }
+
+    .app-title-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-title);
+      letter-spacing: -0.01em;
+    }
+
+    .titlebar-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-left: 8px;
+      padding-left: 12px;
+      border-left: 1px solid var(--stroke-divider);
+    }
+
+    .titlebar-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .titlebar-search-chip {
+      background-color: var(--mica-surface);
+      border: 1px solid var(--stroke-divider);
+      border-radius: var(--radius-sm);
+      padding: 3px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: all var(--duration-fast) ease;
+    }
+
+    .titlebar-search-chip:hover {
+      background-color: var(--mica-surface-raised);
+      color: var(--text-secondary);
+      border-color: var(--stroke-card);
+    }
+
+    .kbd-shortcut {
+      background-color: rgba(255, 255, 255, 0.08);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+    }
+
+    .window-controls {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .win-control-btn {
+      width: 32px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: background-color var(--duration-fast) ease;
+    }
+
+    .win-control-btn:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+    }
+
+    .win-control-btn.close:hover {
+      background-color: #E81123;
+      color: #FFFFFF;
+    }
+
+    .win-control-btn svg {
+      width: 10px;
+      height: 10px;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    /* 2. Workspace Layout */
+    .app-workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* 3. Modern Fluent Sidebar */
+    .sidebar {
+      width: 228px;
+      background-color: var(--mica-sidebar);
+      border-right: 1px solid var(--stroke-divider);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .sidebar-section-header {
+      padding: 14px 16px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+    }
+
+    .nav-list {
+      padding: 4px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 10px;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.04);
+      color: var(--text-primary);
+    }
+
+    .nav-item:active {
+      transform: scale(0.985);
+    }
+
+    .nav-item.active {
+      background-color: rgba(255, 255, 255, 0.07);
+      color: var(--text-title);
+      font-weight: 600;
+    }
+
+    .nav-item.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 6px;
+      bottom: 6px;
+      width: 3px;
+      border-radius: 0 2px 2px 0;
+      background-color: var(--accent-brand);
+    }
+
+    .nav-lead {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .nav-lead svg {
+      width: 15px;
+      height: 15px;
+      stroke-width: 1.8;
+      stroke: currentColor;
+      fill: none;
+      flex-shrink: 0;
+    }
+
+    .nav-lead span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-pill {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-tertiary);
+    }
+
+    .nav-pill.highlight {
+      background-color: var(--color-safe-subtle);
+      color: var(--color-safe);
+    }
+
+    .sidebar-drive-section {
+      margin-top: auto;
+      padding: 14px 12px;
+      border-top: 1px solid var(--stroke-divider);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mini-drive-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .mini-drive-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .mini-drive-bar-well {
+      width: 100%;
+      height: 4px;
+      background-color: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+      margin-top: 3px;
+    }
+
+    .mini-drive-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-pill);
+      transition: width 0.4s var(--ease-fluid);
+    }
+
+    /* 4. Main Viewport */
+    .viewport {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--mica-bg);
+      overflow: hidden;
+    }
+
+    /* Header Bar */
+    .workspace-header {
+      height: 52px;
+      border-bottom: 1px solid var(--stroke-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+
+    .header-path-flow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Fluent Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      outline: none;
+      transition: all var(--duration-fast) ease;
+      white-space: nowrap;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .btn svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+      flex-shrink: 0;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-brand);
+      color: #FFFFFF;
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--accent-brand-hover);
+    }
+
+    .btn-safe {
+      background-color: var(--color-safe);
+      color: #064E3B;
+      border-color: rgba(255, 255, 255, 0.15);
+      font-weight: 700;
+    }
+    .btn-safe:hover:not(:disabled) {
+      background-color: #34D399;
+    }
+
+    .btn-secondary {
+      background-color: var(--mica-surface);
+      color: var(--text-secondary);
+      border-color: var(--stroke-card);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background-color: var(--mica-surface-raised);
+      color: var(--text-primary);
+      border-color: var(--stroke-highlight);
+    }
+
+    .btn-junction {
+      background-color: var(--color-junction);
+      color: #FFFFFF;
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    .btn-junction:hover:not(:disabled) {
+      background-color: var(--color-junction-hover);
+    }
+
+    .btn-danger {
+      background-color: var(--color-danger);
+      color: #FFFFFF;
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background-color: var(--color-danger-hover);
+    }
+
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 11px;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Content Scroll Area */
+    .view-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+    }
+
+    .tab-panel {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 1160px;
+      margin: 0 auto;
+      animation: panelIn var(--duration-normal) var(--ease-fluid);
+    }
+
+    .tab-panel.active {
+      display: flex;
+    }
+
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 5. Master Storage Horizon Component */
+    .storage-master-card {
+      background-color: var(--mica-surface);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .horizon-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .horizon-title-box h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-title);
+      letter-spacing: -0.01em;
+    }
+
+    .horizon-title-box p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Dual Drive Radar / Spectrum */
+    .spectrum-container {
+      background-color: var(--mica-surface-subtle);
+      border: 1px solid var(--stroke-divider);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .spectrum-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .spectrum-track {
+      height: 12px;
+      background-color: #1E2738;
+      border-radius: var(--radius-sm);
+      display: flex;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .spectrum-seg {
+      height: 100%;
+      transition: width 0.4s var(--ease-fluid);
+    }
+
+    .seg-core { background-color: #475569; }
+    .seg-safe { background-color: var(--color-safe); }
+    .seg-dev { background-color: var(--color-dev); }
+    .seg-junction { background-color: var(--color-junction); }
+    .seg-free { background-color: #0E1522; }
+
+    .spectrum-legend {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .legend-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* 6. Four Pillars Matrix */
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .pillar-card {
+      background-color: var(--mica-surface);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color var(--duration-fast) ease, transform var(--duration-fast) ease;
+      cursor: pointer;
+    }
+
+    .pillar-card:hover {
+      border-color: var(--stroke-highlight);
+      transform: translateY(-1px);
+    }
+
+    .pillar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .status-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+    }
+
+    .badge-safe {
+      background-color: var(--color-safe-subtle);
+      color: var(--color-safe);
+      border: 1px solid var(--color-safe-border);
+    }
+
+    .badge-dev {
+      background-color: var(--color-dev-subtle);
+      color: var(--color-dev);
+      border: 1px solid var(--color-dev-border);
+    }
+
+    .badge-junction {
+      background-color: var(--color-junction-subtle);
+      color: var(--color-junction);
+      border: 1px solid var(--color-junction-border);
+    }
+
+    .badge-warning {
+      background-color: var(--color-warning-subtle);
+      color: var(--color-warning);
+      border: 1px solid var(--color-warning-border);
+    }
+
+    .pillar-val {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-title);
+    }
+
+    .pillar-desc {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 7. Master-Detail Two-Pane Architecture */
+    .master-detail-container {
+      display: flex;
+      height: 520px;
+      background-color: var(--mica-surface);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .master-pane {
+      width: 330px;
+      border-right: 1px solid var(--stroke-divider);
+      display: flex;
+      flex-direction: column;
+      background-color: var(--mica-surface-subtle);
+      flex-shrink: 0;
+    }
+
+    .master-pane-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--stroke-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: rgba(255, 255, 255, 0.015);
+    }
+
+    .master-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .master-count-badge {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      font-weight: 600;
+    }
+
+    .master-scroll-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .master-item-row {
+      padding: 9px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      transition: all var(--duration-fast) ease;
+    }
+
+    .master-item-row:hover {
+      background-color: var(--mica-surface-raised);
+    }
+
+    .master-item-row.selected {
+      background-color: rgba(2, 132, 199, 0.12);
+      border-color: var(--accent-brand);
+    }
+
+    .master-item-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .fluent-check {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--color-safe);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .master-item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .master-item-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .master-item-sub {
+      font-size: 10px;
+      color: var(--text-tertiary);
+    }
+
+    .master-item-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .master-item-size {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-title);
+      text-align: right;
+    }
+
+    .chevron-icon {
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+    }
+
+    .chevron-icon svg {
+      width: 12px;
+      height: 12px;
+      stroke-width: 2.2;
+    }
+
+    /* Detail Inspector Pane */
+    .detail-inspector-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--mica-surface);
+      overflow: hidden;
+    }
+
+    .inspector-header {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--stroke-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: rgba(255, 255, 255, 0.015);
+    }
+
+    .inspector-header-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-title);
+    }
+
+    .inspector-header-sub {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    .inspector-search-bar {
+      padding: 7px 18px;
+      border-bottom: 1px solid var(--stroke-divider);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--mica-bg);
+    }
+
+    .inspector-search-bar svg {
+      width: 13px;
+      height: 13px;
+      stroke: var(--text-tertiary);
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
+    .inspector-search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 11px;
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+    }
+
+    .inspector-search-input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .inspector-tree-shell {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .tree-empty-notice {
+      text-align: center;
+      color: var(--text-tertiary);
+      padding: 48px;
+      font-size: 12px;
+    }
+
+    .inspector-path-row {
+      background-color: var(--mica-surface-subtle);
+      border: 1px solid var(--stroke-divider);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: border-color var(--duration-fast) ease;
+    }
+
+    .inspector-path-row:hover {
+      border-color: var(--stroke-card);
+    }
+
+    .path-row-lead {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .path-row-lead svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--text-tertiary);
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
+    .path-string-mono {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .path-row-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .path-size-text {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-safe);
+      min-width: 70px;
+      text-align: right;
+    }
+
+    .inspector-footer {
+      height: 42px;
+      border-top: 1px solid var(--stroke-divider);
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      background-color: var(--mica-surface-subtle);
+      flex-shrink: 0;
+    }
+
+    /* 8. Standard Fluent Cards for Dashboard */
+    .fluent-card {
+      background-color: var(--mica-surface);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-top-title h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-title);
+    }
+
+    .card-top-title p {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .desktop-row {
+      background-color: var(--mica-surface-subtle);
+      border: 1px solid var(--stroke-divider);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color var(--duration-fast) ease;
+    }
+
+    .desktop-row:hover {
+      border-color: var(--stroke-card);
+    }
+
+    .desktop-row-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .row-meta-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+
+    .row-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .row-subtitle {
+      font-size: 10px;
+      color: var(--text-tertiary);
+    }
+
+    .desktop-row-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .row-bytes {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-title);
+      min-width: 75px;
+      text-align: right;
+    }
+
+    /* 9. Junction Bridge Stage */
+    .bridge-card {
+      background-color: var(--mica-surface-subtle);
+      border: 1px solid var(--stroke-divider);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bridge-diagram {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+      background-color: var(--mica-bg);
+      border: 1px solid var(--stroke-divider);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+    }
+
+    .bridge-node {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .bridge-node-title {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    .bridge-node-path {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bridge-arrow-icon {
+      color: var(--color-junction);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bridge-arrow-icon svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2;
+    }
+
+    /* 10. Giant Files Table */
+    .filter-segment-group {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .segment-tab {
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      background-color: var(--mica-surface-subtle);
+      border: 1px solid var(--stroke-divider);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--duration-fast) ease;
+    }
+
+    .segment-tab:hover {
+      background-color: var(--mica-surface-raised);
+      color: var(--text-primary);
+    }
+
+    .segment-tab.active {
+      background-color: var(--accent-brand-subtle);
+      border-color: var(--accent-brand);
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .table-shell {
+      background-color: var(--mica-surface-subtle);
+      border: 1px solid var(--stroke-divider);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .fluent-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .fluent-table th {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--stroke-divider);
+      color: var(--text-tertiary);
+      font-weight: 600;
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .fluent-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      vertical-align: middle;
+    }
+
+    .fluent-table tr:hover td {
+      background-color: var(--mica-surface-raised);
+    }
+
+    /* 11. Vacuum Strip Visual */
+    .vacuum-strip {
+      background-color: var(--mica-surface-subtle);
+      border: 1px solid var(--stroke-divider);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .vacuum-diagram-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 320px;
+    }
+
+    .vacuum-diagram-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+    }
+
+    .vacuum-track-mini {
+      flex: 1;
+      height: 6px;
+      background-color: var(--mica-bg);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+      border: 1px solid var(--stroke-divider);
+    }
+
+    /* 12. Native Status Bar */
+    .statusbar {
+      height: 24px;
+      background-color: var(--mica-bg);
+      border-top: 1px solid var(--stroke-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 10px;
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .status-left, .status-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--color-safe);
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+    }
+
+    /* Toast Alert */
+    .toast-alert {
+      position: fixed;
+      bottom: 32px;
+      right: 24px;
+      background-color: #1E293B;
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      transform: translateY(60px);
+      opacity: 0;
+      transition: all var(--duration-normal) var(--ease-fluid);
+      pointer-events: none;
+    }
+
+    .toast-alert.show {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .toast-alert svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--color-safe);
+      stroke-width: 2.2;
+      fill: none;
+    }
+
+    /* Dialog Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-color: rgba(5, 8, 12, 0.72);
+      backdrop-filter: blur(6px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-dialog {
+      background-color: var(--mica-surface);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-lg);
+      width: 440px;
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      animation: dialogPop var(--duration-normal) var(--ease-fluid);
+    }
+
+    @keyframes dialogPop {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-dialog h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-title);
+    }
+
+    .modal-dialog p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Integrated Native Window Title Bar -->
+  <header class="titlebar">
+    <div class="titlebar-drag-area">
+      <div class="app-icon-badge">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      </div>
+      <span class="app-title-text">CleanFlow (净流) Pro</span>
+      <div class="titlebar-breadcrumb">
+        <span>Windows 磁盘资产治理</span>
+        <span>/</span>
+        <span id="breadcrumbSectionName" style="color: var(--text-secondary);">总览仪表盘</span>
+      </div>
+    </div>
+
+    <div class="titlebar-center">
+      <div class="titlebar-search-chip" onclick="navigate('giant')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <span>全盘大文件透视</span>
+        <span class="kbd-shortcut">Ctrl+K</span>
+      </div>
+    </div>
+
+    <div class="window-controls">
+      <button class="win-control-btn" title="最小化" onclick="showToast('桌面端运行中')">
+        <svg viewBox="0 0 10 1"><line x1="0" y1="0.5" x2="10" y2="0.5"></line></svg>
+      </button>
+      <button class="win-control-btn" title="最大化" onclick="showToast('自适应窗口布局')">
+        <svg viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9"></rect></svg>
+      </button>
+      <button class="win-control-btn close" title="关闭" onclick="window.close()">
+        <svg viewBox="0 0 10 10"><line x1="0" y1="0" x2="10" y2="10"></line><line x1="10" y1="0" x2="0" y2="10"></line></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. Workspace Body -->
+  <div class="app-workspace">
+    <!-- Fluent Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section-header">系统资产巡检</div>
+      <nav class="nav-list">
+        <div class="nav-item active" onclick="navigate('dashboard')">
+          <div class="nav-lead">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>总览仪表盘</span>
+          </div>
+          <span class="nav-pill" id="navBadgeTotal">0 B</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('smart')">
+          <div class="nav-lead">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>智能安全清理</span>
+          </div>
+          <span class="nav-pill highlight" id="navBadgeSafe">0 B</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('pro')">
+          <div class="nav-lead">
+            <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            <span>现代开发生态</span>
+          </div>
+          <span class="nav-pill" id="navBadgeDev">0 B</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-section-header">重型资产调度</div>
+      <nav class="nav-list">
+        <div class="nav-item" onclick="navigate('migrate')">
+          <div class="nav-lead">
+            <svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+            <span>大资产空间迁移</span>
+          </div>
+          <span class="nav-pill">NTFS</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('junctions')">
+          <div class="nav-lead">
+            <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            <span>虚拟联接中心</span>
+          </div>
+          <span class="nav-pill" id="navBadgeJunctions">0 处</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('giant')">
+          <div class="nav-lead">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span>大文件透视分析</span>
+          </div>
+          <span class="nav-pill">Top 100</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('vacuum')">
+          <div class="nav-lead">
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+            <span>SQLite 碎片收缩</span>
+          </div>
+          <span class="nav-pill">VACUUM</span>
+        </div>
+      </nav>
+
+      <!-- Mini Drive Watermark Indicator -->
+      <div class="sidebar-drive-section" id="sidebarMiniDrives">
+        <span style="font-size: 10px; color: var(--text-tertiary);">正在获取驱动器状态...</span>
+      </div>
+    </aside>
+
+    <!-- Main Viewport -->
+    <main class="viewport">
+      <div class="workspace-header">
+        <div class="header-path-flow">
+          <span id="currentViewHeading">系统资产容量总览</span>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn btn-secondary btn-sm" onclick="refreshDisks()">
+            <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <span>刷新磁盘</span>
+          </button>
+          <button class="btn btn-primary btn-sm" id="btnRunFullScan" onclick="runFullScan()">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span id="btnRunScanText">极速全盘体检</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable Tabs Area -->
+      <div class="view-scroll">
+        <!-- 1. Dashboard Tab -->
+        <section id="panel-dashboard" class="tab-panel active">
+          <!-- Master Storage Horizon -->
+          <div class="storage-master-card">
+            <div class="horizon-header-row">
+              <div class="horizon-title-box">
+                <h2>C 盘资产地平线与双盘治理全景</h2>
+                <p>底层采用 Rust 多线程高并发遍历与 NTFS 原生符号联接，实现系统盘毫秒级减负与物理迁移。</p>
+              </div>
+              <button class="btn btn-safe" id="btnHorizonQuickClean" onclick="cleanAllSafeItems()" disabled>
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span id="btnHorizonQuickText">一键安全释放</span>
+              </button>
+            </div>
+
+            <!-- Spectrum Multi-segment Bar -->
+            <div class="spectrum-container">
+              <div class="spectrum-meta">
+                <span style="font-weight: 600; color: var(--text-title);" id="horizonDriveLabel">C 盘物理水位</span>
+                <span class="tabular-num" style="color: var(--text-secondary);" id="horizonNumbers">正在统计...</span>
+              </div>
+              <div class="spectrum-track">
+                <div class="spectrum-seg seg-core" id="segCore" style="width: 70%;"></div>
+                <div class="spectrum-seg seg-safe" id="segSafe" style="width: 4%;"></div>
+                <div class="spectrum-seg seg-dev" id="segDev" style="width: 4%;"></div>
+                <div class="spectrum-seg seg-junction" id="segJunction" style="width: 6%;"></div>
+                <div class="spectrum-seg seg-free" id="segFree" style="width: 16%;"></div>
+              </div>
+              <div class="spectrum-legend">
+                <div class="legend-tag">
+                  <div class="legend-indicator" style="background-color: #475569;"></div>
+                  <span>系统核心与已占用</span>
+                </div>
+                <div class="legend-tag">
+                  <div class="legend-indicator" style="background-color: var(--color-safe);"></div>
+                  <span>零风险安全清理 (建议立即释放)</span>
+                </div>
+                <div class="legend-tag">
+                  <div class="legend-indicator" style="background-color: var(--color-dev);"></div>
+                  <span>开发与构建缓存 (可自动重建)</span>
+                </div>
+                <div class="legend-tag">
+                  <div class="legend-indicator" style="background-color: var(--color-junction);"></div>
+                  <span>重型大资产 (支持无感迁往 D 盘)</span>
+                </div>
+                <div class="legend-tag">
+                  <div class="legend-indicator" style="background-color: #0E1522; border: 1px solid var(--stroke-divider);"></div>
+                  <span>当前可用物理空间</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Four Pillars Matrix -->
+          <div class="pillar-grid">
+            <div class="pillar-card" onclick="navigate('smart')">
+              <div class="pillar-header">
+                <span>系统与办公缓存</span>
+                <span class="status-badge badge-safe">0 风险</span>
+              </div>
+              <div class="pillar-val tabular-num" id="pillarSafe">0 B</div>
+              <div class="pillar-desc">Windows Temp / 微信 / 飞书更新包</div>
+            </div>
+
+            <div class="pillar-card" onclick="navigate('pro')">
+              <div class="pillar-header">
+                <span>现代开发构建</span>
+                <span class="status-badge badge-dev">可重建</span>
+              </div>
+              <div class="pillar-val tabular-num" id="pillarDev">0 B</div>
+              <div class="pillar-desc">npm / pnpm / uv / Unity / Electron</div>
+            </div>
+
+            <div class="pillar-card" onclick="navigate('vacuum')">
+              <div class="pillar-header">
+                <span>状态库碎片</span>
+                <span class="status-badge badge-safe">无损压缩</span>
+              </div>
+              <div class="pillar-val tabular-num" id="pillarDb">0 B</div>
+              <div class="pillar-desc">Cursor state.vscdb 瘦身 95%+</div>
+            </div>
+
+            <div class="pillar-card" onclick="navigate('migrate')">
+              <div class="pillar-header">
+                <span>重型资产迁移</span>
+                <span class="status-badge badge-junction">透明搬家</span>
+              </div>
+              <div class="pillar-val tabular-num" id="pillarMigrate">0 B</div>
+              <div class="pillar-desc">安卓手机模拟器 / 微信存储 / 自定义目录</div>
+            </div>
+          </div>
+
+          <!-- Instant Clean Recommend Card -->
+          <div class="fluent-card">
+            <div class="card-top-bar">
+              <div class="card-top-title">
+                <h3>零风险安全释放清单</h3>
+                <p>包含系统运行产生的临时文件与离线离场更新包，清理后 100% 不影响任何业务正常运行。</p>
+              </div>
+              <button class="btn btn-safe btn-sm" id="btnDashboardClean" onclick="cleanAllSafeItems()" disabled>
+                立即释放
+              </button>
+            </div>
+            <div id="dashboardQuickRows" style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="text-align: center; color: var(--text-tertiary); padding: 24px; font-size: 12px;">
+                请点击上方「极速全盘体检」以生成系统盘体检报告
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Smart Clean Tab (Master-Detail Two-Pane Architecture) -->
+        <section id="panel-smart" class="tab-panel">
+          <div class="card-top-bar" style="margin-bottom: -4px;">
+            <div class="card-top-title">
+              <h3>智能安全清理 (100% 零风险)</h3>
+              <p>Windows 临时缓存、更新备份、缩略图数据库与办公通讯离线包。底层已启用防独占跳过机制。</p>
+            </div>
+            <button class="btn btn-safe btn-sm" onclick="submitCleanBatch('smart')">清理所有勾选分类</button>
+          </div>
+
+          <div class="master-detail-container">
+            <!-- Master Pane -->
+            <div class="master-pane">
+              <div class="master-pane-header">
+                <div class="master-header-actions">
+                  <button class="btn btn-secondary btn-sm" style="padding: 2px 7px; font-size: 10px;" onclick="toggleChecks('smart', true)">全选</button>
+                  <button class="btn btn-secondary btn-sm" style="padding: 2px 7px; font-size: 10px;" onclick="toggleChecks('smart', false)">取消</button>
+                </div>
+                <span class="master-count-badge" id="smartMasterCount">0 个分类</span>
+              </div>
+              <div class="master-scroll-list" id="smartMasterList"></div>
+            </div>
+
+            <!-- Detail Inspector Pane -->
+            <div class="detail-inspector-pane">
+              <div class="inspector-header">
+                <div>
+                  <div class="inspector-header-title" id="smartInspectorTitle">选择左侧分类进行深度文件检索</div>
+                  <div class="inspector-header-sub" id="smartInspectorSub">
+                    <span class="status-badge badge-safe" id="smartInspectorBadge">0 风险</span>
+                    <span id="smartInspectorPathMeta">包含 0 处物理路径 · 0 个文件</span>
+                  </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="smartInspectorRevealBtn" onclick="revealActiveInspectorRoot()" disabled>
+                  在资源管理器中定位主目录
+                </button>
+              </div>
+
+              <!-- Quick Path Search Bar -->
+              <div class="inspector-search-bar">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" class="inspector-search-input" id="smartSearchInput" placeholder="实时过滤当前分类下的物理子路径..." oninput="filterInspectorPaths('smart')" />
+              </div>
+
+              <!-- Path Tree List -->
+              <div class="inspector-tree-shell" id="smartInspectorPaths">
+                <div class="tree-empty-notice">点击左侧分类查看详细物理路径树与单体大小</div>
+              </div>
+
+              <!-- Footer Actions -->
+              <div class="inspector-footer">
+                <span id="smartInspectorFootInfo">就绪</span>
+                <button class="btn btn-safe btn-sm" id="smartInspectorCleanSingleBtn" onclick="cleanActiveInspectorCategory('smart')" disabled>
+                  立即清理当前分类
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Pro Dev Clean Tab (Master-Detail Two-Pane Architecture) -->
+        <section id="panel-pro" class="tab-panel">
+          <div class="card-top-bar" style="margin-bottom: -4px;">
+            <div class="card-top-title">
+              <h3>现代开发与构建生态治理</h3>
+              <p>npm、Bun、pnpm、uv、Unity Shader 着色器与旧版 AI 运行时。清理后后续编译会自动拉取最新版本。</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="submitCleanBatch('pro')">清理所有勾选构建缓存</button>
+          </div>
+
+          <div class="master-detail-container">
+            <!-- Master Pane -->
+            <div class="master-pane">
+              <div class="master-pane-header">
+                <div class="master-header-actions">
+                  <button class="btn btn-secondary btn-sm" style="padding: 2px 7px; font-size: 10px;" onclick="toggleChecks('pro', true)">全选</button>
+                  <button class="btn btn-secondary btn-sm" style="padding: 2px 7px; font-size: 10px;" onclick="toggleChecks('pro', false)">取消</button>
+                </div>
+                <span class="master-count-badge" id="proMasterCount">0 个工具项</span>
+              </div>
+              <div class="master-scroll-list" id="proMasterList"></div>
+            </div>
+
+            <!-- Detail Inspector Pane -->
+            <div class="detail-inspector-pane">
+              <div class="inspector-header">
+                <div>
+                  <div class="inspector-header-title" id="proInspectorTitle">选择左侧开发工具查看构建缓存详情</div>
+                  <div class="inspector-header-sub" id="proInspectorSub">
+                    <span class="status-badge badge-dev" id="proInspectorBadge">可自动重建</span>
+                    <span id="proInspectorPathMeta">包含 0 处物理路径 · 0 个文件</span>
+                  </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="proInspectorRevealBtn" onclick="revealActiveInspectorRoot()" disabled>
+                  在资源管理器中定位主目录
+                </button>
+              </div>
+
+              <!-- Quick Path Search Bar -->
+              <div class="inspector-search-bar">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" class="inspector-search-input" id="proSearchInput" placeholder="实时过滤当前构建缓存下的物理子路径..." oninput="filterInspectorPaths('pro')" />
+              </div>
+
+              <!-- Path Tree List -->
+              <div class="inspector-tree-shell" id="proInspectorPaths">
+                <div class="tree-empty-notice">点击左侧分类查看详细物理路径树与单体大小</div>
+              </div>
+
+              <!-- Footer Actions -->
+              <div class="inspector-footer">
+                <span id="proInspectorFootInfo">就绪</span>
+                <button class="btn btn-primary btn-sm" id="proInspectorCleanSingleBtn" onclick="cleanActiveInspectorCategory('pro')" disabled>
+                  立即清理当前开发缓存
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Space Migrator Tab -->
+        <section id="panel-migrate" class="tab-panel">
+          <!-- Custom Directory Path Tool -->
+          <div class="fluent-card">
+            <div class="card-top-title">
+              <h3>自定义 C 盘大目录一键无感搬迁</h3>
+              <p>输入 C 盘任意占用过大的目录（如 Ollama 模型、HuggingFace 权重、Gradle 依赖），无感迁移至 D 盘并在原位创建系统虚拟联接。</p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="customMigrateInput" class="btn-secondary" style="flex: 1; padding: 7px 12px; font-family: var(--font-mono); font-size: 11px; outline: none; border-radius: var(--radius-sm); border: 1px solid var(--stroke-card); color: #FFFFFF;" placeholder="输入或粘贴 C 盘目录完整绝对路径，例如 C:\Users\EDY\.ollama\models" />
+              <select id="customTargetDrive" class="btn-secondary" style="padding: 6px 10px; font-size: 11px; outline: none; border-radius: var(--radius-sm);">
+                <option value="D">目标: D 盘 (推荐)</option>
+                <option value="E">目标: E 盘</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="inspectCustomPath()">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span>分析目录与独占状态</span>
+              </button>
+            </div>
+            <div id="customPathResult" style="display: none; background: var(--mica-bg); padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--stroke-divider); font-size: 11px;"></div>
+          </div>
+
+          <!-- Preset Targets -->
+          <div id="migrateListRows" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        </section>
+
+        <!-- 5. Active Junctions Tab -->
+        <section id="panel-junctions" class="tab-panel">
+          <div class="fluent-card">
+            <div class="card-top-bar">
+              <div class="card-top-title">
+                <h3>虚拟联接管理中心 (已重定向资产)</h3>
+                <p>集中查看所有已在 C 盘建立的 NTFS 虚拟联接（Junction）。清晰掌握物理落盘路径，支持随时一键无损完整回退还原。</p>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="loadJunctions()">
+                <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                <span>刷新状态</span>
+              </button>
+            </div>
+            <div id="junctionListRows" style="display: flex; flex-direction: column; gap: 10px;"></div>
+          </div>
+        </section>
+
+        <!-- 6. Giant Files Detective Tab -->
+        <section id="panel-giant" class="tab-panel">
+          <div class="fluent-card">
+            <div class="card-top-bar">
+              <div class="card-top-title">
+                <h3>全盘单体超大文件透视分析 (Top 100)</h3>
+                <p>极速揪出超过 100 MB 的单体巨型文件（虚拟机硬盘、AI 权重、内存转储、离线镜像），支持直接定位或物理清除。</p>
+              </div>
+              <button class="btn btn-primary btn-sm" id="btnScanGiant" onclick="loadGiantFiles()">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span>开始透视扫描</span>
+              </button>
+            </div>
+
+            <!-- Segment Bar -->
+            <div class="filter-segment-group">
+              <div class="segment-tab active" onclick="filterGiantCategory('ALL')">全部大文件</div>
+              <div class="segment-tab" onclick="filterGiantCategory('VirtualDisk')">虚拟机与镜像 (.vmdk/.img/.iso)</div>
+              <div class="segment-tab" onclick="filterGiantCategory('Database')">数据库文件 (.db/.vscdb)</div>
+              <div class="segment-tab" onclick="filterGiantCategory('Archive')">压缩包与安装包 (.zip/.7z/.pkg)</div>
+              <div class="segment-tab" onclick="filterGiantCategory('AIModel')">AI 模型权重 (.bin/.safetensors)</div>
+              <div class="segment-tab" onclick="filterGiantCategory('DumpLog')">崩溃转储日志 (.hprof/.dmp)</div>
+              <div class="segment-tab" onclick="filterGiantCategory('Media')">音视频媒体 (.mp4/.mov/.mkv)</div>
+            </div>
+
+            <div class="table-shell">
+              <table class="fluent-table">
+                <thead>
+                  <tr>
+                    <th style="width: 46%;">文件名与绝对物理路径</th>
+                    <th style="width: 14%;">资产分类</th>
+                    <th style="width: 14%;">单体大小</th>
+                    <th style="width: 26%; text-align: right;">治理动作</th>
+                  </tr>
+                </thead>
+                <tbody id="giantFilesBody">
+                  <tr>
+                    <td colspan="4" style="text-align: center; color: var(--text-tertiary); padding: 32px;">
+                      点击上方「开始透视扫描」以检索系统巨型文件
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. SQLite Vacuum Tab -->
+        <section id="panel-vacuum" class="tab-panel">
+          <div class="fluent-card">
+            <div class="card-top-bar">
+              <div class="card-top-title">
+                <h3>SQLite 核心数据库无损挤水分 (VACUUM)</h3>
+                <p>Cursor `state.vscdb` 经年累月的高频读写产生了高达 95% 的空闲碎片页（Freelist）。执行原生 VACUUM 收缩不损坏任何对话配置，将文件从数 GB 缩减至几兆。</p>
+              </div>
+            </div>
+            <div id="vacuumListRows" style="display: flex; flex-direction: column; gap: 10px;"></div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- 3. Native Windows Status Bar -->
+  <footer class="statusbar">
+    <div class="status-left">
+      <div class="status-dot"></div>
+      <span>Rust 原生内核 (GNU x86_64)</span>
+      <span>|</span>
+      <span>NTFS Junction 透明联接引擎: 正常</span>
+      <span>|</span>
+      <span>SQLite WAL 截断器: 就绪</span>
+    </div>
+    <div class="status-right">
+      <span id="statusBarDiskState">C 盘健康水位: 实时监测</span>
+      <span>|</span>
+      <span>内存独占进程侦测: 激活</span>
+    </div>
+  </footer>
+
+  <!-- Interactive Dialog Modal -->
+  <div class="modal-overlay" id="actionModal">
+    <div class="modal-dialog">
+      <h4 id="modalHeading">确认执行操作</h4>
+      <p id="modalBodyText">确认继续执行该操作吗？</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" onclick="dismissModal()">取消</button>
+        <button class="btn btn-primary btn-sm" id="modalOkBtn">立即执行</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Migration Progress Modal -->
+  <div class="modal-overlay" id="migrationProgressModal">
+    <div class="modal-dialog" style="width: 520px; max-width: 90vw;">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h4 id="migModalTitle">正在无感迁移大资产...</h4>
+        <span class="status-badge badge-dev" id="migModalStateBadge">准备就绪</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px; background: var(--mica-bg); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--stroke-divider);">
+        <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); word-break: break-all;">
+          <span style="color: var(--text-tertiary);">源入口 (C:): </span><span id="migModalSrc" style="color: #FFFFFF;">-</span>
+        </div>
+        <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); word-break: break-all;">
+          <span style="color: var(--text-tertiary);">物理落盘: </span><span id="migModalDst" style="color: var(--color-safe);">-</span>
+        </div>
+      </div>
+
+      <!-- Modern Fluent Progress Bar -->
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;">
+          <span style="color: var(--text-tertiary);">总体搬迁进度</span>
+          <span id="migModalPercentText" class="tabular-num" style="font-weight: 700; color: #FFFFFF;">0.0%</span>
+        </div>
+        <div style="height: 8px; background: rgba(255,255,255,0.07); border-radius: var(--radius-pill); overflow: hidden; position: relative;">
+          <div id="migModalProgressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #0284C7, #10B981); border-radius: var(--radius-pill); transition: width 200ms ease;"></div>
+        </div>
+      </div>
+
+      <!-- Progress Stats Grid -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: var(--mica-surface-raised); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--stroke-card);">
+        <div>
+          <div style="font-size: 10px; color: var(--text-tertiary);">已搬迁容量</div>
+          <div id="migModalSizeStat" class="tabular-num" style="font-size: 13px; font-weight: 700; color: var(--color-safe); margin-top: 2px;">0 B / 0 B</div>
+        </div>
+        <div>
+          <div style="font-size: 10px; color: var(--text-tertiary);">已同步文件</div>
+          <div id="migModalFileStat" class="tabular-num" style="font-size: 13px; font-weight: 700; color: var(--color-dev); margin-top: 2px;">0 / 0 文件</div>
+        </div>
+      </div>
+
+      <div id="migModalCurrentFile" style="font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 2px 4px;">
+        正在就绪...
+      </div>
+
+      <div class="modal-actions" id="migModalActions">
+        <button class="btn btn-secondary btn-sm" id="migModalCloseBtn" onclick="closeMigrationModal()" style="display: none;">完成并关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Alert -->
+  <div class="toast-alert" id="toastBox">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <span id="toastMsg" style="font-size: 11px; font-weight: 600; color: #FFFFFF;">操作成功</span>
+  </div>
+
+  <script>
+    let diskList = [];
+    let reportData = null;
+    let isScanningNow = false;
+    let allGiantFiles = [];
+    let currentGiantCategory = 'ALL';
+    let modalCallback = null;
+
+    // Master-Detail State Management
+    const masterDetailData = {
+      smart: { rules: [], selectedIndex: 0 },
+      pro: { rules: [], selectedIndex: 0 }
+    };
+
+    const SECTION_TITLES = {
+      dashboard: '总览仪表盘',
+      smart: '智能安全清理',
+      pro: '现代开发生态',
+      migrate: '大资产空间迁移',
+      junctions: '虚拟联接管理中心',
+      giant: '全盘大文件透视',
+      vacuum: 'SQLite 碎片收缩'
+    };
+
+    function navigate(panelId) {
+      document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+      if (typeof event !== 'undefined' && event && event.currentTarget && event.currentTarget.classList && event.currentTarget.classList.contains('nav-item')) {
+        event.currentTarget.classList.add('active');
+      } else {
+        const item = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick') && el.getAttribute('onclick').includes(panelId));
+        if (item) item.classList.add('active');
+      }
+
+      const target = document.getElementById(`panel-${panelId}`);
+      if (target) target.classList.add('active');
+
+      const title = SECTION_TITLES[panelId] || '资产治理';
+      document.getElementById('breadcrumbSectionName').innerText = title;
+      document.getElementById('currentViewHeading').innerText = title;
+
+      if (panelId === 'junctions') {
+        loadJunctions();
+      }
+    }
+
+    function formatSize(bytes) {
+      if (!bytes || bytes === 0) return '0 B';
+      const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(1024));
+      return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + units[i];
+    }
+
+    function showToast(text) {
+      const box = document.getElementById('toastBox');
+      document.getElementById('toastMsg').innerText = text;
+      box.classList.add('show');
+      setTimeout(() => box.classList.remove('show'), 3500);
+    }
+
+    function promptModal(title, message, onConfirm, okButtonClass = 'btn-primary') {
+      document.getElementById('modalHeading').innerText = title;
+      document.getElementById('modalBodyText').innerText = message;
+      modalCallback = onConfirm;
+
+      const okBtn = document.getElementById('modalOkBtn');
+      okBtn.className = `btn ${okButtonClass} btn-sm`;
+      document.getElementById('actionModal').classList.add('show');
+    }
+
+    function dismissModal() {
+      document.getElementById('actionModal').classList.remove('show');
+      modalCallback = null;
+    }
+
+    document.getElementById('modalOkBtn').addEventListener('click', () => {
+      if (modalCallback) modalCallback();
+      dismissModal();
+    });
+
+    // 1. Disks API
+    async function refreshDisks() {
+      try {
+        const res = await fetch('/api/disks');
+        diskList = await res.json();
+        renderSidebarMiniDrives();
+        updateHorizonSpectrum();
+      } catch (err) {
+        console.error('获取磁盘失败:', err);
+      }
+    }
+
+    function renderSidebarMiniDrives() {
+      const box = document.getElementById('sidebarMiniDrives');
+      box.innerHTML = '<div style="font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase;">驱动器水位</div>';
+
+      diskList.forEach(d => {
+        let barColor = 'var(--color-safe)';
+        if (d.usage_percent > 85) barColor = 'var(--color-warning)';
+        if (d.usage_percent > 95) barColor = 'var(--color-danger)';
+
+        const row = document.createElement('div');
+        row.innerHTML = `
+          <div class="mini-drive-row">
+            <span class="mini-drive-meta">${d.letter} 盘 <span class="tabular-num">(${d.usage_percent}%)</span></span>
+            <span class="tabular-num" style="color: var(--text-secondary);">${formatSize(d.free_bytes)} 可用</span>
+          </div>
+          <div class="mini-drive-bar-well">
+            <div class="mini-drive-bar-fill" style="width: ${d.usage_percent}%; background-color: ${barColor};"></div>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+    }
+
+    function updateHorizonSpectrum() {
+      const cDrive = diskList.find(d => d.letter === 'C') || diskList[0];
+      if (!cDrive) return;
+
+      const total = cDrive.total_bytes;
+      const free = cDrive.free_bytes;
+
+      let safeBytes = 0;
+      let devBytes = 0;
+      let migrateBytes = 0;
+
+      if (reportData && reportData.categories) {
+        reportData.categories.forEach(cat => {
+          cat.rules.forEach(r => {
+            if (cat.id === 'system_junk' || cat.id === 'office_chat') safeBytes += r.total_size_bytes;
+            else if (cat.id === 'dev_cache' || cat.id === 'ai_tools') devBytes += r.total_size_bytes;
+            else if (cat.id === 'high_value_migrate') migrateBytes += r.total_size_bytes;
+          });
+        });
+      }
+
+      const freePct = Math.max(5, (free / total) * 100);
+      const safePct = Math.min(15, (safeBytes / total) * 100);
+      const devPct = Math.min(15, (devBytes / total) * 100);
+      const junctionPct = Math.min(20, (migrateBytes / total) * 100);
+      const corePct = Math.max(10, 100 - freePct - safePct - devPct - junctionPct);
+
+      document.getElementById('segCore').style.width = corePct + '%';
+      document.getElementById('segSafe').style.width = safePct + '%';
+      document.getElementById('segDev').style.width = devPct + '%';
+      document.getElementById('segJunction').style.width = junctionPct + '%';
+      document.getElementById('segFree').style.width = freePct + '%';
+
+      document.getElementById('horizonDriveLabel').innerText = `${cDrive.letter} 盘总容量: ${formatSize(total)} (已用 ${cDrive.usage_percent}%)`;
+      
+      const potentialGain = safeBytes + migrateBytes;
+      const projectedFree = free + potentialGain;
+      
+      document.getElementById('horizonNumbers').innerHTML = `
+        当前可用: <b style="color: #FFFFFF;">${formatSize(free)}</b>
+        ${potentialGain > 0 ? ` &rarr; 优化后预计可用: <b style="color: var(--color-safe);">${formatSize(projectedFree)}</b> (+${formatSize(potentialGain)})` : ''}
+      `;
+
+      document.getElementById('statusBarDiskState').innerText = `C 盘当前空闲: ${formatSize(free)} / 建议治理空间: ${formatSize(potentialGain)}`;
+    }
+
+    // 2. Full Scan API
+    async function runFullScan() {
+      if (isScanningNow) return;
+      isScanningNow = true;
+
+      const btn = document.getElementById('btnRunFullScan');
+      const text = document.getElementById('btnRunScanText');
+
+      btn.disabled = true;
+      text.innerText = '正在极速扫描全盘...';
+
+      try {
+        const t0 = performance.now();
+        const res = await fetch('/api/scan');
+        reportData = await res.json();
+        const duration = ((performance.now() - t0) / 1000).toFixed(2);
+
+        showToast(`全盘体检完成! 耗时 ${duration}s，发现 ${formatSize(reportData.total_size_bytes)} 可治理资产`);
+        populateScanResults();
+        updateHorizonSpectrum();
+      } catch (err) {
+        showToast('扫描过程异常: ' + err);
+      } finally {
+        isScanningNow = false;
+        btn.disabled = false;
+        text.innerText = '极速全盘体检';
+      }
+    }
+
+    function populateScanResults() {
+      if (!reportData || !reportData.categories) return;
+
+      let safeSum = 0;
+      let devSum = 0;
+      let dbSum = 0;
+      let migrateSum = 0;
+
+      const smartRules = [];
+      const proRules = [];
+      const migrateRules = [];
+      const vacuumRules = [];
+
+      reportData.categories.forEach(cat => {
+        cat.rules.forEach(rule => {
+          if (rule.total_size_bytes > 0 || rule.matched_paths.length > 0) {
+            if (cat.id === 'system_junk' || cat.id === 'office_chat') {
+              safeSum += rule.total_size_bytes;
+              smartRules.push({ ...rule, catName: cat.name, risk: 'SAFE' });
+            } else if (cat.id === 'dev_cache' || cat.id === 'ai_tools') {
+              devSum += rule.total_size_bytes;
+              proRules.push({ ...rule, catName: cat.name, risk: 'MEDIUM' });
+            } else if (cat.id === 'sqlite_optimize') {
+              dbSum += rule.total_size_bytes;
+              vacuumRules.push(rule);
+            } else if (cat.id === 'high_value_migrate') {
+              migrateSum += rule.total_size_bytes;
+              migrateRules.push(rule);
+            }
+          }
+        });
+      });
+
+      masterDetailData.smart.rules = smartRules;
+      masterDetailData.smart.selectedIndex = 0;
+
+      masterDetailData.pro.rules = proRules;
+      masterDetailData.pro.selectedIndex = 0;
+
+      const totalGain = safeSum + devSum;
+      document.getElementById('navBadgeTotal').innerText = formatSize(totalGain);
+      document.getElementById('navBadgeSafe').innerText = formatSize(safeSum);
+      document.getElementById('navBadgeDev').innerText = formatSize(devSum);
+
+      const btnHorizon = document.getElementById('btnHorizonQuickClean');
+      const textHorizon = document.getElementById('btnHorizonQuickText');
+      if (safeSum > 0) {
+        btnHorizon.disabled = false;
+        textHorizon.innerText = `一键安全释放 ${formatSize(safeSum)}`;
+      } else {
+        btnHorizon.disabled = true;
+        textHorizon.innerText = '当前暂无安全文件';
+      }
+
+      document.getElementById('pillarSafe').innerText = formatSize(safeSum);
+      document.getElementById('pillarDev').innerText = formatSize(devSum);
+      document.getElementById('pillarDb').innerText = formatSize(dbSum);
+      document.getElementById('pillarMigrate').innerText = formatSize(migrateSum);
+
+      renderDashboardRows(smartRules, safeSum);
+      renderMasterDetail('smart');
+      renderMasterDetail('pro');
+      renderMigrationCards(migrateRules);
+      renderVacuumCards(vacuumRules);
+    }
+
+    function renderDashboardRows(rules, totalSafe) {
+      const box = document.getElementById('dashboardQuickRows');
+      const btn = document.getElementById('btnDashboardClean');
+
+      if (rules.length === 0) {
+        box.innerHTML = '<div style="text-align: center; color: var(--color-safe); padding: 20px; font-size: 12px;">太棒了! 当前暂无系统与办公临时垃圾。</div>';
+        btn.disabled = true;
+        btn.innerText = '暂无安全文件';
+        return;
+      }
+
+      btn.disabled = false;
+      btn.innerText = `立即一键释放 ${formatSize(totalSafe)}`;
+
+      box.innerHTML = rules.map(r => `
+        <div class="desktop-row">
+          <div class="desktop-row-main">
+            <div class="row-meta-info">
+              <div class="row-title">${r.name}</div>
+              <div class="row-subtitle">${r.catName} · 包含 ${r.matched_paths.length} 处物理路径 (${r.total_files} 个文件)</div>
+            </div>
+            <div class="desktop-row-right">
+              <span class="status-badge badge-safe">0 风险</span>
+              <span class="row-bytes tabular-num">${formatSize(r.total_size_bytes)}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Master-Detail Dual Pane Renderer
+    function renderMasterDetail(prefix) {
+      const state = masterDetailData[prefix];
+      const masterListEl = document.getElementById(`${prefix}MasterList`);
+      const countEl = document.getElementById(`${prefix}MasterCount`);
+
+      countEl.innerText = `${state.rules.length} 个分类`;
+
+      if (state.rules.length === 0) {
+        masterListEl.innerHTML = '<div class="tree-empty-notice">该分类下暂无匹配资产。</div>';
+        renderDetailInspector(prefix);
+        return;
+      }
+
+      masterListEl.innerHTML = state.rules.map((rule, idx) => {
+        const isSelected = idx === state.selectedIndex;
+        const checkId = `${prefix}_cb_${idx}`;
+        const pathsData = encodeURIComponent(JSON.stringify(rule.matched_paths.map(p => p.path)));
+
+        return `
+          <div class="master-item-row ${isSelected ? 'selected' : ''}" onclick="selectMasterItem('${prefix}', ${idx})">
+            <div class="master-item-left">
+              <input type="checkbox" class="fluent-check ${prefix}-check" id="${checkId}" data-paths="${pathsData}" onclick="event.stopPropagation()" checked>
+              <div class="master-item-info">
+                <div class="master-item-title">${rule.name}</div>
+                <div class="master-item-sub">${rule.matched_paths.length} 处路径 (${rule.total_files} 文件)</div>
+              </div>
+            </div>
+            <div class="master-item-right">
+              <span class="master-item-size tabular-num">${formatSize(rule.total_size_bytes)}</span>
+              <div class="chevron-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      renderDetailInspector(prefix);
+    }
+
+    function selectMasterItem(prefix, index) {
+      masterDetailData[prefix].selectedIndex = index;
+      const rows = document.querySelectorAll(`#${prefix}MasterList .master-item-row`);
+      rows.forEach((r, idx) => {
+        r.classList.toggle('selected', idx === index);
+      });
+      renderDetailInspector(prefix);
+    }
+
+    function renderDetailInspector(prefix) {
+      const state = masterDetailData[prefix];
+      const selectedRule = state.rules[state.selectedIndex];
+
+      const titleEl = document.getElementById(`${prefix}InspectorTitle`);
+      const badgeEl = document.getElementById(`${prefix}InspectorBadge`);
+      const metaEl = document.getElementById(`${prefix}InspectorPathMeta`);
+      const pathsEl = document.getElementById(`${prefix}InspectorPaths`);
+      const footInfoEl = document.getElementById(`${prefix}InspectorFootInfo`);
+      const revealBtn = document.getElementById(`${prefix}InspectorRevealBtn`);
+      const cleanBtn = document.getElementById(`${prefix}InspectorCleanSingleBtn`);
+
+      if (!selectedRule) {
+        titleEl.innerText = '请选择左侧分类进行查看';
+        metaEl.innerText = '暂无选中的项目';
+        pathsEl.innerHTML = '<div class="tree-empty-notice">点击左侧分类查看详细物理路径树与单体大小</div>';
+        footInfoEl.innerText = '就绪';
+        revealBtn.disabled = true;
+        cleanBtn.disabled = true;
+        return;
+      }
+
+      titleEl.innerText = selectedRule.name;
+      badgeEl.className = selectedRule.risk === 'SAFE' ? 'status-badge badge-safe' : 'status-badge badge-dev';
+      badgeEl.innerText = selectedRule.risk === 'SAFE' ? '0 风险' : '可自动重建';
+      metaEl.innerText = `${selectedRule.catName || ''} · 包含 ${selectedRule.matched_paths.length} 处物理路径 (${selectedRule.total_files} 个文件)`;
+
+      revealBtn.disabled = false;
+      cleanBtn.disabled = false;
+      cleanBtn.innerText = `立即清理当前分类 (${formatSize(selectedRule.total_size_bytes)})`;
+
+      footInfoEl.innerHTML = `当前分类占用 C 盘: <b style="color: #FFFFFF;">${formatSize(selectedRule.total_size_bytes)}</b> (包含 ${selectedRule.matched_paths.length} 处路径)`;
+
+      filterInspectorPaths(prefix);
+    }
+
+    function filterInspectorPaths(prefix) {
+      const state = masterDetailData[prefix];
+      const selectedRule = state.rules[state.selectedIndex];
+      if (!selectedRule) return;
+
+      const searchInput = document.getElementById(`${prefix}SearchInput`);
+      const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+      const pathsEl = document.getElementById(`${prefix}InspectorPaths`);
+
+      const filtered = query
+        ? selectedRule.matched_paths.filter(p => p.path.toLowerCase().includes(query))
+        : selectedRule.matched_paths;
+
+      if (filtered.length === 0) {
+        pathsEl.innerHTML = '<div class="tree-empty-notice">未检索到与关键词匹配的子路径。</div>';
+        return;
+      }
+
+      pathsEl.innerHTML = filtered.map(p => `
+        <div class="inspector-path-row">
+          <div class="path-row-lead">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            <div class="path-string-mono" title="${p.path}">${p.path}</div>
+          </div>
+          <div class="path-row-actions">
+            <span class="path-size-text tabular-num">${formatSize(p.size_bytes)}</span>
+            <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 10px;" onclick="revealExplorer('${p.path.replace(/\\/g, '\\\\')}')">定位</button>
+            <button class="btn btn-danger btn-sm" style="padding: 2px 8px; font-size: 10px;" onclick="cleanSinglePath('${p.path.replace(/\\/g, '\\\\')}')">清理</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function revealActiveInspectorRoot() {
+      const activeTab = document.querySelector('.tab-panel.active').id.replace('panel-', '');
+      const prefix = activeTab === 'pro' ? 'pro' : 'smart';
+      const state = masterDetailData[prefix];
+      const selectedRule = state.rules[state.selectedIndex];
+      if (selectedRule && selectedRule.matched_paths.length > 0) {
+        revealExplorer(selectedRule.matched_paths[0].path);
+      }
+    }
+
+    function cleanActiveInspectorCategory(prefix) {
+      const state = masterDetailData[prefix];
+      const selectedRule = state.rules[state.selectedIndex];
+      if (!selectedRule) return;
+
+      const paths = selectedRule.matched_paths.map(p => p.path);
+      promptModal(
+        `清理当前项: ${selectedRule.name}`,
+        `即将清理选中的【${selectedRule.name}】(共 ${paths.length} 处路径，合计 ${formatSize(selectedRule.total_size_bytes)})。\n\n系统独占文件将自动跳过。是否继续？`,
+        () => dispatchClean(paths),
+        prefix === 'smart' ? 'btn-safe' : 'btn-primary'
+      );
+    }
+
+    function cleanSinglePath(path) {
+      promptModal(
+        '清理指定物理路径',
+        `即将清理路径:\n${path}\n\n确认继续执行吗？`,
+        () => dispatchClean([path]),
+        'btn-danger'
+      );
+    }
+
+    function toggleChecks(prefix, checked) {
+      document.querySelectorAll(`.${prefix}-check`).forEach(cb => cb.checked = checked);
+    }
+
+    // 3. Clean Execution API
+    function cleanAllSafeItems() {
+      const paths = [];
+      document.querySelectorAll('.smart-check').forEach(cb => {
+        paths.push(...JSON.parse(decodeURIComponent(cb.dataset.paths)));
+      });
+
+      if (paths.length === 0) return;
+
+      promptModal(
+        '一键释放安全空间',
+        `即将安全清除所有零风险系统临时文件与办公离线包 (共 ${paths.length} 处路径)。\n\n此操作 100% 0 风险，正在被系统独占的文件将自动安全跳过。是否继续？`,
+        () => dispatchClean(paths),
+        'btn-safe'
+      );
+    }
+
+    function submitCleanBatch(prefix) {
+      const paths = [];
+      document.querySelectorAll(`.${prefix}-check:checked`).forEach(cb => {
+        paths.push(...JSON.parse(decodeURIComponent(cb.dataset.paths)));
+      });
+
+      if (paths.length === 0) {
+        showToast('请至少勾选一项要清理的资产分类');
+        return;
+      }
+
+      promptModal(
+        '确认执行批量清理',
+        `即将清理选中的 ${paths.length} 处资产路径。CleanFlow 原生容错引擎将安全清理并跳过系统独占文件。是否继续？`,
+        () => dispatchClean(paths),
+        prefix === 'smart' ? 'btn-safe' : 'btn-primary'
+      );
+    }
+
+    async function dispatchClean(paths) {
+      try {
+        const res = await fetch('/api/clean', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paths })
+        });
+        const out = await res.json();
+        if (out.success) {
+          showToast(`清理成功! 共释放 ${formatSize(out.bytes_freed)} 物理空间`);
+          await refreshDisks();
+          await runFullScan();
+        } else {
+          showToast(`清理失败: ${out.error}`);
+        }
+      } catch (err) {
+        showToast(`请求异常: ${err}`);
+      }
+    }
+
+    // 4. Migrations & Custom Path API
+    function renderMigrationCards(rules) {
+      const box = document.getElementById('migrateListRows');
+      if (rules.length === 0) {
+        box.innerHTML = '<div style="text-align: center; color: var(--text-tertiary); padding: 32px; font-size: 12px;">暂未匹配到常见大资产路径。</div>';
+        return;
+      }
+
+      box.innerHTML = rules.map(r => {
+        return r.matched_paths.map(p => `
+          <div class="bridge-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h4 style="font-size: 13px; font-weight: 700; color: #FFFFFF;">${r.name}</h4>
+                <p style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">
+                  占用 C 盘 <span class="tabular-num" style="font-weight: 600; color: var(--color-safe);">${formatSize(p.size_bytes)}</span> · 包含 ${p.file_count} 个核心资产文件
+                </p>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-secondary btn-sm" onclick="revealExplorer('${p.path.replace(/\\/g, '\\\\')}')">在文件夹中定位</button>
+                <button class="btn btn-junction btn-sm" onclick="promptMigrate('${p.path.replace(/\\/g, '\\\\')}', 'D')">
+                  <svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                  <span>无感迁移至 D 盘 (NTFS 联接)</span>
+                </button>
+              </div>
+            </div>
+            <div class="bridge-diagram">
+              <div class="bridge-node">
+                <span class="bridge-node-title">C 盘当前原位 (0 字节透明系统重定向入口)</span>
+                <span class="bridge-node-path">${p.path}</span>
+              </div>
+              <div class="bridge-arrow-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </div>
+              <div class="bridge-node">
+                <span class="bridge-node-title">D 盘物理落盘位置 (多线程 Robocopy 同步)</span>
+                <span class="bridge-node-path">D:\\CleanFlow_Storage\\...</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }).join('');
+    }
+
+    async function inspectCustomPath() {
+      const input = document.getElementById('customMigrateInput').value.trim();
+      const targetDrive = document.getElementById('customTargetDrive').value;
+      const resBox = document.getElementById('customPathResult');
+
+      if (!input) {
+        showToast('请输入要检测的 C 盘目录路径');
+        return;
+      }
+
+      resBox.style.display = 'block';
+      resBox.innerHTML = '<span style="color: var(--text-tertiary);">正在分析目录容量与进程独占状态...</span>';
+
+      try {
+        const res = await fetch('/api/check-path', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: input })
+        });
+        const data = await res.json();
+
+        if (!data.exists) {
+          resBox.innerHTML = `<span style="color: var(--color-danger);">错误: ${data.error || '该路径不存在'}</span>`;
+          return;
+        }
+
+        if (data.is_junction) {
+          resBox.innerHTML = `<span style="color: var(--color-warning);">该路径已经是 NTFS 虚拟联接，无需重复搬家。</span>`;
+          return;
+        }
+
+        let lockHtml = '';
+        if (data.locking_processes && data.locking_processes.length > 0) {
+          lockHtml = `
+            <div style="margin-top: 8px; color: var(--color-warning); display: flex; align-items: center; justify-content: space-between;">
+              <span>检测到以下进程正在占用目录: ${data.locking_processes.map(lp => `<b>${lp.name} (${lp.description})</b>`).join(', ')}</span>
+              <button class="btn btn-secondary btn-sm" onclick="killLockProc('${data.locking_processes[0].name}')">安全退出此进程</button>
+            </div>
+          `;
+        }
+
+        resBox.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 600; color: #FFFFFF;">有效目录: ${data.path}</div>
+              <div style="color: var(--text-secondary); margin-top: 2px;">
+                占用容量: <b style="color: var(--color-safe);" class="tabular-num">${formatSize(data.size_bytes)}</b> (包含 ${data.file_count} 个文件)
+              </div>
+            </div>
+            <button class="btn btn-junction btn-sm" onclick="promptMigrate('${data.path.replace(/\\/g, '\\\\')}', '${targetDrive}')">
+              立即搬迁到 ${targetDrive} 盘并创建联接
+            </button>
+          </div>
+          ${lockHtml}
+        `;
+      } catch (err) {
+        resBox.innerHTML = `<span style="color: var(--color-danger);">检测异常: ${err}</span>`;
+      }
+    }
+
+    async function killLockProc(name) {
+      if (!confirm(`确认要终止进程 ${name} 吗？`)) return;
+      try {
+        const res = await fetch('/api/kill-process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`已成功终止进程 ${name}`);
+          inspectCustomPath();
+        } else {
+          showToast(`终止进程失败: ${data.error}`);
+        }
+      } catch (e) {
+        showToast(`终止请求失败: ${e}`);
+      }
+    }
+
+    let migrationPollInterval = null;
+
+    function promptMigrate(sourcePath, driveLetter) {
+      promptModal(
+        '确认大资产空间无感迁移',
+        `即将通过多线程高速同步引擎将该资产搬迁到 ${driveLetter} 盘，并在 C 盘原位创建 0 字节透明虚拟联接 (NTFS Junction)。\n\n搬迁后应用无感照常读写，彻底释放 C 盘物理空间。\n系统将自动检测独占状态并支持实时进度查看与后续随时一键还原。是否开始？`,
+        () => executeAsyncMigration(sourcePath, driveLetter),
+        'btn-junction'
+      );
+    }
+
+    async function executeAsyncMigration(sourcePath, targetDrive) {
+      const modal = document.getElementById('migrationProgressModal');
+      document.getElementById('migModalTitle').innerText = '正在无感迁移大资产...';
+      document.getElementById('migModalStateBadge').className = 'status-badge badge-dev';
+      document.getElementById('migModalStateBadge').innerText = '正在同步';
+      document.getElementById('migModalSrc').innerText = sourcePath;
+      document.getElementById('migModalDst').innerText = `${targetDrive}:\\CleanFlow_Storage\\...`;
+      document.getElementById('migModalPercentText').innerText = '0.0%';
+      document.getElementById('migModalProgressBar').style.width = '0%';
+      document.getElementById('migModalSizeStat').innerText = '正在计算...';
+      document.getElementById('migModalFileStat').innerText = '正在索引...';
+      document.getElementById('migModalCurrentFile').innerText = '启动多线程传输引擎...';
+      document.getElementById('migModalCloseBtn').style.display = 'none';
+
+      modal.classList.add('show');
+
+      try {
+        const res = await fetch('/api/migrate-start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source_path: sourcePath, target_drive: targetDrive })
+        });
+        const out = await res.json();
+        if (!out.success) {
+          document.getElementById('migModalTitle').innerText = '搬迁任务启动失败';
+          document.getElementById('migModalStateBadge').className = 'status-badge badge-danger';
+          document.getElementById('migModalStateBadge').innerText = '启动失败';
+          document.getElementById('migModalCurrentFile').innerHTML = `<span style="color: var(--color-danger);">${out.error || '未知错误'}</span>`;
+          document.getElementById('migModalCloseBtn').style.display = 'inline-flex';
+          return;
+        }
+
+        if (migrationPollInterval) clearInterval(migrationPollInterval);
+        migrationPollInterval = setInterval(pollMigrationProgress, 300);
+      } catch (err) {
+        document.getElementById('migModalCurrentFile').innerHTML = `<span style="color: var(--color-danger);">请求异常: ${err}</span>`;
+        document.getElementById('migModalCloseBtn').style.display = 'inline-flex';
+      }
+    }
+
+    async function pollMigrationProgress() {
+      try {
+        const res = await fetch('/api/migrate-status');
+        const status = await res.json();
+
+        if (status.source_path) document.getElementById('migModalSrc').innerText = status.source_path;
+        if (status.target_path) document.getElementById('migModalDst').innerText = status.target_path;
+
+        const pct = Math.min(100, Math.max(0, status.percent || 0));
+        document.getElementById('migModalProgressBar').style.width = pct + '%';
+        document.getElementById('migModalPercentText').innerText = pct.toFixed(1) + '%';
+
+        if (status.total_bytes > 0) {
+          document.getElementById('migModalSizeStat').innerText = `${formatSize(status.copied_bytes)} / ${formatSize(status.total_bytes)}`;
+        }
+        if (status.total_files > 0) {
+          document.getElementById('migModalFileStat').innerText = `${status.copied_files} / ${status.total_files} 文件`;
+        }
+
+        if (status.current_file) {
+          document.getElementById('migModalCurrentFile').innerText = status.current_file;
+        }
+
+        if (status.state === 'COMPLETED') {
+          clearInterval(migrationPollInterval);
+          migrationPollInterval = null;
+          document.getElementById('migModalTitle').innerText = '大资产空间迁移完成!';
+          document.getElementById('migModalStateBadge').className = 'status-badge badge-safe';
+          document.getElementById('migModalStateBadge').innerText = '联接生效中';
+          document.getElementById('migModalCurrentFile').innerHTML = `<span style="color: var(--color-safe); font-weight: 600;">100% 传输完毕，已建立 NTFS 虚拟符号联接。C 盘已释放 ${formatSize(status.total_bytes)}。</span>`;
+          document.getElementById('migModalCloseBtn').style.display = 'inline-flex';
+          showToast(`大资产迁移成功! 已安全重定向至 ${status.target_drive} 盘`);
+          await refreshDisks();
+          await runFullScan();
+          loadJunctions();
+        } else if (status.state === 'FAILED') {
+          clearInterval(migrationPollInterval);
+          migrationPollInterval = null;
+          document.getElementById('migModalTitle').innerText = '迁移未完成';
+          document.getElementById('migModalStateBadge').className = 'status-badge badge-danger';
+          document.getElementById('migModalStateBadge').innerText = '异常终止';
+          document.getElementById('migModalCurrentFile').innerHTML = `<span style="color: var(--color-danger);">${status.error_msg || '发生未知错误'}</span>`;
+          document.getElementById('migModalCloseBtn').style.display = 'inline-flex';
+        }
+      } catch (e) {
+        console.error('轮询搬迁状态失败:', e);
+      }
+    }
+
+    function closeMigrationModal() {
+      if (migrationPollInterval) {
+        clearInterval(migrationPollInterval);
+        migrationPollInterval = null;
+      }
+      document.getElementById('migrationProgressModal').classList.remove('show');
+    }
+
+    // 5. Junctions Center API
+    async function loadJunctions() {
+      const box = document.getElementById('junctionListRows');
+      box.innerHTML = '<div style="text-align: center; color: var(--text-tertiary); padding: 32px;">正在读取虚拟联接状态...</div>';
+
+      try {
+        const res = await fetch('/api/junctions');
+        const list = await res.json();
+
+        document.getElementById('navBadgeJunctions').innerText = `${list.length} 处`;
+
+        if (list.length === 0) {
+          box.innerHTML = `
+            <div class="bridge-card" style="text-align: center; padding: 40px;">
+              <h4 style="color: var(--text-secondary); margin-bottom: 4px; font-size: 13px;">暂未创建任何虚拟联接资产</h4>
+              <p style="font-size: 11px; color: var(--text-tertiary); max-width: 500px; margin: 0 auto;">
+                在「大资产空间迁移」中将 Android 模拟器、微信数据或自定义大目录搬迁到 D 盘后，此处将集中呈现并支持随时一键安全还原。
+              </p>
+            </div>
+          `;
+          return;
+        }
+
+        let totalRedirected = 0;
+        list.forEach(i => totalRedirected += (i.size_bytes || 0));
+
+        box.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 11px; color: var(--text-secondary);">
+            <span>已托管虚拟联接: <b style="color: #FFFFFF;">${list.length} 处</b></span>
+            <span>累计为 C 盘省出物理空间: <b style="color: var(--color-safe);" class="tabular-num">${formatSize(totalRedirected)}</b></span>
+          </div>
+        ` + list.map(item => `
+          <div class="bridge-card" style="border-color: var(--color-junction-border);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <h4 style="font-size: 13px; font-weight: 700; color: #FFFFFF;">${item.name}</h4>
+                  ${item.is_healthy ? '<span class="status-badge badge-safe">正常联接</span>' : '<span class="status-badge badge-danger">联接断裂/外部盘离线</span>'}
+                  <span style="font-size: 10px; color: var(--text-tertiary);">${item.created_at}</span>
+                </div>
+                <p style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">
+                  已为 C 盘腾出空间: <b style="color: var(--color-safe);" class="tabular-num">${formatSize(item.size_bytes)}</b>
+                </p>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-secondary btn-sm" onclick="revealExplorer('${item.target_path.replace(/\\/g, '\\\\')}')">定位实际落盘数据</button>
+                <button class="btn btn-secondary btn-sm" onclick="revealExplorer('${item.source_path.replace(/\\/g, '\\\\')}')">定位 C 盘入口</button>
+                <button class="btn btn-danger btn-sm" onclick="promptRollback('${item.source_path.replace(/\\/g, '\\\\')}', '${item.name}', ${item.size_bytes})">一键安全迁回 C 盘</button>
+              </div>
+            </div>
+            <div class="bridge-diagram">
+              <div class="bridge-node">
+                <span class="bridge-node-title">C 盘系统联接入口 (0 字节系统重定向)</span>
+                <span class="bridge-node-path">${item.source_path}</span>
+              </div>
+              <div class="bridge-arrow-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </div>
+              <div class="bridge-node">
+                <span class="bridge-node-title">真实物理存储位置 (${item.target_drive} 盘)</span>
+                <span class="bridge-node-path">${item.target_path}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        box.innerHTML = `<div style="color: var(--color-danger); padding: 24px;">加载联接失败: ${e}</div>`;
+      }
+    }
+
+    function promptRollback(sourcePath, name, sizeBytes) {
+      promptModal(
+        `确认将【${name}】还原迁回 C 盘`,
+        `即将解除该虚拟联接，并将物理数据完整拷回 C 盘原位:\n${sourcePath}\n\n还原后将重新占用 C 盘约 ${formatSize(sizeBytes)} 空间。\nCleanFlow 将在执行前自动校验 C 盘剩余可用容量。确认继续吗？`,
+        () => dispatchRollback(sourcePath),
+        'btn-danger'
+      );
+    }
+
+    async function dispatchRollback(sourcePath) {
+      try {
+        const res = await fetch('/api/junctions/rollback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source_path: sourcePath })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`还原成功! 已将 ${formatSize(data.bytes_restored)} 数据移回 C 盘`);
+          await refreshDisks();
+          await runFullScan();
+          loadJunctions();
+        } else {
+          showToast(`还原失败: ${data.error}`);
+        }
+      } catch (err) {
+        showToast(`还原异常: ${err}`);
+      }
+    }
+
+    // 6. Giant Files Explorer API
+    async function loadGiantFiles() {
+      const btn = document.getElementById('btnScanGiant');
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <span>正在检索全盘...</span>
+      `;
+
+      try {
+        const res = await fetch('/api/giant-files');
+        allGiantFiles = await res.json();
+        showToast(`检索完成! 发现 ${allGiantFiles.length} 个超大文件`);
+        renderGiantFilesTable();
+      } catch (e) {
+        showToast('检索失败: ' + e);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span>刷新透视扫描</span>
+        `;
+      }
+    }
+
+    function filterGiantCategory(cat) {
+      currentGiantCategory = cat;
+      document.querySelectorAll('.segment-tab').forEach(el => el.classList.remove('active'));
+      if (event && event.currentTarget) event.currentTarget.classList.add('active');
+      renderGiantFilesTable();
+    }
+
+    function renderGiantFilesTable() {
+      const tbody = document.getElementById('giantFilesBody');
+      const filtered = currentGiantCategory === 'ALL'
+        ? allGiantFiles
+        : allGiantFiles.filter(f => f.category === currentGiantCategory);
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-tertiary); padding: 32px;">暂无该分类的超大文件。</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(f => {
+        let catLabel = f.category;
+        let badgeClass = 'badge-dev';
+        if (f.category === 'VirtualDisk') { catLabel = '虚拟机磁盘'; badgeClass = 'badge-junction'; }
+        else if (f.category === 'Database') { catLabel = '数据库'; badgeClass = 'badge-safe'; }
+        else if (f.category === 'AIModel') { catLabel = 'AI 模型权重'; badgeClass = 'badge-safe'; }
+        else if (f.category === 'Archive') { catLabel = '压缩包/镜像'; badgeClass = 'badge-warning'; }
+        else if (f.category === 'DumpLog') { catLabel = '崩溃转储日志'; badgeClass = 'badge-safe'; }
+        else if (f.category === 'Media') { catLabel = '音视频媒体'; }
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight: 600; color: #FFFFFF; font-size: 12px;">${f.name}</div>
+              <div style="font-size: 10px; font-family: var(--font-mono); color: var(--text-tertiary); margin-top: 2px; word-break: break-all;">${f.path}</div>
+            </td>
+            <td><span class="status-badge ${badgeClass}">${catLabel}</span></td>
+            <td class="tabular-num" style="font-weight: 700; color: var(--color-safe); font-size: 12px;">${formatSize(f.size_bytes)}</td>
+            <td style="text-align: right;">
+              <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                <button class="btn btn-secondary btn-sm" onclick="revealExplorer('${f.path.replace(/\\/g, '\\\\')}')">在文件夹中显示</button>
+                <button class="btn btn-danger btn-sm" onclick="promptDeleteGiantFile('${f.path.replace(/\\/g, '\\\\')}')">安全删除</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function promptDeleteGiantFile(path) {
+      promptModal(
+        '确认删除单体大文件',
+        `即将物理删除以下文件:\n${path}\n\n此操作不可逆，请确认该文件不再需要。是否继续？`,
+        () => dispatchDeleteGiantFile(path),
+        'btn-danger'
+      );
+    }
+
+    async function dispatchDeleteGiantFile(path) {
+      try {
+        const res = await fetch('/api/delete-file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path })
+        });
+        const out = await res.json();
+        if (out.success) {
+          showToast(`已成功删除文件，释放 ${formatSize(out.bytes_freed)} 空间`);
+          await refreshDisks();
+          await loadGiantFiles();
+        } else {
+          showToast(`删除失败: ${out.errors ? out.errors.join(', ') : '未知错误'}`);
+        }
+      } catch (e) {
+        showToast('删除请求异常: ' + e);
+      }
+    }
+
+    // 7. SQLite Vacuum API
+    function renderVacuumCards(rules) {
+      const box = document.getElementById('vacuumListRows');
+      if (rules.length === 0) {
+        box.innerHTML = '<div style="text-align: center; color: var(--text-tertiary); padding: 32px; font-size: 12px;">暂未发现臃肿的 SQLite 状态数据库。</div>';
+        return;
+      }
+
+      box.innerHTML = rules.map(r => {
+        return r.matched_paths.map(p => {
+          const estimatedSize = Math.max(1024 * 1024, Math.floor(p.size_bytes * 0.08));
+          return `
+            <div class="vacuum-strip">
+              <div style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <h4 style="font-size: 13px; font-weight: 700; color: #FFFFFF;">${r.name}</h4>
+                  <span class="status-badge badge-dev">原生 WinSqlite3 驱动</span>
+                  <span class="status-badge badge-safe">0 业务丢失保障</span>
+                </div>
+                <p style="font-size: 10px; font-family: var(--font-mono); color: var(--text-tertiary); margin-top: 4px; word-break: break-all;">${p.path}</p>
+              </div>
+              <div class="vacuum-diagram-box">
+                <div class="vacuum-diagram-row">
+                  <span style="width: 70px; color: var(--text-tertiary);">当前物理占用:</span>
+                  <div class="vacuum-track-mini"><div style="width: 100%; height: 100%; background: linear-gradient(90deg, #F59E0B, #EF4444);"></div></div>
+                  <span class="tabular-num" style="font-weight: 700; color: var(--color-warning); width: 65px; text-align: right;">${formatSize(p.size_bytes)}</span>
+                </div>
+                <div class="vacuum-diagram-row">
+                  <span style="width: 70px; color: var(--text-tertiary);">无损收缩预估:</span>
+                  <div class="vacuum-track-mini"><div style="width: 8%; height: 100%; background: linear-gradient(90deg, #10B981, #38BDF8);"></div></div>
+                  <span class="tabular-num" style="font-weight: 700; color: var(--color-safe); width: 65px; text-align: right;">约 ${formatSize(estimatedSize)}</span>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="promptVacuum('${p.path.replace(/\\/g, '\\\\')}')">
+                <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                <span>执行原生 VACUUM 收缩</span>
+              </button>
+            </div>
+          `;
+        }).join('');
+      }).join('');
+    }
+
+    function promptVacuum(dbPath) {
+      promptModal(
+        '执行数据库碎片挤水分 (原生 VACUUM)',
+        `将调用 Windows 内核级 WinSqlite3 原生驱动对该数据库执行深度扇区整理与 WAL 事务截断:\n\n${dbPath}\n\n物理文件将被无损重组，彻底归还被删除的历史空闲碎片页（Freelist），且绝对不丢失任何对话历史与配置数据。是否立即执行？`,
+        () => dispatchVacuum(dbPath)
+      );
+    }
+
+    async function dispatchVacuum(dbPath) {
+      try {
+        const res = await fetch('/api/vacuum', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ db_path: dbPath })
+        });
+        const out = await res.json();
+        if (out.success) {
+          showToast(`收缩完成! ${formatSize(out.original_size)} -> ${formatSize(out.new_size)}，释放 ${formatSize(out.bytes_freed)}`);
+          await refreshDisks();
+          await runFullScan();
+        } else {
+          showToast(`收缩失败: ${out.error}`);
+        }
+      } catch (err) {
+        showToast(`收缩异常: ${err}`);
+      }
+    }
+
+    // Windows Explorer Reveal
+    function revealExplorer(path) {
+      fetch('/api/reveal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path })
+      });
+      showToast('已在 Windows 资源管理器中高亮定位');
+    }
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') dismissModal();
+      if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') {
+        e.preventDefault();
+        runFullScan();
+      }
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault();
+        navigate('giant');
+      }
+    });
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', async () => {
+      await refreshDisks();
+      await runFullScan();
+    });
+  </script>
+</body>
+</html>
