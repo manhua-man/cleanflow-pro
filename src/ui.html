@@ -1820,6 +1820,24 @@
               <div class="segment-tab" onclick="filterGiantCategory('Media')">音视频媒体 (.mp4/.mov/.mkv)</div>
             </div>
 
+            <!-- WizTree Space Treemap Strip -->
+            <div id="giantTreemapContainer" style="background: var(--mica-surface-subtle); border: 1px solid var(--stroke-divider); border-radius: var(--radius-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-weight: 700; color: #FFFFFF;">物理空间热力分布带 (WizTree 空间透视)</span>
+                  <span style="font-size: 10px; color: var(--text-tertiary);" id="giantTreemapMeta">按单体大小等比分配色块 · 点击色块在下方高亮定位</span>
+                </div>
+                <div style="font-size: 11px; font-weight: 600; color: var(--color-safe);" id="giantTreemapTotal" class="tabular-num">
+                  Top 巨型文件总量: 0 B
+                </div>
+              </div>
+              <div id="giantTreemapStrip" style="height: 32px; background: rgba(0, 0, 0, 0.35); border-radius: var(--radius-sm); border: 1px solid var(--stroke-divider); display: flex; overflow: hidden; position: relative;">
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-tertiary);">
+                  扫描完成后将自动生成物理空间热力占比带
+                </div>
+              </div>
+            </div>
+
             <div class="table-shell">
               <table class="fluent-table">
                 <thead>
@@ -1988,6 +2006,8 @@
 
       if (panelId === 'junctions') {
         loadJunctions();
+      } else if (panelId === 'giant' && allGiantFiles.length === 0) {
+        loadGiantFiles();
       }
     }
 
@@ -2860,6 +2880,7 @@
         const res = await fetch('/api/giant-files');
         allGiantFiles = await res.json();
         showToast(`检索完成! 发现 ${allGiantFiles.length} 个超大文件`);
+        renderGiantTreemap(allGiantFiles);
         renderGiantFilesTable();
       } catch (e) {
         showToast('检索失败: ' + e);
@@ -2872,10 +2893,76 @@
       }
     }
 
+    function renderGiantTreemap(files) {
+      const container = document.getElementById('giantTreemapStrip');
+      const totalEl = document.getElementById('giantTreemapTotal');
+      if (!container || !files || files.length === 0) return;
+
+      const topFiles = files.slice(0, 24);
+      const totalTopBytes = topFiles.reduce((acc, f) => acc + f.size_bytes, 0);
+
+      if (totalTopBytes === 0) {
+        container.innerHTML = '<div style="width: 100%; text-align: center; line-height: 32px; color: var(--text-tertiary); font-size: 11px;">暂无超大文件热力数据</div>';
+        return;
+      }
+
+      totalEl.innerText = `Top ${topFiles.length} 巨额文件合计: ${formatSize(totalTopBytes)}`;
+
+      const catColors = {
+        VirtualDisk: '#8B5CF6',
+        AIModel: '#0EA5E9',
+        Database: '#F59E0B',
+        Archive: '#10B981',
+        DumpLog: '#F43F5E',
+        Media: '#EC4899',
+        Executable: '#64748B',
+        Other: '#475569'
+      };
+
+      container.innerHTML = topFiles.map(f => {
+        const pct = Math.max(1.8, (f.size_bytes / totalTopBytes) * 100);
+        const bg = catColors[f.category] || '#0284C7';
+        const showLabel = pct > 4.5;
+        const cleanPath = f.path.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+        return `
+          <div class="treemap-block" 
+               style="width: ${pct.toFixed(2)}%; background-color: ${bg}; height: 100%; display: flex; align-items: center; justify-content: center; border-right: 1px solid rgba(0,0,0,0.4); cursor: pointer; transition: filter 120ms ease; padding: 0 4px; overflow: hidden;"
+               title="${f.name}&#10;分类: ${f.category}&#10;大小: ${formatSize(f.size_bytes)}&#10;路径: ${f.path}"
+               onclick="focusGiantFileRow('${cleanPath}')">
+            ${showLabel ? `<span style="font-size: 10px; font-weight: 700; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">${f.name}</span>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function focusGiantFileRow(path) {
+      currentGiantCategory = 'ALL';
+      document.querySelectorAll('.segment-tab').forEach((el, idx) => {
+        el.classList.toggle('active', idx === 0);
+      });
+      renderGiantFilesTable();
+
+      setTimeout(() => {
+        const rows = document.querySelectorAll('#giantFilesBody tr');
+        rows.forEach(r => {
+          if (r.dataset.path === path) {
+            r.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            r.style.backgroundColor = 'rgba(14, 165, 233, 0.25)';
+            r.style.outline = '1px solid var(--accent-brand)';
+            setTimeout(() => {
+              r.style.backgroundColor = '';
+              r.style.outline = '';
+            }, 3000);
+          }
+        });
+      }, 50);
+    }
+
     function filterGiantCategory(cat) {
       currentGiantCategory = cat;
       document.querySelectorAll('.segment-tab').forEach(el => el.classList.remove('active'));
-      if (event && event.currentTarget) event.currentTarget.classList.add('active');
+      if (typeof event !== 'undefined' && event && event.currentTarget) event.currentTarget.classList.add('active');
       renderGiantFilesTable();
     }
 
@@ -2901,7 +2988,7 @@
         else if (f.category === 'Media') { catLabel = '音视频媒体'; }
 
         return `
-          <tr>
+          <tr data-path="${f.path}">
             <td>
               <div style="font-weight: 600; color: #FFFFFF; font-size: 12px;">${f.name}</div>
               <div style="font-size: 10px; font-family: var(--font-mono); color: var(--text-tertiary); margin-top: 2px; word-break: break-all;">${f.path}</div>
