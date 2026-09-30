@@ -1,11 +1,18 @@
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
+use std::hash::{Hash, Hasher};
 use std::path::Path;
 use std::process::Command;
-use std::sync::atomic::{AtomicU64, Ordering};
 
-static COUNTER: AtomicU64 = AtomicU64::new(1);
+fn compute_issue_id(prefix: &str, key: &str, val: Option<&str>) -> String {
+    let mut hasher = std::collections::hash_map::DefaultHasher::new();
+    key.hash(&mut hasher);
+    if let Some(v) = val {
+        v.hash(&mut hasher);
+    }
+    format!("{}_{:012x}", prefix, hasher.finish() & 0x0000_ffff_ffff_ffff)
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RegistryIssue {
@@ -73,7 +80,7 @@ pub fn scan_registry_issues() -> Vec<RegistryIssue> {
             if (file_path_str.len() > 3 && &file_path_str[1..3] == ":\\") || file_path_str.starts_with(r"\\") {
                 let p = Path::new(file_path_str);
                 if !p.exists() {
-                    let id = format!("reg_mui_{}", COUNTER.fetch_add(1, Ordering::Relaxed));
+                    let id = compute_issue_id("reg_mui", mui_key, Some(val_raw));
                     issues.push(RegistryIssue {
                         id,
                         root_key: mui_key.to_string(),
@@ -142,8 +149,8 @@ pub fn scan_registry_issues() -> Vec<RegistryIssue> {
                         }
 
                         if !exists {
-                            let id = format!("reg_openwith_{}", COUNTER.fetch_add(1, Ordering::Relaxed));
                             let reg_root = current_key.replace("HKEY_CURRENT_USER", "HKCU");
+                            let id = compute_issue_id("reg_openwith", &reg_root, Some(val_name));
                             issues.push(RegistryIssue {
                                 id,
                                 root_key: reg_root,
@@ -231,17 +238,15 @@ pub fn scan_registry_issues() -> Vec<RegistryIssue> {
                     }
 
                     if let Some(dead_path) = dead_target {
-                        let id = format!("reg_uninst_{}", COUNTER.fetch_add(1, Ordering::Relaxed));
+                        let clean_key = subkey
+                            .replace("HKEY_LOCAL_MACHINE", "HKLM")
+                            .replace("HKEY_CURRENT_USER", "HKCU");
+                        let id = compute_issue_id("reg_uninst", &clean_key, None);
                         let app_label = if !display_name.is_empty() {
                             display_name
                         } else {
                             subkey.rsplit('\\').next().unwrap_or("Unknown").to_string()
                         };
-
-                        // Convert HKEY_LOCAL_MACHINE to HKLM, etc.
-                        let clean_key = subkey
-                            .replace("HKEY_LOCAL_MACHINE", "HKLM")
-                            .replace("HKEY_CURRENT_USER", "HKCU");
 
                         issues.push(RegistryIssue {
                             id,
