@@ -280,6 +280,21 @@
           "default_checked": false
         }
       ]
+    },
+    {
+      "id": "custom",
+      "name": "用户自定义扩展",
+      "description": "用户在界面自定义配置的专属巡检清理规则",
+      "risk_level": "safe",
+      "rules": [
+        {
+          "id": "custom_1790954721",
+          "name": "测试构建临时包",
+          "path_pattern": "%TEMP%\\test_pack_*",
+          "action": "clean_dir",
+          "default_checked": true
+        }
+      ]
     }
   ]
 }

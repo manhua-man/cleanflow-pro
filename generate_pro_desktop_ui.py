@@ -1,4 +1,13 @@
-<!DOCTYPE html>
+# -*- coding: utf-8 -*-
+"""
+CleanFlow Pro - Professional Windows 11 Fluent 2 Desktop Architecture
+Grounded in App Studio (winui.csv, frontend-design, emil-design-eng, impeccable).
+Strict Zero-Emoji rule. Authentic desktop software ergonomics.
+"""
+import re
+import os
+
+HTML_CONTENT = r'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -2928,3 +2937,24 @@
   </script>
 </body>
 </html>
+'''
+
+def main():
+    # Verify zero emojis in HTML_CONTENT
+    emojis = re.findall(r'[\U00010000-\U0010ffff]', HTML_CONTENT)
+    if emojis:
+        print(f"ERROR: Found {len(emojis)} emojis!")
+        return
+
+    target_ui_path = os.path.join(os.path.dirname(__file__), 'src', 'ui.html')
+    with open(target_ui_path, 'w', encoding='utf-8') as f:
+        f.write(HTML_CONTENT)
+    print(f"Generated Pro Desktop UI: {target_ui_path} ({len(HTML_CONTENT)} bytes, 0 emojis)")
+
+    # Also update build_desktop_ui.py to match
+    with open('build_desktop_ui.py', 'w', encoding='utf-8') as f:
+        f.write(f'# -*- coding: utf-8 -*-\nHTML_CONTENT = r\'\'\'{HTML_CONTENT}\'\'\'\n\nif __name__ == "__main__":\n    import os\n    target_path = os.path.join(os.path.dirname(__file__), "src", "ui.html")\n    with open(target_path, "w", encoding="utf-8") as f:\n        f.write(HTML_CONTENT)\n    print(f"Generated: {{target_path}}")\n')
+    print("build_desktop_ui.py synced.")
+
+if __name__ == '__main__':
+    main()

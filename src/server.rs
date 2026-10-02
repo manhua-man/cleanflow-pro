@@ -96,10 +96,16 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                 continue;
             }
 
-            // Route handling
             if url == "/" || url == "/index.html" {
+                let html = if let Ok(s) = std::fs::read_to_string("src/ui.html") {
+                    s
+                } else if let Ok(s) = std::fs::read_to_string("ui.html") {
+                    s
+                } else {
+                    HTML_CONTENT.to_string()
+                };
                 let header = Header::from_bytes(&b"Content-Type"[..], &b"text/html; charset=utf-8"[..]).unwrap();
-                let response = Response::from_string(HTML_CONTENT).with_header(header);
+                let response = Response::from_string(html).with_header(header);
                 let _ = request.respond(response);
             } else if url == "/api/disks" && method == Method::Get {
                 let drives = get_disk_drives();
