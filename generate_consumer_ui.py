@@ -18,69 +18,71 @@ HTML_CONTENT = r'''<!DOCTYPE html>
        Windows 11 Fluent 2 Consumer-Grade Tokens (App Studio Grounded)
        ========================================================================== */
     :root {
-      /* Surface & Mica Layers */
-      --bg-base: #0f1216;
-      --bg-mica: #15181f;
-      --bg-surface: #1a1e27;
-      --bg-card: #202532;
-      --bg-card-hover: #262c3b;
-      --bg-card-active: #1c212c;
-      --bg-acrylic: rgba(26, 30, 39, 0.85);
+      /* Surface & Mica Layers - Windows 11 Fluent 2 Grounded */
+      --bg-base: #0a0d13;
+      --bg-mica: #11151f;
+      --bg-surface: #151a24;
+      --bg-card: #1c2230;
+      --bg-card-hover: #232b3c;
+      --bg-card-active: #181d28;
+      --bg-acrylic: rgba(22, 27, 38, 0.88);
 
       /* Subtle Fills */
-      --fill-subtle: rgba(255, 255, 255, 0.04);
-      --fill-subtle-hover: rgba(255, 255, 255, 0.08);
-      --fill-subtle-active: rgba(255, 255, 255, 0.05);
+      --fill-subtle: rgba(255, 255, 255, 0.045);
+      --fill-subtle-hover: rgba(255, 255, 255, 0.085);
+      --fill-subtle-active: rgba(255, 255, 255, 0.055);
 
       /* Borders & Dividers */
       --stroke-card: rgba(255, 255, 255, 0.08);
-      --stroke-card-hover: rgba(255, 255, 255, 0.16);
+      --stroke-card-hover: rgba(0, 120, 212, 0.42);
       --stroke-divider: rgba(255, 255, 255, 0.06);
-      --stroke-focus: #60cdff;
+      --stroke-focus: #0078d4;
 
-      /* Typography */
-      --font-family: 'Segoe UI Variable Text', 'Segoe UI Variable Display', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'PingFang SC', 'Microsoft YaHei UI', sans-serif;
-      --font-mono: 'Consolas', 'Cascadia Code', monospace;
+      /* Typography - High DPI Windows Optical Sizing */
+      --font-family: 'Segoe UI Variable Text', 'Segoe UI Variable Display', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'SF Pro Text', Roboto, 'PingFang SC', 'Microsoft YaHei UI', sans-serif;
+      --font-display: 'Segoe UI Variable Display', 'Segoe UI Variable Text', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Cascadia Code', 'Consolas', monospace;
       --text-primary: #ffffff;
-      --text-secondary: #c5cbd5;
-      --text-tertiary: #838e9e;
-      --text-disabled: #4e5664;
+      --text-secondary: #d4dbe8;
+      --text-tertiary: #95a3b7;
+      --text-disabled: #556277;
 
       /* Primary Brand & Accents */
       --accent-primary: #0078d4;
       --accent-hover: #1084d9;
       --accent-active: #006cbe;
+      --accent-gradient: linear-gradient(135deg, #0078d4 0%, #0099ff 50%, #00c7ff 100%);
       --accent-subtle: rgba(0, 120, 212, 0.16);
-      --accent-glow: rgba(0, 120, 212, 0.35);
+      --accent-glow: rgba(0, 120, 212, 0.45);
 
       /* Semantic Badges */
-      --status-safe: #10b981;
-      --status-safe-bg: rgba(16, 185, 129, 0.14);
-      --status-safe-border: rgba(16, 185, 129, 0.28);
+      --status-safe: #22c55e;
+      --status-safe-bg: rgba(34, 197, 94, 0.12);
+      --status-safe-border: rgba(34, 197, 94, 0.28);
 
-      --status-warn: #f59e0b;
-      --status-warn-bg: rgba(245, 158, 11, 0.14);
-      --status-warn-border: rgba(245, 158, 11, 0.28);
+      --status-warn: #fbbf24;
+      --status-warn-bg: rgba(251, 191, 36, 0.12);
+      --status-warn-border: rgba(251, 191, 36, 0.28);
 
-      --status-danger: #ef4444;
-      --status-danger-bg: rgba(239, 68, 68, 0.14);
-      --status-danger-border: rgba(239, 68, 68, 0.28);
+      --status-danger: #f43f5e;
+      --status-danger-bg: rgba(244, 63, 94, 0.12);
+      --status-danger-border: rgba(244, 63, 94, 0.28);
 
-      --status-purple: #a855f7;
-      --status-purple-bg: rgba(168, 85, 247, 0.14);
-      --status-purple-border: rgba(168, 85, 247, 0.28);
+      --status-purple: #c084fc;
+      --status-purple-bg: rgba(192, 132, 252, 0.12);
+      --status-purple-border: rgba(192, 132, 252, 0.28);
 
-      --status-cyan: #06b6d4;
-      --status-cyan-bg: rgba(6, 182, 212, 0.14);
-      --status-cyan-border: rgba(6, 182, 212, 0.28);
+      --status-cyan: #22d3ee;
+      --status-cyan-bg: rgba(34, 211, 238, 0.12);
+      --status-cyan-border: rgba(34, 211, 238, 0.28);
 
       /* Radii & Shadows */
       --radius-sm: 6px;
       --radius-md: 10px;
       --radius-lg: 14px;
       --radius-pill: 9999px;
-      --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.25);
-      --shadow-glow: 0 8px 24px rgba(0, 120, 212, 0.28);
+      --shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 18px rgba(0, 0, 0, 0.35);
+      --shadow-glow: 0 8px 28px rgba(0, 120, 212, 0.45);
       --motion-spring: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -258,7 +260,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
     /* NavigationView (Sidebar) */
     .desktop-navigation {
-      width: 220px;
+      width: 242px;
       background-color: var(--bg-mica);
       border-right: 1px solid var(--stroke-divider);
       display: flex;
@@ -302,8 +304,8 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     }
 
     .nav-item.active {
-      background-color: var(--fill-subtle-hover);
-      color: var(--text-primary);
+      background: linear-gradient(90deg, rgba(0, 120, 212, 0.18) 0%, rgba(0, 120, 212, 0.04) 100%);
+      color: #ffffff;
       font-weight: 600;
     }
 
@@ -313,9 +315,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       left: 0;
       top: 6px;
       bottom: 6px;
-      width: 3px;
+      width: 3.5px;
       border-radius: 2px;
-      background-color: var(--accent-primary);
+      background: var(--accent-gradient);
+      box-shadow: 0 0 8px rgba(0, 120, 212, 0.6);
     }
 
     .nav-item-left {
@@ -407,27 +410,28 @@ HTML_CONTENT = r'''<!DOCTYPE html>
        Hero Consumer Space Visualizer (CleanMyMac / Raycast Grade)
        ========================================================================== */
     .consumer-hero-banner {
-      background: linear-gradient(135deg, rgba(32, 38, 50, 0.75), rgba(22, 26, 35, 0.85));
-      border: 1px solid var(--stroke-card);
+      background: linear-gradient(135deg, rgba(30, 37, 51, 0.82) 0%, rgba(20, 25, 36, 0.92) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-lg);
       padding: 24px 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 28px;
-      box-shadow: var(--shadow-card);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 6px 24px rgba(0, 0, 0, 0.38);
       position: relative;
       overflow: hidden;
+      backdrop-filter: blur(20px);
     }
 
     .consumer-hero-banner::before {
       content: "";
       position: absolute;
-      top: -40px;
-      right: -40px;
-      width: 220px;
-      height: 220px;
-      background: radial-gradient(circle, rgba(0, 120, 212, 0.18), transparent 70%);
+      top: -60px;
+      right: -60px;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(0, 120, 212, 0.22), transparent 70%);
       pointer-events: none;
     }
 
@@ -437,33 +441,49 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       gap: 24px;
     }
 
-    /* Radial Gauge Circle */
+    /* Radial Gauge Circle with Ambient Halo */
     .hero-gauge-container {
       position: relative;
-      width: 124px;
-      height: 124px;
+      width: 136px;
+      height: 136px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
 
+    .gauge-ambient-glow {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 150, 255, 0.2) 0%, rgba(0, 229, 255, 0.04) 55%, transparent 72%);
+      animation: gaugeHaloPulse 4s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes gaugeHaloPulse {
+      0% { transform: scale(0.92); opacity: 0.35; }
+      100% { transform: scale(1.08); opacity: 0.75; }
+    }
+
     .gauge-svg {
       width: 100%;
       height: 100%;
       transform: rotate(-90deg);
+      filter: drop-shadow(0 2px 8px rgba(0, 170, 255, 0.35));
     }
 
     .gauge-bg {
       fill: none;
-      stroke: rgba(255, 255, 255, 0.07);
-      stroke-width: 9;
+      stroke: rgba(255, 255, 255, 0.06);
+      stroke-width: 9.5;
     }
 
     .gauge-fill {
       fill: none;
       stroke: url(#gaugeGradient);
-      stroke-width: 9;
+      stroke-width: 9.5;
       stroke-linecap: round;
       stroke-dasharray: 440;
       stroke-dashoffset: 140;
@@ -479,18 +499,36 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       text-align: center;
     }
 
+    .gauge-val-row {
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+      line-height: 1;
+    }
+
     .gauge-value {
-      font-size: 26px;
+      font-size: 32px;
       font-weight: 700;
-      letter-spacing: -1px;
+      letter-spacing: -1.2px;
       color: #ffffff;
-      line-height: 1.1;
+      font-family: var(--font-display);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .gauge-unit {
+      font-size: 13px;
+      font-weight: 600;
+      color: #60cdff;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
 
     .gauge-label {
-      font-size: 10.5px;
+      font-size: 11px;
       color: var(--text-tertiary);
       font-weight: 500;
+      margin-top: 3px;
+      letter-spacing: 0.2px;
     }
 
     .hero-info {
@@ -530,29 +568,49 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
     /* Consumer Primary CTA Button */
     .btn-hero-cta {
+      position: relative;
+      overflow: hidden;
       display: inline-flex;
       align-items: center;
       gap: 10px;
       padding: 12px 24px;
-      background: linear-gradient(135deg, #0078d4, #0099ff);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: linear-gradient(135deg, #0078d4 0%, #0099ff 50%, #00c7ff 100%);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       border-radius: var(--radius-md);
       color: #ffffff;
       font-size: 13.5px;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 4px 18px rgba(0, 120, 212, 0.45);
-      transition: all 160ms var(--motion-spring);
+      box-shadow: 0 4px 20px rgba(0, 120, 212, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      transition: all 180ms var(--motion-spring);
+    }
+
+    .btn-hero-cta::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+      transform: skewX(-20deg);
+      animation: ctaShimmerSweep 5s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes ctaShimmerSweep {
+      0%, 75% { left: -100%; }
+      90%, 100% { left: 160%; }
     }
 
     .btn-hero-cta:hover {
-      background: linear-gradient(135deg, #1084d9, #1aa3ff);
+      background: linear-gradient(135deg, #1084d9 0%, #1aa3ff 50%, #20d4ff 100%);
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 120, 212, 0.6);
+      box-shadow: 0 8px 28px rgba(0, 120, 212, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.45);
     }
 
     .btn-hero-cta:active {
-      transform: translateY(0);
+      transform: scale(0.975);
       box-shadow: 0 2px 10px rgba(0, 120, 212, 0.4);
     }
 
@@ -614,24 +672,34 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     }
 
     .feature-card {
-      background-color: var(--bg-card);
-      border: 1px solid var(--stroke-card);
+      background: linear-gradient(180deg, rgba(30, 37, 51, 0.82) 0%, rgba(21, 26, 36, 0.92) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-md);
-      padding: 16px;
+      padding: 16px 18px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       gap: 14px;
       cursor: pointer;
-      transition: all 150ms var(--motion-spring);
+      transition: all 180ms var(--motion-spring);
       position: relative;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 4px 18px rgba(0, 0, 0, 0.32);
+      backdrop-filter: blur(16px);
     }
 
     .feature-card:hover {
-      background-color: var(--bg-card-hover);
-      border-color: var(--stroke-card-hover);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-card);
+      background: linear-gradient(180deg, rgba(37, 46, 63, 0.9) 0%, rgba(26, 32, 45, 0.98) 100%);
+      border-color: rgba(0, 120, 212, 0.42);
+      transform: translateY(-3px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 120, 212, 0.25);
+    }
+
+    .feature-card:hover .card-icon-box {
+      transform: scale(1.08);
+    }
+
+    .feature-card:hover .card-action-link svg {
+      transform: translateX(3px);
     }
 
     .feature-card-top {
@@ -657,11 +725,26 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     .icon-box-red { background: var(--status-danger-bg); color: var(--status-danger); border: 1px solid var(--status-danger-border); }
 
     .feature-card-metric {
-      font-size: 20px;
+      font-family: var(--font-display);
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+    }
+
+    .metric-num {
+      font-size: 21px;
       font-weight: 700;
       color: #ffffff;
-      font-family: var(--font-mono);
-      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
+    .metric-unit {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
 
     .feature-card-body {
@@ -1263,14 +1346,17 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       </div>
 
       <!-- Sidebar Bottom Info -->
-      <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 11px;">
-        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-          <span style="color:var(--text-tertiary);">当前盘符</span>
-          <span style="color:#60cdff; font-weight:600;" id="sbDriveLetter">C:</span>
+      <div style="background: rgba(0,0,0,0.28); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 11px; display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="color:var(--text-secondary); font-weight:600;">系统盘 (C:)</span>
+          <span style="color:var(--status-safe); font-weight:600;" id="sbDriveFree">29.8 GB 可用</span>
         </div>
-        <div style="display:flex; justify-content:space-between;">
-          <span style="color:var(--text-tertiary);">可用空间</span>
-          <span style="color:var(--status-safe); font-weight:600;" id="sbDriveFree">29.8 GB</span>
+        <div style="height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
+          <div id="sbDriveBarFill" style="width:70%; height:100%; background:linear-gradient(90deg, #0078d4, #00c7ff); border-radius:3px;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:10.5px; color:var(--text-tertiary);">
+          <span>健康度良好</span>
+          <span id="sbDriveTotal">共 100.0 GB</span>
         </div>
       </div>
     </nav>
@@ -1286,19 +1372,24 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           <div class="consumer-hero-banner">
             <div class="hero-left">
               <div class="hero-gauge-container">
+                <div class="gauge-ambient-glow"></div>
                 <svg class="gauge-svg" viewBox="0 0 160 160">
                   <defs>
                     <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="#0078d4" />
-                      <stop offset="100%" stop-color="#00e5ff" />
+                      <stop offset="0%" stop-color="#0066cc" />
+                      <stop offset="50%" stop-color="#00aaff" />
+                      <stop offset="100%" stop-color="#00f2fe" />
                     </linearGradient>
                   </defs>
                   <circle class="gauge-bg" cx="80" cy="80" r="68"></circle>
                   <circle class="gauge-fill" id="heroGaugeCircle" cx="80" cy="80" r="68"></circle>
                 </svg>
                 <div class="gauge-center-content">
-                  <span class="gauge-value" id="heroReclaimNum">21.5</span>
-                  <span class="gauge-label">GB 可释放</span>
+                  <div class="gauge-val-row">
+                    <span class="gauge-value" id="heroReclaimNum">21.5</span>
+                    <span class="gauge-unit">GB</span>
+                  </div>
+                  <span class="gauge-label">可释放空间</span>
                 </div>
               </div>
 
@@ -1956,6 +2047,16 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
 
+    function formatMetricHtml(bytes) {
+      if (!bytes || bytes === 0) return '<span class="metric-num">0</span> <span class="metric-unit">B</span>';
+      const k = 1024;
+      const dm = 1;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      const val = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
+      return `<span class="metric-num">${val}</span> <span class="metric-unit">${sizes[i]}</span>`;
+    }
+
     function escapeHtml(str) {
       if (!str) return '';
       return String(str)
@@ -2205,22 +2306,22 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
         // Update Card Metrics
         const sysCat = state.scanReport.categories.find(c => c.id === 'system');
-        if (sysCat) document.getElementById('cardSystemMetric').innerText = formatBytes(sysCat.total_size_bytes);
+        if (sysCat) document.getElementById('cardSystemMetric').innerHTML = formatMetricHtml(sysCat.total_size_bytes);
 
         const devCat = state.scanReport.categories.find(c => c.id === 'dev_cache');
         if (devCat) {
-          document.getElementById('cardDevMetric').innerText = formatBytes(devCat.total_size_bytes);
+          document.getElementById('cardDevMetric').innerHTML = formatMetricHtml(devCat.total_size_bytes);
           document.getElementById('badgeDevCache').innerText = formatBytes(devCat.total_size_bytes);
         }
 
         const bCat = state.scanReport.categories.find(c => c.id === 'browser_cache');
         if (bCat) {
-          document.getElementById('cardBrowserMetric').innerText = formatBytes(bCat.total_size_bytes);
+          document.getElementById('cardBrowserMetric').innerHTML = formatMetricHtml(bCat.total_size_bytes);
           document.getElementById('badgeBrowser').innerText = formatBytes(bCat.total_size_bytes);
         }
 
         const vacCat = state.scanReport.categories.find(c => c.id === 'sqlite_optimize' || c.id === 'db_vacuum');
-        if (vacCat) document.getElementById('cardVacuumMetric').innerText = formatBytes(vacCat.total_size_bytes);
+        if (vacCat) document.getElementById('cardVacuumMetric').innerHTML = formatMetricHtml(vacCat.total_size_bytes);
 
         renderOverviewTable();
         renderDevCacheTable();
