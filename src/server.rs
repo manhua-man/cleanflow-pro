@@ -59,6 +59,11 @@ struct DeleteFileRequest {
 }
 
 #[derive(serde::Deserialize)]
+struct DockerPruneRequest {
+    target: String,
+}
+
+#[derive(serde::Deserialize)]
 struct AddCustomRuleRequest {
     name: String,
     path_pattern: String,
@@ -456,6 +461,43 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                     Err(e) => {
                         let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
                         send_json_response(request, err_json);
+                    }
+                }
+            } else if url == "/api/docker/status" && method == Method::Get {
+                let status = crate::docker::get_docker_status();
+                let json = serde_json::to_string(&status).unwrap_or_else(|_| "{}".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/docker/prune" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                let req_parsed: Result<DockerPruneRequest, _> = serde_json::from_str(&content);
+                match req_parsed {
+                    Ok(req) => match crate::docker::prune_docker(&req.target) {
+                        Ok(output) => {
+                            let res_json = serde_json::json!({
+                                "success": true,
+                                "output": output,
+                            })
+                            .to_string();
+                            send_json_response(request, res_json);
+                        }
+                        Err(e) => {
+                            let res_json = serde_json::json!({
+                                "success": false,
+                                "error": e,
+                            })
+                            .to_string();
+                            send_json_response(request, res_json);
+                        }
+                    },
+                    Err(e) => {
+                        let res_json = serde_json::json!({
+                            "success": false,
+                            "error": format!("解析请求失败: {}", e),
+                        })
+                        .to_string();
+                        send_json_response(request, res_json);
                     }
                 }
             } else if url == "/api/shutdown" && method == Method::Post {

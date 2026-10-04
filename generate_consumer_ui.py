@@ -667,7 +667,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
        ========================================================================== */
     .consumer-cards-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 14px;
     }
 
@@ -1297,6 +1297,20 @@ HTML_CONTENT = r'''<!DOCTYPE html>
             </div>
             <span class="nav-badge" id="badgeDevCache">1.3 GB</span>
           </li>
+          <li class="nav-item" onclick="switchTab('office')">
+            <div class="nav-item-left">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg></span>
+              <span>微信与社交专清</span>
+            </div>
+            <span class="nav-badge" id="badgeOffice">1.4 GB</span>
+          </li>
+          <li class="nav-item" onclick="switchTab('docker')">
+            <div class="nav-item-left">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg></span>
+              <span>Docker 虚拟镜像</span>
+            </div>
+            <span class="nav-badge" id="badgeDocker">27.8 GB</span>
+          </li>
           <li class="nav-item" onclick="switchTab('browser')">
             <div class="nav-item-left">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></span>
@@ -1420,7 +1434,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
             </div>
           </div>
 
-          <!-- 6 Consumer Feature Cards Grid -->
+          <!-- 8 Consumer Feature Cards Grid -->
           <div class="consumer-cards-grid">
             <!-- Card 1: System Temp -->
             <div class="feature-card" onclick="openInspectorByCategory('system')">
@@ -1428,7 +1442,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
                 <div class="card-icon-box icon-box-cyan">
                   <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
                 </div>
-                <div class="feature-card-metric" id="cardSystemMetric">2.2 GB</div>
+                <div class="feature-card-metric" id="cardSystemMetric"><span class="metric-num">3.3</span><span class="metric-unit">GB</span></div>
               </div>
               <div class="feature-card-body">
                 <div class="card-title">系统冗余与临时垃圾</div>
@@ -1436,7 +1450,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               </div>
               <div class="feature-card-footer">
                 <span class="badge-pill badge-safe">完全安全可清</span>
-                <span class="card-action-link">查看详情 ></span>
+                <span class="card-action-link"><span>查看详情</span><svg style="width:12px; height:12px; fill:currentColor; transition: transform 140ms ease;" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></span>
               </div>
             </div>
 
@@ -1446,7 +1460,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
                 <div class="card-icon-box icon-box-green">
                   <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
                 </div>
-                <div class="feature-card-metric" id="cardDevMetric">1.3 GB</div>
+                <div class="feature-card-metric" id="cardDevMetric"><span class="metric-num">1.3</span><span class="metric-unit">GB</span></div>
               </div>
               <div class="feature-card-body">
                 <div class="card-title">现代开发与包管理器</div>
@@ -1454,11 +1468,47 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               </div>
               <div class="feature-card-footer">
                 <span class="badge-pill badge-safe">可安全回收</span>
-                <span class="card-action-link">管理缓存 ></span>
+                <span class="card-action-link"><span>管理缓存</span><svg style="width:12px; height:12px; fill:currentColor; transition: transform 140ms ease;" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></span>
               </div>
             </div>
 
-            <!-- Card 3: Browser Cache -->
+            <!-- Card 3: WeChat & Office -->
+            <div class="feature-card" onclick="switchTab('office')">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-purple">
+                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+                </div>
+                <div class="feature-card-metric" id="cardOfficeMetric"><span class="metric-num">1.4</span><span class="metric-unit">GB</span></div>
+              </div>
+              <div class="feature-card-body">
+                <div class="card-title">微信与办公深度专清</div>
+                <div class="card-desc">微信 4.0 日志、月度离线多媒体、旧版 XPlugin 与飞书缓存</div>
+              </div>
+              <div class="feature-card-footer">
+                <span class="badge-pill badge-safe">聊天记录无损</span>
+                <span class="card-action-link"><span>立即专清</span><svg style="width:12px; height:12px; fill:currentColor; transition: transform 140ms ease;" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></span>
+              </div>
+            </div>
+
+            <!-- Card 4: Docker Virtual Engine -->
+            <div class="feature-card" onclick="switchTab('docker')">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-blue">
+                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg>
+                </div>
+                <div class="feature-card-metric" id="cardDockerMetric"><span class="metric-num">27.8</span><span class="metric-unit">GB</span></div>
+              </div>
+              <div class="feature-card-body">
+                <div class="card-title">Docker 虚拟镜像治理</div>
+                <div class="card-desc">构建缓存 (Buildx)、废弃镜像、孤立数据卷及宿主运行日志</div>
+              </div>
+              <div class="feature-card-footer">
+                <span class="badge-pill badge-safe">虚拟化减负</span>
+                <span class="card-action-link"><span>镜像治理</span><svg style="width:12px; height:12px; fill:currentColor; transition: transform 140ms ease;" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></span>
+              </div>
+            </div>
+
+            <!-- Card 5: Browser Cache -->
             <div class="feature-card" onclick="switchTab('browser')">
               <div class="feature-card-top">
                 <div class="card-icon-box icon-box-orange">
@@ -1594,6 +1644,132 @@ HTML_CONTENT = r'''<!DOCTYPE html>
                 </tr>
               </thead>
               <tbody id="devCacheTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Office & WeChat Cache -->
+        <section class="workspace-pane" id="pane-office">
+          <div class="workspace-header">
+            <div class="workspace-title-box">
+              <h1>微信与办公社交软件深度专清</h1>
+              <p>深度清理微信 4.0 每日诊断 xlog、月度离线多媒体缓存、临时表情预览、微信 3.x 历史残存插件 (XPlugin) 及飞书容器缓存</p>
+            </div>
+            <div class="workspace-controls">
+              <button class="btn btn-primary" onclick="cleanCategoryItems('office_chat')">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
+                <span>一键专清办公社交缓存</span>
+              </button>
+            </div>
+          </div>
+          <div class="data-grid-container">
+            <table class="data-grid">
+              <thead>
+                <tr>
+                  <th class="col-checkbox"><input type="checkbox" checked onchange="toggleSelectAllCategory('office_chat', this)"></th>
+                  <th style="width: 240px;">清理项目 / 软件</th>
+                  <th>关联物理路径</th>
+                  <th style="width: 110px; text-align: right;">占用体积</th>
+                  <th style="width: 90px; text-align: right;">文件数</th>
+                  <th style="width: 80px; text-align: center;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="officeTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Docker Virtual Engine Studio -->
+        <section class="workspace-pane" id="pane-docker">
+          <div class="workspace-header">
+            <div class="workspace-title-box">
+              <h1>Docker 桌面端与虚拟镜像治理</h1>
+              <p>排查 WSL2/Hyper-V 虚拟化存储、Docker 构建缓存 (Buildx)、废弃虚悬镜像及宿主机运行日志</p>
+            </div>
+            <div class="workspace-controls">
+              <button class="btn btn-secondary" onclick="loadDockerStatus()">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
+                <span>刷新 Docker 状态</span>
+              </button>
+              <button class="btn btn-primary" onclick="pruneDocker('builder')">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
+                <span>清理构建缓存 (3.5 GB)</span>
+              </button>
+              <button class="btn btn-danger" onclick="pruneDocker('all')">
+                <span>全量系统瘦身 (27.8 GB)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Docker Engine Stats 4-Card Row -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+            <div class="feature-card" style="cursor: default;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-blue">
+                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/></svg>
+                </div>
+                <div class="feature-card-metric" id="dockerImagesMetric"><span class="metric-num">20.5</span><span class="metric-unit">GB</span></div>
+              </div>
+              <div class="feature-card-body">
+                <div class="card-title">容器镜像资产 (Images)</div>
+                <div class="card-desc" id="dockerImagesDesc">37 个镜像 · 17.5 GB 可回收</div>
+              </div>
+            </div>
+
+            <div class="feature-card" style="cursor: default;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-cyan">
+                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                </div>
+                <div class="feature-card-metric" id="dockerBuilderMetric"><span class="metric-num">3.56</span><span class="metric-unit">GB</span></div>
+              </div>
+              <div class="feature-card-body">
+                <div class="card-title">构建缓存 (Buildx)</div>
+                <div class="card-desc">256 个缓存块 · 100% 可安全释放</div>
+              </div>
+            </div>
+
+            <div class="feature-card" style="cursor: default;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-purple">
+                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 3C7.58 3 4 4.79 4 7v10c0 2.21 3.58 4 8 4s8-1.79 8-4V7c0-2.21-3.58-4-8-4z"/></svg>
+                </div>
+                <div class="feature-card-metric" id="dockerVolumesMetric"><span class="metric-num">7.18</span><span class="metric-unit">GB</span></div>
+              </div>
+              <div class="feature-card-body">
+                <div class="card-title">持久化本地卷 (Volumes)</div>
+                <div class="card-desc" id="dockerVolumesDesc">30 个卷 · 6.8 GB 孤立未挂载</div>
+              </div>
+            </div>
+
+            <div class="feature-card" style="cursor: default;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-orange">
+                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
+                </div>
+                <div class="feature-card-metric" id="dockerLogsMetric"><span class="metric-num">182.4</span><span class="metric-unit">MB</span></div>
+              </div>
+              <div class="feature-card-body">
+                <div class="card-title">宿主机与 VM 运行日志</div>
+                <div class="card-desc">115 个日常诊断与崩溃轮转日志</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Docker Local Files Table -->
+          <div class="data-grid-container" style="flex: 1;">
+            <table class="data-grid">
+              <thead>
+                <tr>
+                  <th class="col-checkbox"><input type="checkbox" checked onchange="toggleSelectAllCategory('docker_virtual', this)"></th>
+                  <th style="width: 240px;">清理项 / 资产名称</th>
+                  <th>关联物理路径</th>
+                  <th style="width: 110px; text-align: right;">占用体积</th>
+                  <th style="width: 90px; text-align: right;">文件数</th>
+                  <th style="width: 80px; text-align: center;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="dockerTableBody"></tbody>
             </table>
           </div>
         </section>
@@ -2086,8 +2262,8 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       if (pane) pane.classList.add('active');
 
       const navMap = {
-        'overview': 0, 'devcache': 1, 'browser': 2, 'registry': 3,
-        'giant': 4, 'migration': 5, 'vacuum': 6, 'rules': 7
+        'overview': 0, 'devcache': 1, 'office': 2, 'docker': 3, 'browser': 4, 'registry': 5,
+        'giant': 6, 'migration': 7, 'vacuum': 8, 'rules': 9
       };
       const items = document.querySelectorAll('.nav-item');
       if (items[navMap[tabId]]) items[navMap[tabId]].classList.add('active');
@@ -2096,6 +2272,11 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       if (tabId === 'registry' && state.registryIssues.length === 0) loadRegistryIssues();
       if (tabId === 'migration') loadActiveJunctions();
       if (tabId === 'rules') renderCustomRulesTable();
+      if (tabId === 'office') renderOfficeTable();
+      if (tabId === 'docker') { renderDockerTable(); loadDockerStatus(); }
+      if (tabId === 'devcache') renderDevCacheTable();
+      if (tabId === 'browser') renderBrowserTable();
+      if (tabId === 'vacuum') renderVacuumTable();
     }
 
     // Inspector Control
@@ -2314,6 +2495,18 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           document.getElementById('badgeDevCache').innerText = formatBytes(devCat.total_size_bytes);
         }
 
+        const offCat = state.scanReport.categories.find(c => c.id === 'office_chat');
+        if (offCat) {
+          if (document.getElementById('cardOfficeMetric')) document.getElementById('cardOfficeMetric').innerHTML = formatMetricHtml(offCat.total_size_bytes);
+          if (document.getElementById('badgeOffice')) document.getElementById('badgeOffice').innerText = formatBytes(offCat.total_size_bytes);
+        }
+
+        const docCat = state.scanReport.categories.find(c => c.id === 'docker_virtual');
+        if (docCat) {
+          if (document.getElementById('cardDockerMetric')) document.getElementById('cardDockerMetric').innerHTML = formatMetricHtml(docCat.total_size_bytes);
+          if (document.getElementById('badgeDocker')) document.getElementById('badgeDocker').innerText = formatBytes(docCat.total_size_bytes);
+        }
+
         const bCat = state.scanReport.categories.find(c => c.id === 'browser_cache');
         if (bCat) {
           document.getElementById('cardBrowserMetric').innerHTML = formatMetricHtml(bCat.total_size_bytes);
@@ -2325,6 +2518,8 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
         renderOverviewTable();
         renderDevCacheTable();
+        renderOfficeTable();
+        renderDockerTable();
         renderBrowserTable();
         renderVacuumTable();
         renderCustomRulesTable();
@@ -2434,6 +2629,142 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       }
       document.getElementById('sbSelection').innerText = `已选 ${state.selectedPaths.size} 项 (${formatBytes(selBytes)})`;
       document.getElementById('heroBtnCleanText').innerText = `一键快速清理 (${formatBytes(selBytes)})`;
+    }
+
+    // Render Office & WeChat Table
+    function renderOfficeTable() {
+      const tbody = document.getElementById("officeTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      if (!state.scanReport) return;
+      const cat = state.scanReport.categories.find(c => c.id === "office_chat");
+      if (!cat) return;
+
+      cat.rules.forEach(r => {
+        r.matched_paths.forEach(mp => {
+          if (mp.size_bytes === 0) return;
+          const tr = document.createElement("tr");
+          tr.setAttribute("data-path", mp.path);
+          tr.setAttribute("data-name", r.name);
+          tr.setAttribute("data-size", mp.size_bytes);
+          tr.setAttribute("data-cat", "办公与社交");
+          tr.onclick = (e) => {
+            if (e.target.tagName !== "INPUT" && e.target.tagName !== "BUTTON") {
+              document.querySelectorAll(".data-grid tbody tr").forEach(row => row.classList.remove("selected"));
+              tr.classList.add("selected");
+              inspectItem(mp.path, r.name, mp.size_bytes, mp.file_count, "办公与社交");
+            }
+          };
+
+          tr.innerHTML = `
+            <td class="col-checkbox"><input type="checkbox" checked onchange="updateSelectionStatus()"></td>
+            <td><span style="font-weight:600; color:#fff;">${escapeHtml(r.name)}</span></td>
+            <td><span class="path-text" title="${escapeHtml(mp.path)}">${escapeHtml(mp.path)}</span></td>
+            <td style="text-align:right; font-family:var(--font-mono); font-weight:600; color:#60cdff;">${formatBytes(mp.size_bytes)}</td>
+            <td style="text-align:right; font-family:var(--font-mono); color:var(--text-tertiary);">${mp.file_count}</td>
+            <td style="text-align:center;">
+              <button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="event.stopPropagation(); revealPath('${escapeHtml(mp.path).replace(/\\/g, "\\\\")}')">定位</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    // Render Docker Virtual Table
+    function renderDockerTable() {
+      const tbody = document.getElementById("dockerTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      if (!state.scanReport) return;
+      const cat = state.scanReport.categories.find(c => c.id === "docker_virtual");
+      if (!cat) return;
+
+      cat.rules.forEach(r => {
+        r.matched_paths.forEach(mp => {
+          if (mp.size_bytes === 0) return;
+          const tr = document.createElement("tr");
+          tr.setAttribute("data-path", mp.path);
+          tr.setAttribute("data-name", r.name);
+          tr.setAttribute("data-size", mp.size_bytes);
+          tr.setAttribute("data-cat", "Docker虚拟");
+          tr.onclick = (e) => {
+            if (e.target.tagName !== "INPUT" && e.target.tagName !== "BUTTON") {
+              document.querySelectorAll(".data-grid tbody tr").forEach(row => row.classList.remove("selected"));
+              tr.classList.add("selected");
+              inspectItem(mp.path, r.name, mp.size_bytes, mp.file_count, "Docker虚拟");
+            }
+          };
+
+          tr.innerHTML = `
+            <td class="col-checkbox"><input type="checkbox" checked onchange="updateSelectionStatus()"></td>
+            <td><span style="font-weight:600; color:#fff;">${escapeHtml(r.name)}</span></td>
+            <td><span class="path-text" title="${escapeHtml(mp.path)}">${escapeHtml(mp.path)}</span></td>
+            <td style="text-align:right; font-family:var(--font-mono); font-weight:600; color:#60cdff;">${formatBytes(mp.size_bytes)}</td>
+            <td style="text-align:right; font-family:var(--font-mono); color:var(--text-tertiary);">${mp.file_count}</td>
+            <td style="text-align:center;">
+              <button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="event.stopPropagation(); revealPath('${escapeHtml(mp.path).replace(/\\/g, "\\\\")}')">定位</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    // Load Docker Engine live status
+    async function loadDockerStatus() {
+      try {
+        const res = await fetch("/api/docker/status");
+        const data = await res.json();
+        if (data && data.available && data.running && data.items) {
+          const imgItem = data.items.find(i => i.item_type === "Images");
+          if (imgItem) {
+            document.getElementById("dockerImagesMetric").innerHTML = `<span class="metric-num">${imgItem.total_size.replace("GB","")}</span><span class="metric-unit">GB</span>`;
+            document.getElementById("dockerImagesDesc").innerText = `${imgItem.total_count} 个镜像 · ${imgItem.reclaimable} 可回收`;
+          }
+          const bldItem = data.items.find(i => i.item_type === "Build Cache");
+          if (bldItem) {
+            document.getElementById("dockerBuilderMetric").innerHTML = `<span class="metric-num">${bldItem.total_size.replace("GB","")}</span><span class="metric-unit">GB</span>`;
+          }
+          const volItem = data.items.find(i => i.item_type === "Local Volumes");
+          if (volItem) {
+            document.getElementById("dockerVolumesMetric").innerHTML = `<span class="metric-num">${volItem.total_size.replace("GB","")}</span><span class="metric-unit">GB</span>`;
+            document.getElementById("dockerVolumesDesc").innerText = `${volItem.total_count} 个本地卷 · ${volItem.reclaimable} 未挂载`;
+          }
+        }
+      } catch (err) {
+        console.warn("Docker status fetch error:", err);
+      }
+    }
+
+    // Execute Docker prune
+    async function pruneDocker(target) {
+      const targetLabels = {
+        "builder": "Docker 构建缓存",
+        "images": "虚悬无用容器镜像",
+        "all": "Docker 全量未激活容器与镜像"
+      };
+      const label = targetLabels[target] || target;
+      if (!confirm(`确定执行清理: ${label} 吗？`)) return;
+
+      showToast(`正在执行 ${label} 清理...`);
+      try {
+        const res = await fetch("/api/docker/prune", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ target })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`${label} 清理完成！`);
+          loadDockerStatus();
+          runScan();
+        } else {
+          showToast(`清理失败: ${data.error || "未知错误"}`);
+        }
+      } catch (err) {
+        showToast("请求失败: " + err.message);
+      }
     }
 
     // Dev Cache Table

@@ -67,40 +67,84 @@ pub fn resolve_path_patterns(pattern: &str) -> Vec<PathBuf> {
         }
     }
 
-    // Split parent directory and glob pattern
-    let path = Path::new(&expanded);
-    let parent = match path.parent() {
-        Some(p) if p.exists() => p,
-        _ => return Vec::new(),
-    };
+    // Normalize slashes for Windows
+    let normalized = expanded.replace('/', "\\");
+    let segments: Vec<&str> = normalized.split('\\').filter(|s| !s.is_empty()).collect();
+    if segments.is_empty() {
+        return Vec::new();
+    }
 
-    let file_pattern = match path.file_name().and_then(|n| n.to_str()) {
-        Some(f) => f,
-        None => return Vec::new(),
-    };
+    let mut current_paths: Vec<PathBuf> = Vec::new();
+    let mut start_idx = 0;
 
-    let regex_pattern = format!(
-        "^{}$",
-        regex::escape(file_pattern)
-            .replace("\\*", ".*")
-            .replace("\\?", ".")
-    );
+    if segments[0].ends_with(':') {
+        current_paths.push(PathBuf::from(format!("{}\\", segments[0])));
+        start_idx = 1;
+    } else if normalized.starts_with("\\\\") {
+        if segments.len() >= 2 {
+            current_paths.push(PathBuf::from(format!("\\\\{}\\{}", segments[0], segments[1])));
+            start_idx = 2;
+        } else {
+            return Vec::new();
+        }
+    } else {
+        current_paths.push(PathBuf::from("."));
+    }
 
-    let re = match regex::Regex::new(&regex_pattern) {
-        Ok(r) => r,
-        Err(_) => return Vec::new(),
-    };
+    for &seg in &segments[start_idx..] {
+        let mut next_paths = Vec::new();
 
-    let mut matches = Vec::new();
-    if let Ok(entries) = std::fs::read_dir(parent) {
-        for entry in entries.flatten() {
-            if let Ok(name) = entry.file_name().into_string() {
-                if re.is_match(&name) {
-                    matches.push(entry.path());
+        if !seg.contains('*') && !seg.contains('?') {
+            for cp in current_paths {
+                let candidate = cp.join(seg);
+                if candidate.exists() {
+                    next_paths.push(candidate);
+                }
+            }
+        } else {
+            let regex_pattern = format!(
+                "(?i)^{}$",
+                regex::escape(seg)
+                    .replace("\\*", ".*")
+                    .replace("\\?", ".")
+            );
+            if let Ok(re) = regex::Regex::new(&regex_pattern) {
+                for cp in current_paths {
+                    if let Ok(entries) = std::fs::read_dir(&cp) {
+                        for entry in entries.flatten() {
+                            if let Ok(name) = entry.file_name().into_string() {
+                                if re.is_match(&name) {
+                                    next_paths.push(entry.path());
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
+
+        current_paths = next_paths;
+        if current_paths.is_empty() {
+            break;
+        }
     }
 
-    matches
+    current_paths
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_resolve_temp_path() {
+        let paths = resolve_path_patterns("%LOCALAPPDATA%\\Temp");
+        assert!(!paths.is_empty(), "Temp directory should resolve");
+    }
+
+    #[test]
+    fn test_resolve_wildcard_segments() {
+        let paths = resolve_path_patterns("%LOCALAPPDATA%\\*");
+        assert!(!paths.is_empty(), "Local appdata wildcard should resolve multiple folders");
+    }
 }

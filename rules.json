@@ -47,13 +47,48 @@
     {
       "id": "office_chat",
       "name": "办公与社交软件缓存",
-      "description": "飞书、WPS、微信等办公社交软件的网页离线包、更新包与临时缓存",
+      "description": "微信、飞书、WPS 等日常办公与即时通讯软件的网页离线包、日志与多媒体缓存",
       "risk_level": "safe",
       "rules": [
+        {
+          "id": "wechat_xlog",
+          "name": "微信 4.0 每日运行与诊断日志 (*.xlog)",
+          "path_pattern": "%APPDATA%\\Tencent\\xwechat\\log\\*.xlog",
+          "action": "delete_matching_files",
+          "default_checked": true
+        },
+        {
+          "id": "wechat_cache",
+          "name": "微信 4.0 月度离线多媒体与网页缓存",
+          "path_pattern": "%USERPROFILE%\\xwechat_files\\*\\cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "wechat_temp",
+          "name": "微信 4.0 临时预览图片与表情缓存",
+          "path_pattern": "%USERPROFILE%\\xwechat_files\\*\\temp",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "wechat_legacy_plugins",
+          "name": "微信 3.x 历史残存扩展与运行时 (XPlugin)",
+          "path_pattern": "%APPDATA%\\Tencent\\WeChat\\XPlugin",
+          "action": "clear_content",
+          "default_checked": true
+        },
         {
           "id": "wechat_radium_cache",
           "name": "微信 4.0 浏览器与小程序离线缓存",
           "path_pattern": "%APPDATA%\\Tencent\\xwechat\\radium\\cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "wechat_legacy_cache",
+          "name": "微信 3.x 历史小程序与网页离线缓存",
+          "path_pattern": "%APPDATA%\\Tencent\\WeChat\\radium\\cache",
           "action": "clear_content",
           "default_checked": true
         },
@@ -77,6 +112,35 @@
           "path_pattern": "%APPDATA%\\kingsoft\\wps\\download",
           "action": "clear_content",
           "default_checked": true
+        }
+      ]
+    },
+    {
+      "id": "docker_virtual",
+      "name": "Docker 桌面端与虚拟化专清",
+      "description": "Docker Desktop 桌面运行日志、构建插件缓存与历史虚拟机数据",
+      "risk_level": "safe",
+      "rules": [
+        {
+          "id": "docker_host_logs",
+          "name": "Docker Desktop 宿主机与虚拟机运行日志",
+          "path_pattern": "%LOCALAPPDATA%\\Docker\\log",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "docker_buildx_cache",
+          "name": "Docker Buildx 构建插件缓存",
+          "path_pattern": "%USERPROFILE%\\.docker\\buildx",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "docker_cli_plugins",
+          "name": "Docker CLI 临时与插件缓存",
+          "path_pattern": "%USERPROFILE%\\.docker\\cli-plugins",
+          "action": "clear_content",
+          "default_checked": false
         }
       ]
     },
