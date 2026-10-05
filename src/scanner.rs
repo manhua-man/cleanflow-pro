@@ -27,6 +27,8 @@ pub struct RuleScanResult {
     pub name: String,
     pub action: String,
     pub default_checked: bool,
+    #[serde(default)]
+    pub tag: Option<String>,
     pub total_size_bytes: u64,
     pub total_files: u64,
     pub matched_paths: Vec<MatchedPathItem>,
@@ -92,6 +94,7 @@ pub fn scan_rule(rule: &CleanRule) -> RuleScanResult {
         name: rule.name.clone(),
         action: rule.action.clone(),
         default_checked: rule.default_checked,
+        tag: rule.tag.clone(),
         total_size_bytes: total_size,
         total_files,
         matched_paths: items,

@@ -25,6 +25,8 @@ pub struct CleanRule {
     pub action: String,
     #[serde(default = "default_true")]
     pub default_checked: bool,
+    #[serde(default)]
+    pub tag: Option<String>,
 }
 
 fn default_true() -> bool {

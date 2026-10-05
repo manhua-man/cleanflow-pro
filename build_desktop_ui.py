@@ -855,6 +855,22 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       font-weight: 600;
     }
 
+    .tag-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 7px;
+      border-radius: var(--radius-pill);
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .tag-blue { background: rgba(96, 205, 255, 0.15); color: #60cdff; border: 1px solid rgba(96, 205, 255, 0.3); }
+    .tag-green { background: rgba(108, 203, 95, 0.15); color: #6ccb5f; border: 1px solid rgba(108, 203, 95, 0.3); }
+    .tag-purple { background: rgba(190, 140, 255, 0.15); color: #be8cff; border: 1px solid rgba(190, 140, 255, 0.3); }
+    .tag-orange { background: rgba(255, 170, 70, 0.15); color: #ffaa46; border: 1px solid rgba(255, 170, 70, 0.3); }
+
     /* DataGrid */
     .data-grid-container {
       background-color: var(--bg-card);
@@ -1285,7 +1301,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           <li class="nav-item" onclick="switchTab('devcache')">
             <div class="nav-item-left">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg></span>
-              <span>开发与编译包</span>
+              <span>开发与设计专清</span>
             </div>
             <span class="nav-badge" id="badgeDevCache">1.3 GB</span>
           </li>
@@ -1455,8 +1471,8 @@ HTML_CONTENT = r'''<!DOCTYPE html>
                 <div class="feature-card-metric" id="cardDevMetric"><span class="metric-num">1.3</span><span class="metric-unit">GB</span></div>
               </div>
               <div class="feature-card-body">
-                <div class="card-title">现代开发与包管理器</div>
-                <div class="card-desc">Unity、npm、Gradle、pnpm 离线依赖包与构建缓存</div>
+                <div class="card-title">现代开发与设计套件</div>
+                <div class="card-desc">JetBrains/Android Studio、Cursor、Pip、Cargo、Adobe 及 npm/Unity 缓存</div>
               </div>
               <div class="feature-card-footer">
                 <span class="badge-pill badge-safe">可安全回收</span>
@@ -1609,27 +1625,40 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
         </section>
 
-        <!-- 2. Dev Cache -->
+        <!-- 2. Dev Cache & IDE Studio -->
         <section class="workspace-pane" id="pane-devcache">
           <div class="workspace-header">
             <div class="workspace-title-box">
-              <h1>现代开发与包管理器缓存</h1>
-              <p>释放 npm、pnpm、Unity、Gradle 等前端/后端/游戏引擎全局离线依赖包与编译缓存</p>
+              <h1>现代开发、IDE 与创意设计专清</h1>
+              <p>深度清理 JetBrains / Android Studio、Cursor / VS Code、Adobe 创意套件、Pip / Cargo / npm 及 Unity 编译依赖与媒体缓存</p>
             </div>
             <div class="workspace-controls">
               <button class="btn btn-primary" onclick="cleanCategoryItems('dev_cache')">
                 <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
-                <span>清理开发缓存</span>
+                <span>一键专清开发与设计缓存</span>
               </button>
             </div>
           </div>
+
+          <!-- Dev Sub-filter Bar -->
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div class="filter-tabs" id="devFilterTabs">
+              <div class="filter-tab active" onclick="setDevFilter('all', this)">全部开发资产</div>
+              <div class="filter-tab" onclick="setDevFilter('ide', this)">IDE 与编辑器 (Android Studio / Cursor)</div>
+              <div class="filter-tab" onclick="setDevFilter('pkg', this)">包管理生态 (pip / cargo / npm)</div>
+              <div class="filter-tab" onclick="setDevFilter('creative', this)">Adobe 创意套件 (Premiere / AE)</div>
+              <div class="filter-tab" onclick="setDevFilter('runtime', this)">构建运行时 (Gradle / Unity)</div>
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-tertiary);" id="devSummaryCount">已扫描 0 个专清目标</div>
+          </div>
+
           <div class="data-grid-container">
             <table class="data-grid">
               <thead>
                 <tr>
-                  <th class="col-checkbox"><input type="checkbox" checked></th>
-                  <th style="width: 220px;">技术栈 / 工具</th>
-                  <th>缓存物理路径</th>
+                  <th class="col-checkbox"><input type="checkbox" checked onchange="toggleSelectAllCategory('dev_cache', this)"></th>
+                  <th style="width: 250px;">技术栈 / 软件模块</th>
+                  <th>关联物理路径</th>
                   <th style="width: 110px; text-align: right;">占用体积</th>
                   <th style="width: 90px; text-align: right;">文件数</th>
                   <th style="width: 80px; text-align: center;">操作</th>
@@ -2759,42 +2788,92 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       }
     }
 
-    // Dev Cache Table
+    state.devFilter = 'all';
+
+    function setDevFilter(filter, el) {
+      state.devFilter = filter;
+      document.querySelectorAll('#devFilterTabs .filter-tab').forEach(t => t.classList.remove('active'));
+      if (el) el.classList.add('active');
+      renderDevCacheTable();
+    }
+
+    function toggleSelectAllCategory(catId, masterCheckbox) {
+      const checked = masterCheckbox.checked;
+      if (!state.scanReport) return;
+      const cat = state.scanReport.categories.find(c => c.id === catId);
+      if (!cat) return;
+      cat.rules.forEach(r => {
+        r.matched_paths.forEach(mp => {
+          if (mp.size_bytes > 0) {
+            if (checked) state.selectedPaths.add(mp.path);
+            else state.selectedPaths.delete(mp.path);
+          }
+        });
+      });
+      if (catId === 'dev_cache') renderDevCacheTable();
+      if (catId === 'office_chat') renderOfficeTable();
+      if (catId === 'docker_virtual') renderDockerTable();
+      if (catId === 'browser_cache') renderBrowserTable();
+      renderOverviewTable();
+      updateSelectionStatus();
+    }
+
+    // Dev Cache & Design Studio Table
     function renderDevCacheTable() {
       const tbody = document.getElementById('devCacheTableBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
       if (!state.scanReport) return;
       const cat = state.scanReport.categories.find(c => c.id === 'dev_cache');
       if (!cat) return;
 
+      const filter = state.devFilter || 'all';
+      let matchCount = 0;
+
+      const tagBadgeMap = {
+        'ide': '<span class="tag-pill tag-blue">IDE</span>',
+        'pkg': '<span class="tag-pill tag-green">包管理</span>',
+        'creative': '<span class="tag-pill tag-purple">Adobe</span>',
+        'runtime': '<span class="tag-pill tag-orange">运行时</span>'
+      };
+
       cat.rules.forEach(r => {
+        if (filter !== 'all' && r.tag !== filter) return;
         r.matched_paths.forEach(mp => {
           if (mp.size_bytes === 0) return;
+          matchCount++;
           const tr = document.createElement('tr');
           tr.setAttribute('data-path', mp.path);
           tr.setAttribute('data-name', r.name);
           tr.setAttribute('data-size', mp.size_bytes);
-          tr.setAttribute('data-cat', '开发缓存');
+          tr.setAttribute('data-cat', '开发与设计');
           tr.onclick = (e) => {
             if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
               document.querySelectorAll('.data-grid tbody tr').forEach(row => row.classList.remove('selected'));
               tr.classList.add('selected');
-              inspectItem({ name: r.name, path: mp.path, size_bytes: mp.size_bytes, file_count: mp.file_count, category: '开发缓存' });
+              inspectItem({ name: r.name, path: mp.path, size_bytes: mp.size_bytes, file_count: mp.file_count, category: '开发与设计' });
             }
           };
+
+          const isChecked = state.selectedPaths.has(mp.path);
+          const badge = tagBadgeMap[r.tag] || '<span class="tag-pill tag-blue">DEV</span>';
+
           tr.innerHTML = `
-            <td class="col-checkbox"><input type="checkbox" checked></td>
-            <td style="font-weight:600;">${escapeHtml(r.name)}</td>
+            <td class="col-checkbox"><input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleItemSelect('${escapeHtml(mp.path)}', this.checked)"></td>
+            <td>${badge}<span style="font-weight:600; color:#fff;">${escapeHtml(r.name)}</span></td>
             <td><span class="path-text" title="${escapeHtml(mp.path)}">${escapeHtml(mp.path)}</span></td>
-            <td style="text-align: right; font-family: var(--font-mono); font-weight: 600;">${formatBytes(mp.size_bytes)}</td>
-            <td style="text-align: right; color: var(--text-tertiary);">${mp.file_count}</td>
+            <td style="text-align: right; font-family: var(--font-mono); font-weight: 600; color: #60cdff;">${formatBytes(mp.size_bytes)}</td>
+            <td style="text-align: right; font-family: var(--font-mono); color: var(--text-tertiary);">${mp.file_count}</td>
             <td style="text-align: center;">
-              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapeHtml(mp.path)}')">定位</button>
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="event.stopPropagation(); revealInExplorer('${escapeHtml(mp.path)}')">定位</button>
             </td>
           `;
           tbody.appendChild(tr);
         });
       });
+
+      const summaryEl = document.getElementById('devSummaryCount');
+      if (summaryEl) summaryEl.innerText = `显示 ${matchCount} 个专清目标`;
     }
 
     // Browser Cache Table

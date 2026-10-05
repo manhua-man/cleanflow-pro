@@ -559,6 +559,7 @@ fn save_custom_rule(req: AddCustomRuleRequest) -> Result<(), String> {
         path_pattern: req.path_pattern,
         action: "clean_dir".to_string(),
         default_checked: true,
+        tag: None,
     };
 
     if let Some(cat) = config.categories.iter_mut().find(|c| c.id == "custom") {

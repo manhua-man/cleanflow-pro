@@ -197,7 +197,7 @@
     {
       "id": "dev_cache",
       "name": "现代开发与包管理器缓存",
-      "description": "前端/后端/移动端/游戏引擎构建下载的离线依赖包与沙箱环境",
+      "description": "包含 JetBrains/Android Studio、Cursor/VS Code、Adobe 创意套件、npm/pip/cargo 等全局开发依赖包、构建与媒体缓存",
       "risk_level": "safe",
       "rules": [
         {
@@ -205,70 +205,264 @@
           "name": "Unity 资源商店下载包及临时缓存",
           "path_pattern": "%LOCALAPPDATA%\\Unity\\cache",
           "action": "remove_dir",
-          "default_checked": true
+          "default_checked": true,
+          "tag": "runtime"
         },
         {
           "id": "unity_editor_caches",
           "name": "Unity Editor 运行时临时缓存",
           "path_pattern": "%LOCALAPPDATA%\\Unity\\Caches",
           "action": "remove_dir",
-          "default_checked": true
+          "default_checked": true,
+          "tag": "runtime"
         },
         {
           "id": "bun_cache",
           "name": "Bun 安装依赖包全局缓存",
           "path_pattern": "%USERPROFILE%\\.bun\\install\\cache",
           "action": "remove_dir",
-          "default_checked": true
+          "default_checked": true,
+          "tag": "pkg"
         },
         {
           "id": "pnpm_cache",
           "name": "pnpm 存储缓存",
           "path_pattern": "%LOCALAPPDATA%\\pnpm",
           "action": "remove_dir",
-          "default_checked": true
+          "default_checked": true,
+          "tag": "pkg"
         },
         {
           "id": "uv_cache",
           "name": "uv Python 包管理器离线缓存",
           "path_pattern": "%LOCALAPPDATA%\\uv",
           "action": "remove_dir",
-          "default_checked": true
+          "default_checked": true,
+          "tag": "pkg"
         },
         {
           "id": "npm_cache",
           "name": "npm 全局下载缓存",
           "path_pattern": "%LOCALAPPDATA%\\npm-cache",
           "action": "remove_dir",
-          "default_checked": true
+          "default_checked": true,
+          "tag": "pkg"
         },
         {
           "id": "electron_cache",
           "name": "Electron 二进制离线包缓存",
           "path_pattern": "%LOCALAPPDATA%\\electron",
           "action": "remove_dir",
-          "default_checked": true
+          "default_checked": true,
+          "tag": "runtime"
         },
         {
           "id": "playwright_browsers",
           "name": "Playwright 自动化测试浏览器内核",
           "path_pattern": "%LOCALAPPDATA%\\ms-playwright",
           "action": "remove_dir",
-          "default_checked": true
+          "default_checked": true,
+          "tag": "runtime"
         },
         {
           "id": "puppeteer_browsers",
           "name": "Puppeteer 无头浏览器内核缓存",
           "path_pattern": "%USERPROFILE%\\.cache\\puppeteer",
           "action": "remove_dir",
-          "default_checked": true
+          "default_checked": true,
+          "tag": "runtime"
         },
         {
           "id": "gradle_caches",
           "name": "Gradle 编译依赖包缓存",
           "path_pattern": "%USERPROFILE%\\.gradle\\caches",
           "action": "remove_dir",
-          "default_checked": false
+          "default_checked": false,
+          "tag": "runtime"
+        },
+        {
+          "id": "android_studio_caches",
+          "name": "Android Studio 编译与语法缓存",
+          "path_pattern": "%LOCALAPPDATA%\\\\Google\\\\AndroidStudio*\\\\caches",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "android_studio_logs",
+          "name": "Android Studio 运行与诊断日志",
+          "path_pattern": "%LOCALAPPDATA%\\\\Google\\\\AndroidStudio*\\\\log",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "android_studio_index",
+          "name": "Android Studio 历史符号索引",
+          "path_pattern": "%LOCALAPPDATA%\\\\Google\\\\AndroidStudio*\\\\index",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "jetbrains_caches",
+          "name": "JetBrains IDE (IDEA/PyCharm/WebStorm) 运行时缓存",
+          "path_pattern": "%LOCALAPPDATA%\\\\JetBrains\\\\*\\\\caches",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "jetbrains_logs",
+          "name": "JetBrains IDE 运行与诊断日志",
+          "path_pattern": "%LOCALAPPDATA%\\\\JetBrains\\\\*\\\\log",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "jetbrains_index",
+          "name": "JetBrains IDE 符号索引缓存",
+          "path_pattern": "%LOCALAPPDATA%\\\\JetBrains\\\\*\\\\index",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "cursor_cached_data",
+          "name": "Cursor V8 运行时代码缓存",
+          "path_pattern": "%APPDATA%\\\\Cursor\\\\CachedData",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "cursor_vsix_cache",
+          "name": "Cursor 离线插件安装包缓存 (*.vsix)",
+          "path_pattern": "%APPDATA%\\\\Cursor\\\\CachedExtensionVSIXs",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "cursor_logs",
+          "name": "Cursor 历史会话诊断日志",
+          "path_pattern": "%APPDATA%\\\\Cursor\\\\logs",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "cursor_web_storage",
+          "name": "Cursor 网页视图与模型交互存储",
+          "path_pattern": "%APPDATA%\\\\Cursor\\\\WebStorage",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "cursor_gpu_cache",
+          "name": "Cursor GPU 渲染管线缓存",
+          "path_pattern": "%APPDATA%\\\\Cursor\\\\GPUCache",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "vscode_cached_data",
+          "name": "VS Code V8 运行时代码缓存",
+          "path_pattern": "%APPDATA%\\\\Code\\\\CachedData",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "vscode_vsix_cache",
+          "name": "VS Code 离线插件安装包缓存 (*.vsix)",
+          "path_pattern": "%APPDATA%\\\\Code\\\\CachedExtensionVSIXs",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "vscode_logs",
+          "name": "VS Code 历史会话诊断日志",
+          "path_pattern": "%APPDATA%\\\\Code\\\\logs",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "pip_cache",
+          "name": "Pip Python 官方包下载缓存",
+          "path_pattern": "%LOCALAPPDATA%\\\\pip\\\\cache",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "pkg"
+        },
+        {
+          "id": "cargo_cache",
+          "name": "Cargo Rust crate 源码包下载缓存",
+          "path_pattern": "%USERPROFILE%\\\\.cargo\\\\registry\\\\cache",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "pkg"
+        },
+        {
+          "id": "gradle_daemon_logs",
+          "name": "Gradle 后台守护进程与诊断日志",
+          "path_pattern": "%USERPROFILE%\\\\.gradle\\\\daemon",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "runtime"
+        },
+        {
+          "id": "gradle_tmp",
+          "name": "Gradle 构建临时暂存文件",
+          "path_pattern": "%USERPROFILE%\\\\.gradle\\\\.tmp",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "runtime"
+        },
+        {
+          "id": "postman_partitions",
+          "name": "Postman 离线接口与微服务调试缓存",
+          "path_pattern": "%APPDATA%\\\\Postman\\\\Partitions",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "runtime"
+        },
+        {
+          "id": "adobe_media_cache",
+          "name": "Adobe Premiere/AE 媒体离线峰值文件 (*.ims / *.cfa)",
+          "path_pattern": "%APPDATA%\\\\Adobe\\\\Common\\\\Media Cache Files",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "creative"
+        },
+        {
+          "id": "adobe_media_db",
+          "name": "Adobe 媒体数据库索引缓存",
+          "path_pattern": "%APPDATA%\\\\Adobe\\\\Common\\\\Media Cache",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "creative"
+        },
+        {
+          "id": "adobe_crashdumps",
+          "name": "Adobe 创意套件崩溃转储文件",
+          "path_pattern": "%LOCALAPPDATA%\\\\Adobe\\\\CrashDumps",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "creative"
+        },
+        {
+          "id": "adobe_cef_cache",
+          "name": "Adobe Creative Cloud CEF 容器网页缓存",
+          "path_pattern": "%LOCALAPPDATA%\\\\Adobe\\\\*\\\\CEF\\\\User Data\\\\Cache",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "creative"
         }
       ]
     },
