@@ -1,7 +1,9 @@
+use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 use std::fs::File;
-use std::io::Write;
 use std::hash::{Hash, Hasher};
+use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 
@@ -34,11 +36,63 @@ pub struct RegistryCleanResult {
     pub errors: Vec<String>,
 }
 
-/// Scans for obsolete or orphaned registry keys and application caches
-pub fn scan_registry_issues() -> Vec<RegistryIssue> {
-    let mut issues = Vec::new();
+fn get_registered_app_paths() -> HashSet<String> {
+    let mut set = HashSet::new();
+    let keys = [
+        r"HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths",
+        r"HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths",
+    ];
+    for k in &keys {
+        if let Ok(out) = Command::new("reg").args(["query", k]).output() {
+            let text = String::from_utf8_lossy(&out.stdout);
+            for line in text.lines() {
+                let trimmed = line.trim();
+                if let Some(pos) = trimmed.rfind('\\') {
+                    let exe = &trimmed[pos + 1..];
+                    if !exe.is_empty() {
+                        set.insert(exe.to_lowercase());
+                    }
+                }
+            }
+        }
+    }
+    set
+}
 
-    // 1. Scan MuiCache for deleted executables
+fn extract_dead_target(uninst_str: &str, install_loc: &str) -> Option<String> {
+    if !uninst_str.is_empty() {
+        let clean = uninst_str.trim();
+        let target = if clean.starts_with('"') {
+            if let Some(end_idx) = clean[1..].find('"') {
+                &clean[1..1 + end_idx]
+            } else {
+                clean.trim_matches('"')
+            }
+        } else {
+            clean.split(" /").next().unwrap_or(clean).split(" -").next().unwrap_or(clean)
+        };
+        let target_trimmed = target.trim();
+        if target_trimmed.len() > 3 && &target_trimmed[1..3] == ":\\" {
+            if !Path::new(target_trimmed).exists() {
+                return Some(target_trimmed.to_string());
+            }
+        }
+    }
+
+    if !install_loc.is_empty() {
+        let loc_trimmed = install_loc.trim().trim_matches('"');
+        if loc_trimmed.len() > 3 && &loc_trimmed[1..3] == ":\\" {
+            if !Path::new(loc_trimmed).exists() {
+                return Some(loc_trimmed.to_string());
+            }
+        }
+    }
+
+    None
+}
+
+fn scan_mui_cache() -> Vec<RegistryIssue> {
+    let mut issues = Vec::new();
     let mui_key = r"HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache";
     let output = Command::new("reg")
         .args(["query", mui_key, "/v", "*"])
@@ -52,8 +106,6 @@ pub fn scan_registry_issues() -> Vec<RegistryIssue> {
                 continue;
             }
 
-            // Line format: <Path>.FriendlyAppName    REG_SZ    <FriendlyName>
-            // or:          <Path>.ApplicationCompany REG_SZ    <Company>
             let parts: Vec<&str> = trimmed.split("REG_").collect();
             if parts.is_empty() {
                 continue;
@@ -76,7 +128,6 @@ pub fn scan_registry_issues() -> Vec<RegistryIssue> {
                 file_path_str = &file_path_str[..pos];
             }
 
-            // Validate if it is a file path
             if (file_path_str.len() > 3 && &file_path_str[1..3] == ":\\") || file_path_str.starts_with(r"\\") {
                 let p = Path::new(file_path_str);
                 if !p.exists() {
@@ -95,8 +146,21 @@ pub fn scan_registry_issues() -> Vec<RegistryIssue> {
             }
         }
     }
+    issues
+}
 
-    // 2. Scan OpenWithList in FileExts for uninstalled application right-click associations
+fn scan_openwith_list() -> Vec<RegistryIssue> {
+    let mut issues = Vec::new();
+    let registered_apps = get_registered_app_paths();
+
+    let common_dirs = [
+        std::env::var("ProgramFiles").unwrap_or_default(),
+        std::env::var("ProgramFiles(x86)").unwrap_or_default(),
+        format!("{}\\Programs", std::env::var("LOCALAPPDATA").unwrap_or_default()),
+        std::env::var("WINDIR").unwrap_or_default(),
+        format!("{}\\System32", std::env::var("WINDIR").unwrap_or_default()),
+    ];
+
     let file_exts_key = r"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts";
     let output_exts = Command::new("reg")
         .args(["query", file_exts_key, "/s"])
@@ -117,29 +181,10 @@ pub fn scan_registry_issues() -> Vec<RegistryIssue> {
                     let exe_name = parts[1].trim();
 
                     if val_name.to_lowercase() != "mruposition" && exe_name.to_lowercase().ends_with(".exe") {
-                        // Check if exe is registered or exists in common app directories
-                        let mut exists = false;
-
-                        // Check App Paths in registry
-                        let app_path_key = format!(r"HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\{}", exe_name);
-                        let check_reg = Command::new("reg")
-                            .args(["query", &app_path_key])
-                            .output();
-                        if let Ok(c) = check_reg {
-                            if c.status.success() {
-                                exists = true;
-                            }
-                        }
+                        let exe_lower = exe_name.to_lowercase();
+                        let mut exists = registered_apps.contains(&exe_lower);
 
                         if !exists {
-                            let common_dirs = [
-                                std::env::var("ProgramFiles").unwrap_or_default(),
-                                std::env::var("ProgramFiles(x86)").unwrap_or_default(),
-                                format!("{}\\Programs", std::env::var("LOCALAPPDATA").unwrap_or_default()),
-                                std::env::var("WINDIR").unwrap_or_default(),
-                                format!("{}\\System32", std::env::var("WINDIR").unwrap_or_default()),
-                            ];
-
                             for dir in &common_dirs {
                                 if !dir.is_empty() && Path::new(dir).join(exe_name).exists() {
                                     exists = true;
@@ -167,112 +212,115 @@ pub fn scan_registry_issues() -> Vec<RegistryIssue> {
             }
         }
     }
+    issues
+}
 
-    // 3. Scan Uninstall entries across HKLM, WOW6432Node, and HKCU for deleted installations
-    let uninst_keys = [
-        r"HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall",
-        r"HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall",
-        r"HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall",
-    ];
+fn scan_uninstall_single_root(root: &str) -> Vec<RegistryIssue> {
+    let mut issues = Vec::new();
+    let output_uninst = Command::new("reg")
+        .args(["query", root, "/s"])
+        .output();
 
-    for root in &uninst_keys {
-        let output_uninst = Command::new("reg")
-            .args(["query", root])
-            .output();
+    if let Ok(out) = output_uninst {
+        let text = String::from_utf8_lossy(&out.stdout);
 
-        if let Ok(out) = output_uninst {
-            let text = String::from_utf8_lossy(&out.stdout);
-            for subkey_line in text.lines() {
-                let subkey = subkey_line.trim();
-                if subkey.is_empty() || !subkey.contains(r"Software\Microsoft\Windows\CurrentVersion\Uninstall") {
-                    continue;
+        let mut current_subkey = String::new();
+        let mut display_name = String::new();
+        let mut uninst_str = String::new();
+        let mut install_loc = String::new();
+
+        let commit_entry = |subkey: &str, d_name: &str, u_str: &str, i_loc: &str, issue_list: &mut Vec<RegistryIssue>| {
+            if subkey.is_empty() || subkey.ends_with(r"\Uninstall") {
+                return;
+            }
+
+            if let Some(dead_path) = extract_dead_target(u_str, i_loc) {
+                let clean_key = subkey
+                    .replace("HKEY_LOCAL_MACHINE", "HKLM")
+                    .replace("HKEY_CURRENT_USER", "HKCU");
+                let id = compute_issue_id("reg_uninst", &clean_key, None);
+                let app_label = if !d_name.is_empty() {
+                    d_name.to_string()
+                } else {
+                    clean_key.rsplit('\\').next().unwrap_or("Unknown").to_string()
+                };
+
+                issue_list.push(RegistryIssue {
+                    id,
+                    root_key: clean_key,
+                    value_name: None,
+                    original_value: None,
+                    category: "失效软件卸载项 (Uninstall)".to_string(),
+                    description: format!("软件 [{}] 卸载器或安装目录已不存在，控制面板添加/删除程序中残留无效条目", app_label),
+                    invalid_path: dead_path,
+                    is_safe: true,
+                });
+            }
+        };
+
+        for line in text.lines() {
+            let trimmed = line.trim();
+            if trimmed.starts_with("HKEY_") {
+                commit_entry(&current_subkey, &display_name, &uninst_str, &install_loc, &mut issues);
+                current_subkey = trimmed.to_string();
+                display_name.clear();
+                uninst_str.clear();
+                install_loc.clear();
+            } else if trimmed.contains("DisplayName") && trimmed.contains("REG_SZ") {
+                if let Some(pos) = trimmed.find("REG_SZ") {
+                    display_name = trimmed[pos + 6..].trim().to_string();
                 }
-
-                let query_details = Command::new("reg")
-                    .args(["query", subkey])
-                    .output();
-
-                if let Ok(det_out) = query_details {
-                    let det_text = String::from_utf8_lossy(&det_out.stdout);
-                    let mut display_name = String::new();
-                    let mut uninst_str = String::new();
-                    let mut install_loc = String::new();
-
-                    for l in det_text.lines() {
-                        let line_trimmed = l.trim();
-                        if line_trimmed.contains("DisplayName") && line_trimmed.contains("REG_SZ") {
-                            if let Some(pos) = line_trimmed.find("REG_SZ") {
-                                display_name = line_trimmed[pos + 6..].trim().to_string();
-                            }
-                        } else if line_trimmed.contains("UninstallString") && (line_trimmed.contains("REG_SZ") || line_trimmed.contains("REG_EXPAND_SZ")) {
-                            let flag = if line_trimmed.contains("REG_EXPAND_SZ") { "REG_EXPAND_SZ" } else { "REG_SZ" };
-                            if let Some(pos) = line_trimmed.find(flag) {
-                                uninst_str = line_trimmed[pos + flag.len()..].trim().to_string();
-                            }
-                        } else if line_trimmed.contains("InstallLocation") && line_trimmed.contains("REG_SZ") {
-                            if let Some(pos) = line_trimmed.find("REG_SZ") {
-                                install_loc = line_trimmed[pos + 6..].trim().to_string();
-                            }
-                        }
-                    }
-
-                    // Validate target executable or directory existence
-                    let mut dead_target = None;
-                    if !uninst_str.is_empty() {
-                        let clean_uninst = uninst_str.trim_matches('"');
-                        let exe_target = if let Some(idx) = clean_uninst.find('"') {
-                            &clean_uninst[..idx]
-                        } else {
-                            clean_uninst.split(" /").next().unwrap_or(clean_uninst).split(" -").next().unwrap_or(clean_uninst)
-                        };
-
-                        if exe_target.len() > 3 && &exe_target[1..3] == ":\\" {
-                            if !Path::new(exe_target).exists() {
-                                dead_target = Some(exe_target.to_string());
-                            }
-                        }
-                    } else if !install_loc.is_empty() && install_loc.len() > 3 && &install_loc[1..3] == ":\\" {
-                        if !Path::new(&install_loc).exists() {
-                            dead_target = Some(install_loc.to_string());
-                        }
-                    }
-
-                    if let Some(dead_path) = dead_target {
-                        let clean_key = subkey
-                            .replace("HKEY_LOCAL_MACHINE", "HKLM")
-                            .replace("HKEY_CURRENT_USER", "HKCU");
-                        let id = compute_issue_id("reg_uninst", &clean_key, None);
-                        let app_label = if !display_name.is_empty() {
-                            display_name
-                        } else {
-                            subkey.rsplit('\\').next().unwrap_or("Unknown").to_string()
-                        };
-
-                        issues.push(RegistryIssue {
-                            id,
-                            root_key: clean_key,
-                            value_name: None,
-                            original_value: None,
-                            category: "失效软件卸载项 (Uninstall)".to_string(),
-                            description: format!("软件 [{}] 卸载器或安装目录已不存在，控制面板添加/删除程序中残留无效条目", app_label),
-                            invalid_path: dead_path,
-                            is_safe: true,
-                        });
-                    }
+            } else if trimmed.contains("UninstallString") && (trimmed.contains("REG_SZ") || trimmed.contains("REG_EXPAND_SZ")) {
+                let flag = if trimmed.contains("REG_EXPAND_SZ") { "REG_EXPAND_SZ" } else { "REG_SZ" };
+                if let Some(pos) = trimmed.find(flag) {
+                    uninst_str = trimmed[pos + flag.len()..].trim().to_string();
+                }
+            } else if trimmed.contains("InstallLocation") && trimmed.contains("REG_SZ") {
+                if let Some(pos) = trimmed.find("REG_SZ") {
+                    install_loc = trimmed[pos + 6..].trim().to_string();
                 }
             }
         }
+
+        commit_entry(&current_subkey, &display_name, &uninst_str, &install_loc, &mut issues);
     }
 
     issues
 }
 
-/// Safely cleans chosen registry issues with automatic .reg backup
-pub fn clean_registry_issues(targets: &[RegistryIssue]) -> RegistryCleanResult {
-    let mut cleaned = 0;
-    let mut errors = Vec::new();
+/// Scans for obsolete or orphaned registry keys and application caches concurrently across CPU threads
+pub fn scan_registry_issues() -> Vec<RegistryIssue> {
+    let mut mui_issues = Vec::new();
+    let mut openwith_issues = Vec::new();
+    let mut uninst_hklm = Vec::new();
+    let mut uninst_wow = Vec::new();
+    let mut uninst_hkcu = Vec::new();
 
-    // Prepare backup directory in Temp
+    std::thread::scope(|s| {
+        let t_mui = s.spawn(|| scan_mui_cache());
+        let t_openwith = s.spawn(|| scan_openwith_list());
+        let t_hklm = s.spawn(|| scan_uninstall_single_root(r"HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall"));
+        let t_wow = s.spawn(|| scan_uninstall_single_root(r"HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"));
+        let t_hkcu = s.spawn(|| scan_uninstall_single_root(r"HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall"));
+
+        mui_issues = t_mui.join().unwrap_or_default();
+        openwith_issues = t_openwith.join().unwrap_or_default();
+        uninst_hklm = t_hklm.join().unwrap_or_default();
+        uninst_wow = t_wow.join().unwrap_or_default();
+        uninst_hkcu = t_hkcu.join().unwrap_or_default();
+    });
+
+    let mut issues = Vec::new();
+    issues.extend(mui_issues);
+    issues.extend(openwith_issues);
+    issues.extend(uninst_hklm);
+    issues.extend(uninst_wow);
+    issues.extend(uninst_hkcu);
+    issues
+}
+
+/// Safely cleans chosen registry issues with automatic .reg backup and Rayon parallel execution
+pub fn clean_registry_issues(targets: &[RegistryIssue]) -> RegistryCleanResult {
     let backup_dir = std::env::temp_dir().join("cleanflow_registry_backups");
     let _ = std::fs::create_dir_all(&backup_dir);
     let timestamp = std::time::SystemTime::now()
@@ -281,12 +329,10 @@ pub fn clean_registry_issues(targets: &[RegistryIssue]) -> RegistryCleanResult {
         .unwrap_or(0);
     let backup_path = backup_dir.join(format!("backup_reg_{}.reg", timestamp));
 
-    // Write .reg backup header
     let mut backup_content = String::from("Windows Registry Editor Version 5.00\r\n\r\n");
 
     for issue in targets {
         if let Some(ref val) = issue.value_name {
-            // Backup single value restoration entry
             backup_content.push_str(&format!("[{}]\r\n", issue.root_key));
             backup_content.push_str(&format!("; CleanFlow Auto-Backup for: {}\r\n", issue.invalid_path));
             let orig = issue.original_value.as_deref().unwrap_or("");
@@ -295,35 +341,12 @@ pub fn clean_registry_issues(targets: &[RegistryIssue]) -> RegistryCleanResult {
                 val.replace('\\', "\\\\").replace('"', "\\\""),
                 orig.replace('\\', "\\\\").replace('"', "\\\"")
             ));
-
-            // Execute delete
-            let status = Command::new("reg")
-                .args(["delete", &issue.root_key, "/v", val, "/f"])
-                .status();
-
-            match status {
-                Ok(s) if s.success() => cleaned += 1,
-                Ok(s) => errors.push(format!("删除值 {} 失败，退出码: {:?}", val, s.code())),
-                Err(e) => errors.push(format!("执行 reg delete 失败: {}", e)),
-            }
         } else {
-            // Backup entire key removal
             backup_content.push_str(&format!("; CleanFlow Auto-Backup key removal: {}\r\n", issue.root_key));
             backup_content.push_str(&format!("[-{}]\r\n\r\n", issue.root_key));
-
-            let status = Command::new("reg")
-                .args(["delete", &issue.root_key, "/f"])
-                .status();
-
-            match status {
-                Ok(s) if s.success() => cleaned += 1,
-                Ok(s) => errors.push(format!("删除键 {} 失败，退出码: {:?}", issue.root_key, s.code())),
-                Err(e) => errors.push(format!("执行 reg delete 失败: {}", e)),
-            }
         }
     }
 
-    // Save backup file
     let backup_file_str = if let Ok(mut f) = File::create(&backup_path) {
         let _ = f.write_all(backup_content.as_bytes());
         Some(backup_path.to_string_lossy().to_string())
@@ -331,10 +354,77 @@ pub fn clean_registry_issues(targets: &[RegistryIssue]) -> RegistryCleanResult {
         None
     };
 
+    let execution_results: Vec<(bool, Option<String>)> = targets
+        .par_iter()
+        .map(|issue| {
+            if let Some(ref val) = issue.value_name {
+                let status = Command::new("reg")
+                    .args(["delete", &issue.root_key, "/v", val, "/f"])
+                    .status();
+
+                match status {
+                    Ok(s) if s.success() => (true, None),
+                    Ok(s) => (false, Some(format!("删除值 {} 失败，退出码: {:?}", val, s.code()))),
+                    Err(e) => (false, Some(format!("执行 reg delete 失败: {}", e))),
+                }
+            } else {
+                let status = Command::new("reg")
+                    .args(["delete", &issue.root_key, "/f"])
+                    .status();
+
+                match status {
+                    Ok(s) if s.success() => (true, None),
+                    Ok(s) => (false, Some(format!("删除键 {} 失败，退出码: {:?}", issue.root_key, s.code()))),
+                    Err(e) => (false, Some(format!("执行 reg delete 失败: {}", e))),
+                }
+            }
+        })
+        .collect();
+
+    let mut cleaned = 0;
+    let mut errors = Vec::new();
+    for (success, err) in execution_results {
+        if success {
+            cleaned += 1;
+        } else if let Some(e) = err {
+            errors.push(e);
+        }
+    }
+
     RegistryCleanResult {
         success: errors.is_empty(),
         items_cleaned: cleaned,
         backup_file: backup_file_str,
         errors,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_extract_dead_target() {
+        let dead = extract_dead_target(r#""C:\NonExistentApp12345\uninst.exe" /S"#, "");
+        assert_eq!(dead, Some(r"C:\NonExistentApp12345\uninst.exe".to_string()));
+
+        let dead_loc = extract_dead_target("", r#"C:\NonExistentAppDirectory54321"#);
+        assert_eq!(dead_loc, Some(r"C:\NonExistentAppDirectory54321".to_string()));
+    }
+
+    #[test]
+    fn test_compute_issue_id() {
+        let id1 = compute_issue_id("test", "HKCU\\Software\\Foo", Some("bar"));
+        let id2 = compute_issue_id("test", "HKCU\\Software\\Foo", Some("bar"));
+        let id3 = compute_issue_id("test", "HKCU\\Software\\Foo", Some("baz"));
+        assert_eq!(id1, id2);
+        assert_ne!(id1, id3);
+    }
+
+    #[test]
+    fn test_scan_registry_concurrent() {
+        let issues = scan_registry_issues();
+        // Scanning executes without panic and returns vector
+        println!("Concurrent registry scan completed, found {} issues", issues.len());
     }
 }

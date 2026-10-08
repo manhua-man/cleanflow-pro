@@ -128,45 +128,106 @@ pub fn start_migration_task(source_str: String, target_drive_str: String) -> Res
 
     std::thread::spawn(move || {
         let (src_size, total_files) = crate::scanner::calculate_path_stats(&thread_src);
+
+        // Pre-flight check: Target drive space
+        let drives = crate::disks::get_disk_drives();
+        if let Some(target_d) = drives.iter().find(|d| d.letter.to_uppercase() == thread_drive.to_uppercase()) {
+            let required = src_size + 1024 * 1024 * 1024; // +1GB margin
+            if target_d.free_bytes < required {
+                let mut s = thread_state.lock().unwrap();
+                s.is_active = false;
+                s.state = "FAILED".to_string();
+                s.error_msg = Some(format!(
+                    "目标盘 {} 空间不足! (需 {:.2} GB，当前仅剩 {:.2} GB)",
+                    thread_drive,
+                    required as f64 / (1024.0 * 1024.0 * 1024.0),
+                    target_d.free_bytes as f64 / (1024.0 * 1024.0 * 1024.0)
+                ));
+                return;
+            }
+        }
+
         {
             let mut s = thread_state.lock().unwrap();
             s.total_bytes = src_size;
             s.total_files = total_files;
             s.state = "COPYING".to_string();
-            s.current_file = "启动多线程数据同步...".to_string();
+            s.current_file = "启动多线程无缓存极速同步...".to_string();
+            s.percent = 0.0;
         }
 
-        // Multi-threaded Robocopy execution
-        let copy_status = Command::new("robocopy")
+        // Multi-threaded Robocopy execution with unbuffered I/O (/J) and directory attribute replication (/DCOPY:DAT)
+        let copy_child = Command::new("robocopy")
             .args([
                 thread_src.to_str().unwrap(),
                 thread_dst.to_str().unwrap(),
-                "/E", "/MT:16", "/R:1", "/W:1", "/NFL", "/NDL", "/NP",
+                "/E", "/MT:16", "/J", "/DCOPY:DAT", "/R:1", "/W:1", "/NFL", "/NDL", "/NP", "/NC", "/NS",
             ])
-            .status();
+            .spawn();
 
+        let mut child = match copy_child {
+            Ok(c) => c,
+            Err(e) => {
+                let mut s = thread_state.lock().unwrap();
+                s.is_active = false;
+                s.state = "FAILED".to_string();
+                s.error_msg = Some(format!("启动 robocopy 传输失败: {}", e));
+                let _ = fs::remove_dir_all(&thread_dst);
+                return;
+            }
+        };
+
+        // Real-time copy progress tracker loop
+        while let Ok(None) = child.try_wait() {
+            std::thread::sleep(std::time::Duration::from_millis(800));
+            if thread_dst.exists() {
+                let (dst_size, dst_files) = crate::scanner::calculate_path_stats(&thread_dst);
+                let mut s = thread_state.lock().unwrap();
+                s.copied_bytes = dst_size;
+                s.copied_files = dst_files;
+                if src_size > 0 {
+                    let pct = ((dst_size as f32 / src_size as f32) * 92.0).clamp(0.0, 92.0);
+                    s.percent = pct;
+                    s.current_file = format!(
+                        "已同步 {:.1} MB / {:.1} MB ({:.1}%)",
+                        dst_size as f64 / (1024.0 * 1024.0),
+                        src_size as f64 / (1024.0 * 1024.0),
+                        pct
+                    );
+                }
+            }
+        }
+
+        let copy_status = child.wait();
         match copy_status {
             Ok(status) if status.code().unwrap_or(-1) <= 7 => {
-                // Copy succeeded, now link
+                // Copy succeeded, enter transactional atomic linking
                 {
                     let mut s = thread_state.lock().unwrap();
                     s.copied_bytes = src_size;
                     s.copied_files = total_files;
                     s.percent = 95.0;
                     s.state = "LINKING".to_string();
-                    s.current_file = "正在解构原目录并创建 NTFS 虚拟联接...".to_string();
+                    s.current_file = "正在原子置换原目录并建立 NTFS 虚拟联接...".to_string();
                 }
 
-                // 2. Remove source directory
-                if let Err(e) = fs::remove_dir_all(&thread_src) {
+                // Transactional Staging: Attempt atomic rename of source directory
+                let timestamp = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_secs();
+                let staging_dir = thread_src.with_file_name(format!("{}.cleanflow_staging_{}", thread_folder_name, timestamp));
+
+                if let Err(e) = fs::rename(&thread_src, &staging_dir) {
                     let mut s = thread_state.lock().unwrap();
                     s.is_active = false;
                     s.state = "FAILED".to_string();
-                    s.error_msg = Some(format!("删除源目录失败，可能有进程锁定: {}", e));
+                    s.error_msg = Some(format!("源目录被运行中的应用进程锁定（无法重命名）: {}。源数据毫发无损，请完全关闭对应软件后重试。", e));
+                    let _ = fs::remove_dir_all(&thread_dst);
                     return;
                 }
 
-                // 3. Create NTFS Directory Junction (mklink /J "source" "destination")
+                // Create NTFS Directory Junction (mklink /J "source" "destination")
                 let mklink_cmd = format!(
                     "mklink /J \"{}\" \"{}\"",
                     thread_src.to_string_lossy(),
@@ -191,6 +252,9 @@ pub fn start_migration_task(source_str: String, target_drive_str: String) -> Res
                         };
                         let _ = register_junction(record);
 
+                        // Asynchronously clean up staging directory now that junction is live
+                        let _ = fs::remove_dir_all(&staging_dir);
+
                         let mut s = thread_state.lock().unwrap();
                         s.is_active = false;
                         s.state = "COMPLETED".to_string();
@@ -198,16 +262,24 @@ pub fn start_migration_task(source_str: String, target_drive_str: String) -> Res
                         s.current_file = "搬迁完成! 已建立透明符号联接".to_string();
                     }
                     Ok(l_st) => {
+                        // Rollback: Restore original source folder from staging
+                        let _ = fs::rename(&staging_dir, &thread_src);
+                        let _ = fs::remove_dir_all(&thread_dst);
+
                         let mut s = thread_state.lock().unwrap();
                         s.is_active = false;
                         s.state = "FAILED".to_string();
-                        s.error_msg = Some(format!("创建目录联接失败，退出码: {:?}", l_st.code()));
+                        s.error_msg = Some(format!("创建目录联接失败，退出码: {:?}。已安全自动回滚源目录。", l_st.code()));
                     }
                     Err(e) => {
+                        // Rollback: Restore original source folder from staging
+                        let _ = fs::rename(&staging_dir, &thread_src);
+                        let _ = fs::remove_dir_all(&thread_dst);
+
                         let mut s = thread_state.lock().unwrap();
                         s.is_active = false;
                         s.state = "FAILED".to_string();
-                        s.error_msg = Some(format!("调用 cmd mklink 失败: {}", e));
+                        s.error_msg = Some(format!("调用 cmd mklink 失败: {}。已安全自动回滚源目录。", e));
                     }
                 }
             }
@@ -222,7 +294,7 @@ pub fn start_migration_task(source_str: String, target_drive_str: String) -> Res
                 let mut s = thread_state.lock().unwrap();
                 s.is_active = false;
                 s.state = "FAILED".to_string();
-                s.error_msg = Some(format!("调用 robocopy 失败: {}", e));
+                s.error_msg = Some(format!("等待 robocopy 完成失败: {}", e));
                 let _ = fs::remove_dir_all(&thread_dst);
             }
         }
@@ -257,23 +329,46 @@ pub fn migrate_to_drive<P: AsRef<Path>>(source: P, target_drive_letter: &str) ->
 
     let (src_size, _) = crate::scanner::calculate_path_stats(src);
 
-    // 1. Robocopy with multi-thread
+    // Pre-flight check: Target drive space
+    let drives = crate::disks::get_disk_drives();
+    if let Some(target_d) = drives.iter().find(|d| d.letter.to_uppercase() == target_drive_letter.to_uppercase()) {
+        let required = src_size + 1024 * 1024 * 1024;
+        if target_d.free_bytes < required {
+            bail!(
+                "目标盘 {} 空间不足! (需 {:.2} GB，当前仅剩 {:.2} GB)",
+                target_drive_letter,
+                required as f64 / (1024.0 * 1024.0 * 1024.0),
+                target_d.free_bytes as f64 / (1024.0 * 1024.0 * 1024.0)
+            );
+        }
+    }
+
+    // 1. Robocopy with multi-thread & unbuffered I/O
     let status = Command::new("robocopy")
         .args([
             src.to_str().context("路径转字符串失败")?,
             dst.to_str().context("路径转字符串失败")?,
-            "/E", "/MT:16", "/R:1", "/W:1", "/NFL", "/NDL", "/NP",
+            "/E", "/MT:16", "/J", "/DCOPY:DAT", "/R:1", "/W:1", "/NFL", "/NDL", "/NP", "/NC", "/NS",
         ])
         .status()
         .context("执行系统拷贝命令失败")?;
 
     if status.code().unwrap_or(-1) > 7 {
+        let _ = fs::remove_dir_all(&dst);
         bail!("复制数据到目标盘失败，退出码: {:?}", status.code());
     }
 
-    // 2. Remove source directory
-    fs::remove_dir_all(src)
-        .context("删除 C 盘源目录失败，可能有进程锁定，建议关闭相关软件后再试")?;
+    // 2. Transactional Staging: Attempt atomic rename
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    let staging_dir = src.with_file_name(format!("{}.cleanflow_staging_{}", folder_name.to_string_lossy(), timestamp));
+
+    if let Err(e) = fs::rename(src, &staging_dir) {
+        let _ = fs::remove_dir_all(&dst);
+        bail!("源目录被运行中的应用进程锁定（无法重命名）: {}。源数据毫发无损，请完全关闭对应软件后重试。", e);
+    }
 
     // 3. Create NTFS Directory Junction (mklink /J "source" "destination")
     let mklink_cmd = format!(
@@ -288,10 +383,16 @@ pub fn migrate_to_drive<P: AsRef<Path>>(source: P, target_drive_letter: &str) ->
         .context("执行 mklink 创建目录联接失败")?;
 
     if !link_status.success() {
-        bail!("创建目录联接失败，退出码: {:?}", link_status.code());
+        // Rollback
+        let _ = fs::rename(&staging_dir, src);
+        let _ = fs::remove_dir_all(&dst);
+        bail!("创建目录联接失败，退出码: {:?}。已安全自动回滚源目录。", link_status.code());
     }
 
-    // 4. Save to junction registry
+    // 4. Remove staging directory
+    let _ = fs::remove_dir_all(&staging_dir);
+
+    // 5. Save to junction registry
     let record = JunctionRecord {
         id: format!("{}_{}", target_drive_letter, dest_dir_name),
         name: folder_name.to_string_lossy().to_string(),
@@ -354,12 +455,12 @@ pub fn rollback_junction(source_path_str: &str) -> Result<u64> {
     // 2. Re-create normal directory at source
     fs::create_dir_all(src).context("重建源物理目录失败")?;
 
-    // 3. Robocopy data back from target to source
+    // 3. Robocopy data back from target to source with /J unbuffered and /DCOPY:DAT
     let status = Command::new("robocopy")
         .args([
             target_path.to_str().context("路径转字符串失败")?,
             src.to_str().context("路径转字符串失败")?,
-            "/E", "/MT:16", "/R:1", "/W:1", "/NFL", "/NDL", "/NP",
+            "/E", "/MT:16", "/J", "/DCOPY:DAT", "/R:1", "/W:1", "/NFL", "/NDL", "/NP", "/NC", "/NS",
         ])
         .status()
         .context("执行还原数据拷贝失败")?;
@@ -424,9 +525,9 @@ pub fn list_active_junctions() -> Vec<JunctionRecord> {
             .ok()
             .and_then(|s| serde_json::from_str(&s).ok())
             .unwrap_or_default()
-    } else {
-        Vec::new()
-    };
+        } else {
+            Vec::new()
+        };
 
     // Update real-time size and health status
     for item in &mut records {
@@ -477,4 +578,21 @@ fn chrono_like_now() -> String {
         }
     }
     "最近创建".to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_junction_on_normal_dir() {
+        let temp = std::env::temp_dir();
+        assert!(!is_junction(&temp));
+    }
+
+    #[test]
+    fn test_get_migration_status_idle() {
+        let st = get_migration_status();
+        assert!(!st.is_active || st.state == "COMPLETED" || st.state == "FAILED" || st.state == "IDLE");
+    }
 }
