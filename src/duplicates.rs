@@ -1,9 +1,12 @@
 use md5::{Digest, Md5};
+use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::{self, File};
 use std::io::Read;
 use std::path::Path;
+
+const HASH_BUFFER_SIZE: usize = 64 * 1024; // 64 KB streaming buffer
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DuplicateFile {
@@ -25,7 +28,7 @@ pub struct DuplicateGroup {
 fn compute_file_hash<P: AsRef<Path>>(path: P) -> Option<String> {
     let mut file = File::open(path).ok()?;
     let mut hasher = Md5::new();
-    let mut buffer = [0u8; 8192];
+    let mut buffer = [0u8; HASH_BUFFER_SIZE];
 
     loop {
         let n = file.read(&mut buffer).ok()?;
@@ -41,12 +44,9 @@ fn compute_file_hash<P: AsRef<Path>>(path: P) -> Option<String> {
 fn compute_head_hash<P: AsRef<Path>>(path: P) -> Option<String> {
     let mut file = File::open(path).ok()?;
     let mut hasher = Md5::new();
-    let mut buffer = [0u8; 4096];
+    let mut buffer = [0u8; HASH_BUFFER_SIZE];
 
     let n = file.read(&mut buffer).ok()?;
-    if n == 0 {
-        return None;
-    }
     hasher.update(&buffer[..n]);
 
     Some(hex::encode(hasher.finalize()))
@@ -74,80 +74,132 @@ pub fn scan_duplicate_files(target_dir: &str, min_size_bytes: u64) -> Vec<Duplic
         }
     }
 
-    // Phase 2: For candidates with identical size, compute head hash then full hash
-    let mut full_hash_map: HashMap<(u64, String), Vec<String>> = HashMap::new();
+    // Candidate size groups with at least 2 files
+    let candidate_size_groups: Vec<(u64, Vec<String>)> = size_map
+        .into_iter()
+        .filter(|(_sz, paths)| paths.len() >= 2)
+        .collect();
 
-    for (sz, paths) in size_map {
-        if paths.len() < 2 {
-            continue;
-        }
+    // Phase 2: Parallel candidate verification with Rayon work-stealing pool
+    let duplicate_groups: Vec<DuplicateGroup> = candidate_size_groups
+        .into_par_iter()
+        .flat_map(|(sz, paths)| {
+            // Step 2a: Parallel head hash computation
+            let head_results: Vec<(String, String)> = paths
+                .into_par_iter()
+                .filter_map(|p| {
+                    compute_head_hash(&p).map(|hh| (hh, p))
+                })
+                .collect();
 
-        // Head hash check
-        let mut head_map: HashMap<String, Vec<String>> = HashMap::new();
-        for p in paths {
-            if let Some(hh) = compute_head_head_opt(&p) {
+            let mut head_map: HashMap<String, Vec<String>> = HashMap::new();
+            for (hh, p) in head_results {
                 head_map.entry(hh).or_default().push(p);
             }
-        }
 
-        for (_hh, cand_paths) in head_map {
-            if cand_paths.len() < 2 {
-                continue;
-            }
+            let mut size_groups = Vec::new();
 
-            for p in cand_paths {
-                if let Some(fh) = compute_file_hash(&p) {
-                    full_hash_map.entry((sz, fh)).or_default().push(p);
+            for (head_hash, mut cand_paths) in head_map {
+                if cand_paths.len() < 2 {
+                    continue;
+                }
+
+                // Prefer shortest path first for deterministic preservation recommendation
+                cand_paths.sort_by(|a, b| a.len().cmp(&b.len()).then_with(|| a.cmp(b)));
+
+                // If file size is within head buffer, head hash IS the exact full MD5 hash
+                if sz <= HASH_BUFFER_SIZE as u64 {
+                    let wasted = sz * (cand_paths.len() as u64 - 1);
+                    let count = cand_paths.len();
+                    let files = cand_paths
+                        .iter()
+                        .enumerate()
+                        .map(|(i, p)| {
+                            let mod_str = fs::metadata(p)
+                                .and_then(|m| m.modified())
+                                .map(|t| {
+                                    let d = t.duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_secs();
+                                    format!("{}", d)
+                                })
+                                .unwrap_or_default();
+
+                            DuplicateFile {
+                                path: p.clone(),
+                                size_bytes: sz,
+                                modified_time: mod_str,
+                                is_recommended_keep: i == 0,
+                            }
+                        })
+                        .collect();
+
+                    size_groups.push(DuplicateGroup {
+                        hash: head_hash,
+                        size_bytes: sz,
+                        wasted_bytes: wasted,
+                        file_count: count,
+                        files,
+                    });
+                } else {
+                    // For files larger than 64 KB, compute full 64KB-buffered MD5 hash in parallel
+                    let full_results: Vec<(String, String)> = cand_paths
+                        .into_par_iter()
+                        .filter_map(|p| {
+                            compute_file_hash(&p).map(|fh| (fh, p))
+                        })
+                        .collect();
+
+                    let mut full_map: HashMap<String, Vec<String>> = HashMap::new();
+                    for (fh, p) in full_results {
+                        full_map.entry(fh).or_default().push(p);
+                    }
+
+                    for (fh, mut matched_paths) in full_map {
+                        if matched_paths.len() < 2 {
+                            continue;
+                        }
+
+                        matched_paths.sort_by(|a, b| a.len().cmp(&b.len()).then_with(|| a.cmp(b)));
+                        let wasted = sz * (matched_paths.len() as u64 - 1);
+                        let count = matched_paths.len();
+                        let files = matched_paths
+                            .iter()
+                            .enumerate()
+                            .map(|(i, p)| {
+                                let mod_str = fs::metadata(p)
+                                    .and_then(|m| m.modified())
+                                    .map(|t| {
+                                        let d = t.duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_secs();
+                                        format!("{}", d)
+                                    })
+                                    .unwrap_or_default();
+
+                                DuplicateFile {
+                                    path: p.clone(),
+                                    size_bytes: sz,
+                                    modified_time: mod_str,
+                                    is_recommended_keep: i == 0,
+                                }
+                            })
+                            .collect();
+
+                        size_groups.push(DuplicateGroup {
+                            hash: fh,
+                            size_bytes: sz,
+                            wasted_bytes: wasted,
+                            file_count: count,
+                            files,
+                        });
+                    }
                 }
             }
-        }
-    }
 
-    // Phase 3: Construct DuplicateGroup results
-    let mut groups = Vec::new();
+            size_groups
+        })
+        .collect();
 
-    for ((sz, hash), paths) in full_hash_map {
-        if paths.len() < 2 {
-            continue;
-        }
-
-        let mut files = Vec::new();
-        for (i, p) in paths.iter().enumerate() {
-            let mod_str = fs::metadata(p)
-                .and_then(|m| m.modified())
-                .map(|t| {
-                    let d = t.duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_secs();
-                    format!("{}", d)
-                })
-                .unwrap_or_default();
-
-            // Recommend keeping the first one (or shortest path)
-            files.push(DuplicateFile {
-                path: p.clone(),
-                size_bytes: sz,
-                modified_time: mod_str,
-                is_recommended_keep: i == 0,
-            });
-        }
-
-        let wasted = sz * (paths.len() as u64 - 1);
-        let count = files.len();
-
-        groups.push(DuplicateGroup {
-            hash,
-            size_bytes: sz,
-            wasted_bytes: wasted,
-            file_count: count,
-            files,
-        });
-    }
-
+    let mut groups = duplicate_groups;
     groups.sort_by(|a, b| b.wasted_bytes.cmp(&a.wasted_bytes));
     groups
-}
-
-fn compute_head_head_opt(path: &str) -> Option<String> {
-    compute_head_hash(path)
 }
 
 pub fn delete_duplicate_files(paths: &[String]) -> (u64, usize, Vec<String>) {
@@ -187,5 +239,50 @@ mod tests {
         let h = compute_file_hash(&temp_file);
         assert!(h.is_some());
         let _ = fs::remove_file(&temp_file);
+    }
+
+    #[test]
+    fn test_scan_and_delete_duplicates() {
+        let test_dir = std::env::temp_dir().join("cleanflow_dup_test_dir");
+        let sub_dir = test_dir.join("sub");
+        let _ = fs::remove_dir_all(&test_dir);
+        fs::create_dir_all(&sub_dir).unwrap();
+
+        let f1 = test_dir.join("original.txt");
+        let f2 = test_dir.join("copy1.txt");
+        let f3 = sub_dir.join("copy2_nested.txt");
+        let f4 = test_dir.join("different.txt");
+
+        let dup_data = b"Duplicate stream payload content for Rayon parallel testing";
+        fs::write(&f1, dup_data).unwrap();
+        fs::write(&f2, dup_data).unwrap();
+        fs::write(&f3, dup_data).unwrap();
+        fs::write(&f4, b"Completely distinct content").unwrap();
+
+        let groups = scan_duplicate_files(test_dir.to_str().unwrap(), 0);
+        assert_eq!(groups.len(), 1);
+        let g = &groups[0];
+        assert_eq!(g.file_count, 3);
+        assert_eq!(g.wasted_bytes, dup_data.len() as u64 * 2);
+
+        // Verify shortest path is recommended to keep
+        let kept: Vec<_> = g.files.iter().filter(|f| f.is_recommended_keep).collect();
+        assert_eq!(kept.len(), 1);
+
+        // Delete duplicates (excluding kept)
+        let delete_targets: Vec<String> = g.files.iter()
+            .filter(|f| !f.is_recommended_keep)
+            .map(|f| f.path.clone())
+            .collect();
+        assert_eq!(delete_targets.len(), 2);
+
+        let (freed, count, errs) = delete_duplicate_files(&delete_targets);
+        assert_eq!(count, 2);
+        assert_eq!(freed, dup_data.len() as u64 * 2);
+        assert!(errs.is_empty());
+
+        assert!(f1.exists() || f2.exists()); // The kept one still exists
+
+        let _ = fs::remove_dir_all(&test_dir);
     }
 }

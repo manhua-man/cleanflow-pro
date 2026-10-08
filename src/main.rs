@@ -35,7 +35,7 @@ fn run_cli_scan(config: &RuleConfig, json_output: bool) -> anyhow::Result<()> {
 
     println!("============================================================");
     println!("     CleanFlow (净流) - 高性能 Windows 磁盘空间治理引擎     ");
-    println!("             [Rust 核心原生引擎 v0.1.0]                     ");
+    println!("             [Rust 核心原生引擎 v{}]                     ", env!("CARGO_PKG_VERSION"));
     println!("============================================================\n");
 
     println!("正在极速多线程扫描全盘规则资产...\n");

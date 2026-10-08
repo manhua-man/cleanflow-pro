@@ -1,0 +1,558 @@
+{
+  "version": "1.0.0",
+  "categories": [
+    {
+      "id": "system",
+      "name": "系统冗余与临时垃圾",
+      "description": "Windows 系统运行、升级补丁及应用程序生成的无用临时文件",
+      "risk_level": "safe",
+      "rules": [
+        {
+          "id": "user_temp",
+          "name": "用户临时目录 (Temp)",
+          "path_pattern": "%LOCALAPPDATA%\\Temp",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "win_update",
+          "name": "Windows 更新补丁下载缓存",
+          "path_pattern": "%WINDIR%\\SoftwareDistribution\\Download",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "crash_dumps",
+          "name": "程序崩溃转储文件 (.dmp / .hprof)",
+          "path_pattern": "%LOCALAPPDATA%\\CrashDumps",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "user_root_hprof",
+          "name": "用户主目录 Java/IDE 崩溃堆转储 (*.hprof)",
+          "path_pattern": "%USERPROFILE%\\*.hprof",
+          "action": "delete_matching_files",
+          "default_checked": true
+        },
+        {
+          "id": "explorer_thumb",
+          "name": "Windows 缩略图与图标缓存",
+          "path_pattern": "%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer\\thumbcache_*.db",
+          "action": "delete_matching_files",
+          "default_checked": false
+        }
+      ]
+    },
+    {
+      "id": "office_chat",
+      "name": "办公与社交软件缓存",
+      "description": "微信、飞书、WPS 等日常办公与即时通讯软件的网页离线包、日志与多媒体缓存",
+      "risk_level": "safe",
+      "rules": [
+        {
+          "id": "wechat_xlog",
+          "name": "微信 4.0 每日运行与诊断日志 (*.xlog)",
+          "path_pattern": "%APPDATA%\\Tencent\\xwechat\\log\\*.xlog",
+          "action": "delete_matching_files",
+          "default_checked": true
+        },
+        {
+          "id": "wechat_cache",
+          "name": "微信 4.0 月度离线多媒体与网页缓存",
+          "path_pattern": "%USERPROFILE%\\xwechat_files\\*\\cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "wechat_temp",
+          "name": "微信 4.0 临时预览图片与表情缓存",
+          "path_pattern": "%USERPROFILE%\\xwechat_files\\*\\temp",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "wechat_legacy_plugins",
+          "name": "微信 3.x 历史残存扩展与运行时 (XPlugin)",
+          "path_pattern": "%APPDATA%\\Tencent\\WeChat\\XPlugin",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "wechat_radium_cache",
+          "name": "微信 4.0 浏览器与小程序离线缓存",
+          "path_pattern": "%APPDATA%\\Tencent\\xwechat\\radium\\cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "wechat_legacy_cache",
+          "name": "微信 3.x 历史小程序与网页离线缓存",
+          "path_pattern": "%APPDATA%\\Tencent\\WeChat\\radium\\cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "lark_updates",
+          "name": "飞书客户端历史更新安装包",
+          "path_pattern": "%APPDATA%\\LarkShell\\update",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "lark_aha_cache",
+          "name": "飞书网页应用与微应用容器缓存",
+          "path_pattern": "%APPDATA%\\LarkShell\\aha",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "wps_cloud_cache",
+          "name": "WPS 离线模板与下载缓存",
+          "path_pattern": "%APPDATA%\\kingsoft\\wps\\download",
+          "action": "clear_content",
+          "default_checked": true
+        }
+      ]
+    },
+    {
+      "id": "docker_virtual",
+      "name": "Docker 桌面端与虚拟化专清",
+      "description": "Docker Desktop 桌面运行日志、构建插件缓存与历史虚拟机数据",
+      "risk_level": "safe",
+      "rules": [
+        {
+          "id": "docker_host_logs",
+          "name": "Docker Desktop 宿主机与虚拟机运行日志",
+          "path_pattern": "%LOCALAPPDATA%\\Docker\\log",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "docker_buildx_cache",
+          "name": "Docker Buildx 构建插件缓存",
+          "path_pattern": "%USERPROFILE%\\.docker\\buildx",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "docker_cli_plugins",
+          "name": "Docker CLI 临时与插件缓存",
+          "path_pattern": "%USERPROFILE%\\.docker\\cli-plugins",
+          "action": "clear_content",
+          "default_checked": false
+        }
+      ]
+    },
+    {
+      "id": "browser_cache",
+      "name": "主流浏览器深度专清",
+      "description": "Microsoft Edge、Google Chrome、360浏览器及 Firefox 产生的离线网络缓存与代码缓存",
+      "risk_level": "safe",
+      "rules": [
+        {
+          "id": "edge_web_cache",
+          "name": "Microsoft Edge 网页与离线媒体缓存",
+          "path_pattern": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\Default\\Cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "edge_code_cache",
+          "name": "Microsoft Edge JS/WASM 编译代码缓存",
+          "path_pattern": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\Default\\Code Cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "edge_crashpad",
+          "name": "Microsoft Edge 崩溃转储日志",
+          "path_pattern": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\Crashpad",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "chrome_web_cache",
+          "name": "Google Chrome 网页与音视频缓存",
+          "path_pattern": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Default\\Cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "chrome_code_cache",
+          "name": "Google Chrome 编译代码缓存",
+          "path_pattern": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Default\\Code Cache",
+          "action": "clear_content",
+          "default_checked": true
+        },
+        {
+          "id": "se360_cache",
+          "name": "360 安全浏览器网页缓存",
+          "path_pattern": "%APPDATA%\\360se6\\User Data\\Default\\Cache",
+          "action": "clear_content",
+          "default_checked": true
+        }
+      ]
+    },
+    {
+      "id": "dev_cache",
+      "name": "现代开发与包管理器缓存",
+      "description": "包含 JetBrains/Android Studio、Cursor/VS Code、Adobe 创意套件、npm/pip/cargo 等全局开发依赖包、构建与媒体缓存",
+      "risk_level": "safe",
+      "rules": [
+        {
+          "id": "unity_cache",
+          "name": "Unity 资源商店下载包及临时缓存",
+          "path_pattern": "%LOCALAPPDATA%\\Unity\\cache",
+          "action": "remove_dir",
+          "default_checked": true,
+          "tag": "runtime"
+        },
+        {
+          "id": "unity_editor_caches",
+          "name": "Unity Editor 运行时临时缓存",
+          "path_pattern": "%LOCALAPPDATA%\\Unity\\Caches",
+          "action": "remove_dir",
+          "default_checked": true,
+          "tag": "runtime"
+        },
+        {
+          "id": "bun_cache",
+          "name": "Bun 安装依赖包全局缓存",
+          "path_pattern": "%USERPROFILE%\\.bun\\install\\cache",
+          "action": "remove_dir",
+          "default_checked": true,
+          "tag": "pkg"
+        },
+        {
+          "id": "pnpm_cache",
+          "name": "pnpm 存储缓存",
+          "path_pattern": "%LOCALAPPDATA%\\pnpm",
+          "action": "remove_dir",
+          "default_checked": true,
+          "tag": "pkg"
+        },
+        {
+          "id": "uv_cache",
+          "name": "uv Python 包管理器离线缓存",
+          "path_pattern": "%LOCALAPPDATA%\\uv",
+          "action": "remove_dir",
+          "default_checked": true,
+          "tag": "pkg"
+        },
+        {
+          "id": "npm_cache",
+          "name": "npm 全局下载缓存",
+          "path_pattern": "%LOCALAPPDATA%\\npm-cache",
+          "action": "remove_dir",
+          "default_checked": true,
+          "tag": "pkg"
+        },
+        {
+          "id": "electron_cache",
+          "name": "Electron 二进制离线包缓存",
+          "path_pattern": "%LOCALAPPDATA%\\electron",
+          "action": "remove_dir",
+          "default_checked": true,
+          "tag": "runtime"
+        },
+        {
+          "id": "playwright_browsers",
+          "name": "Playwright 自动化测试浏览器内核",
+          "path_pattern": "%LOCALAPPDATA%\\ms-playwright",
+          "action": "remove_dir",
+          "default_checked": true,
+          "tag": "runtime"
+        },
+        {
+          "id": "puppeteer_browsers",
+          "name": "Puppeteer 无头浏览器内核缓存",
+          "path_pattern": "%USERPROFILE%\\.cache\\puppeteer",
+          "action": "remove_dir",
+          "default_checked": true,
+          "tag": "runtime"
+        },
+        {
+          "id": "gradle_caches",
+          "name": "Gradle 编译依赖包缓存",
+          "path_pattern": "%USERPROFILE%\\.gradle\\caches",
+          "action": "remove_dir",
+          "default_checked": false,
+          "tag": "runtime"
+        },
+        {
+          "id": "android_studio_caches",
+          "name": "Android Studio 编译与语法缓存",
+          "path_pattern": "%LOCALAPPDATA%\\\\Google\\\\AndroidStudio*\\\\caches",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "android_studio_logs",
+          "name": "Android Studio 运行与诊断日志",
+          "path_pattern": "%LOCALAPPDATA%\\\\Google\\\\AndroidStudio*\\\\log",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "android_studio_index",
+          "name": "Android Studio 历史符号索引",
+          "path_pattern": "%LOCALAPPDATA%\\\\Google\\\\AndroidStudio*\\\\index",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "jetbrains_caches",
+          "name": "JetBrains IDE (IDEA/PyCharm/WebStorm) 运行时缓存",
+          "path_pattern": "%LOCALAPPDATA%\\\\JetBrains\\\\*\\\\caches",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "jetbrains_logs",
+          "name": "JetBrains IDE 运行与诊断日志",
+          "path_pattern": "%LOCALAPPDATA%\\\\JetBrains\\\\*\\\\log",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "jetbrains_index",
+          "name": "JetBrains IDE 符号索引缓存",
+          "path_pattern": "%LOCALAPPDATA%\\\\JetBrains\\\\*\\\\index",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "cursor_cached_data",
+          "name": "Cursor V8 运行时代码缓存",
+          "path_pattern": "%APPDATA%\\\\Cursor\\\\CachedData",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "cursor_vsix_cache",
+          "name": "Cursor 离线插件安装包缓存 (*.vsix)",
+          "path_pattern": "%APPDATA%\\\\Cursor\\\\CachedExtensionVSIXs",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "cursor_logs",
+          "name": "Cursor 历史会话诊断日志",
+          "path_pattern": "%APPDATA%\\\\Cursor\\\\logs",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "cursor_web_storage",
+          "name": "Cursor 网页视图与模型交互存储",
+          "path_pattern": "%APPDATA%\\\\Cursor\\\\WebStorage",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "cursor_gpu_cache",
+          "name": "Cursor GPU 渲染管线缓存",
+          "path_pattern": "%APPDATA%\\\\Cursor\\\\GPUCache",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "vscode_cached_data",
+          "name": "VS Code V8 运行时代码缓存",
+          "path_pattern": "%APPDATA%\\\\Code\\\\CachedData",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "vscode_vsix_cache",
+          "name": "VS Code 离线插件安装包缓存 (*.vsix)",
+          "path_pattern": "%APPDATA%\\\\Code\\\\CachedExtensionVSIXs",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "vscode_logs",
+          "name": "VS Code 历史会话诊断日志",
+          "path_pattern": "%APPDATA%\\\\Code\\\\logs",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "ide"
+        },
+        {
+          "id": "pip_cache",
+          "name": "Pip Python 官方包下载缓存",
+          "path_pattern": "%LOCALAPPDATA%\\\\pip\\\\cache",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "pkg"
+        },
+        {
+          "id": "cargo_cache",
+          "name": "Cargo Rust crate 源码包下载缓存",
+          "path_pattern": "%USERPROFILE%\\\\.cargo\\\\registry\\\\cache",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "pkg"
+        },
+        {
+          "id": "gradle_daemon_logs",
+          "name": "Gradle 后台守护进程与诊断日志",
+          "path_pattern": "%USERPROFILE%\\\\.gradle\\\\daemon",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "runtime"
+        },
+        {
+          "id": "gradle_tmp",
+          "name": "Gradle 构建临时暂存文件",
+          "path_pattern": "%USERPROFILE%\\\\.gradle\\\\.tmp",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "runtime"
+        },
+        {
+          "id": "postman_partitions",
+          "name": "Postman 离线接口与微服务调试缓存",
+          "path_pattern": "%APPDATA%\\\\Postman\\\\Partitions",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "runtime"
+        },
+        {
+          "id": "adobe_media_cache",
+          "name": "Adobe Premiere/AE 媒体离线峰值文件 (*.ims / *.cfa)",
+          "path_pattern": "%APPDATA%\\\\Adobe\\\\Common\\\\Media Cache Files",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "creative"
+        },
+        {
+          "id": "adobe_media_db",
+          "name": "Adobe 媒体数据库索引缓存",
+          "path_pattern": "%APPDATA%\\\\Adobe\\\\Common\\\\Media Cache",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "creative"
+        },
+        {
+          "id": "adobe_crashdumps",
+          "name": "Adobe 创意套件崩溃转储文件",
+          "path_pattern": "%LOCALAPPDATA%\\\\Adobe\\\\CrashDumps",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "creative"
+        },
+        {
+          "id": "adobe_cef_cache",
+          "name": "Adobe Creative Cloud CEF 容器网页缓存",
+          "path_pattern": "%LOCALAPPDATA%\\\\Adobe\\\\*\\\\CEF\\\\User Data\\\\Cache",
+          "action": "clear_content",
+          "default_checked": true,
+          "tag": "creative"
+        }
+      ]
+    },
+    {
+      "id": "ai_tools",
+      "name": "AI 编程工具与历史冗余",
+      "description": "Cursor、Codex 等 AI 辅助工具产生的废弃副本、旧版本运行时与状态库",
+      "risk_level": "medium",
+      "rules": [
+        {
+          "id": "cursor_bak_files",
+          "name": "Cursor 历史备份副本 (*.bak_*)",
+          "path_pattern": "%APPDATA%\\Cursor\\User\\globalStorage\\state.vscdb.bak*",
+          "action": "delete_matching_files",
+          "default_checked": true
+        },
+        {
+          "id": "codex_old_runtimes",
+          "name": "Codex 历史废弃运行时沙箱 (*.previous*)",
+          "path_pattern": "%USERPROFILE%\\.cache\\codex-runtimes\\*previous*",
+          "action": "delete_matching_dirs",
+          "default_checked": true
+        },
+        {
+          "id": "codex_install_temp",
+          "name": "Codex 运行时临时安装目录 (*-install-*)",
+          "path_pattern": "%USERPROFILE%\\.cache\\codex-runtimes\\*install*",
+          "action": "delete_matching_dirs",
+          "default_checked": true
+        }
+      ]
+    },
+    {
+      "id": "sqlite_optimize",
+      "name": "数据库无损收缩 (VACUUM)",
+      "description": "释放数据库长期读写产生的空闲页碎片 (Freelist)，不丢失任何用户数据",
+      "risk_level": "safe",
+      "rules": [
+        {
+          "id": "cursor_db_vacuum",
+          "name": "Cursor 状态库 (state.vscdb) 碎片收缩",
+          "path_pattern": "%APPDATA%\\Cursor\\User\\globalStorage\\state.vscdb",
+          "action": "sqlite_vacuum",
+          "default_checked": true
+        }
+      ]
+    },
+    {
+      "id": "migration_targets",
+      "name": "大资产一键搬家 (Junction 虚拟化迁移)",
+      "description": "自动搬迁到 D 盘并在原位建立系统目录联接，C 盘立刻释放几十 GB 且软件完全无感照常运行",
+      "risk_level": "high_value_migrate",
+      "rules": [
+        {
+          "id": "android_avd_migrate",
+          "name": "Android 官方手机模拟器镜像目录",
+          "path_pattern": "%USERPROFILE%\\.android\\avd",
+          "action": "migrate_and_junction",
+          "default_checked": false
+        },
+        {
+          "id": "android_sdk_images",
+          "name": "Android SDK 离线系统底包镜像",
+          "path_pattern": "%LOCALAPPDATA%\\Android\\Sdk\\system-images",
+          "action": "migrate_and_junction",
+          "default_checked": false
+        },
+        {
+          "id": "wechat_data_migrate",
+          "name": "微信 4.0 用户聊天记录与全量数据",
+          "path_pattern": "%USERPROFILE%\\xwechat_files",
+          "action": "migrate_and_junction",
+          "default_checked": false
+        }
+      ]
+    },
+    {
+      "id": "custom",
+      "name": "用户自定义扩展",
+      "description": "用户在界面自定义配置的专属巡检清理规则",
+      "risk_level": "safe",
+      "rules": [
+        {
+          "id": "custom_1790954721",
+          "name": "测试构建临时包",
+          "path_pattern": "%TEMP%\\test_pack_*",
+          "action": "clean_dir",
+          "default_checked": true
+        }
+      ]
+    }
+  ]
+}
