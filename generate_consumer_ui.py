@@ -358,7 +358,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       display: flex;
       flex-direction: column;
       overflow-y: auto;
-      padding: 24px 28px;
+      padding: 24px 28px 64px 28px;
       gap: 20px;
     }
 
