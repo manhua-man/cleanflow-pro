@@ -1,6 +1,6 @@
 [package]
 name = "cleanflow"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 description = "High-performance Windows Disk Cleaner & Junction Migrator in Rust"
 authors = ["CleanFlow Team"]

@@ -93,6 +93,12 @@ pub fn start_migration_task(source_str: String, target_drive_str: String) -> Res
         bail!("目标目录已存在: {}，请先清理或重命名", dst.display());
     }
 
+    let locks = crate::process_lock::check_common_locking_processes(&src.to_string_lossy());
+    if !locks.is_empty() {
+        let procs = locks.iter().map(|p| p.name.clone()).collect::<Vec<_>>().join(", ");
+        bail!("检测到有进程正在占用待搬迁目录: {}。请先关闭这些应用后再启动搬迁，以防止数据冲突或写入中断。", procs);
+    }
+
     let job_id = format!("{}_{}", target_drive_str, std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis());
 
     let state_arc = get_job_state();
@@ -304,6 +310,12 @@ pub fn migrate_to_drive<P: AsRef<Path>>(source: P, target_drive_letter: &str) ->
     let dst = dest_base.join(&dest_dir_name);
     if dst.exists() {
         bail!("目标目录已存在: {}，请先清理或重命名", dst.display());
+    }
+
+    let locks = crate::process_lock::check_common_locking_processes(&src.to_string_lossy());
+    if !locks.is_empty() {
+        let procs = locks.iter().map(|p| p.name.clone()).collect::<Vec<_>>().join(", ");
+        bail!("检测到有进程正在占用待搬迁目录: {}。请先关闭这些应用后再启动搬迁，以防止数据冲突或写入中断。", procs);
     }
 
     let (src_size, _) = crate::scanner::calculate_path_stats(src);

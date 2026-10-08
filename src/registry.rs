@@ -399,6 +399,87 @@ pub fn clean_registry_issues(targets: &[RegistryIssue]) -> RegistryCleanResult {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RegistryBackupRecord {
+    pub file_name: String,
+    pub file_path: String,
+    pub created_at: String,
+    pub size_bytes: u64,
+    pub entry_count: usize,
+}
+
+pub fn list_registry_backups() -> Vec<RegistryBackupRecord> {
+    let backup_dir = std::env::temp_dir().join("cleanflow_registry_backups");
+    if !backup_dir.exists() {
+        return Vec::new();
+    }
+
+    let mut records = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(&backup_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("reg") {
+                let file_name = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+                let meta = std::fs::metadata(&path).ok();
+                let size_bytes = meta.as_ref().map(|m| m.len()).unwrap_or(0);
+
+                let created_at = meta
+                    .and_then(|m| m.created().or_else(|_| m.modified()).ok())
+                    .map(|time| {
+                        let dur = time.duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_secs();
+                        dur.to_string()
+                    })
+                    .unwrap_or_default();
+
+                let entry_count = std::fs::read_to_string(&path)
+                    .map(|content| {
+                        content.lines().filter(|l| l.trim().starts_with('[')).count()
+                    })
+                    .unwrap_or(0);
+
+                records.push(RegistryBackupRecord {
+                    file_name,
+                    file_path: path.to_string_lossy().to_string(),
+                    created_at,
+                    size_bytes,
+                    entry_count,
+                });
+            }
+        }
+    }
+
+    records.sort_by(|a, b| b.file_path.cmp(&a.file_path));
+    records
+}
+
+pub fn restore_registry_backup(backup_path: &str) -> anyhow::Result<()> {
+    let path = Path::new(backup_path);
+    if !path.exists() {
+        anyhow::bail!("指定的注册表备份文件不存在: {}", backup_path);
+    }
+
+    let output = Command::new("reg")
+        .args(["import", backup_path])
+        .output()?;
+
+    if output.status.success() {
+        Ok(())
+    } else {
+        let err = String::from_utf8_lossy(&output.stderr).to_string();
+        let out = String::from_utf8_lossy(&output.stdout).to_string();
+        let msg = if !err.trim().is_empty() { err } else { out };
+        anyhow::bail!("还原注册表快照失败: {}", msg.trim());
+    }
+}
+
+pub fn delete_registry_backup(backup_path: &str) -> anyhow::Result<()> {
+    let path = Path::new(backup_path);
+    if path.exists() {
+        std::fs::remove_file(path)?;
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -426,5 +507,25 @@ mod tests {
         let issues = scan_registry_issues();
         // Scanning executes without panic and returns vector
         println!("Concurrent registry scan completed, found {} issues", issues.len());
+    }
+
+    #[test]
+    fn test_registry_backup_lifecycle() {
+        let backup_dir = std::env::temp_dir().join("cleanflow_registry_backups");
+        let _ = std::fs::create_dir_all(&backup_dir);
+        let test_file = backup_dir.join("test_cleanflow_backup_mock.reg");
+        let sample_reg = "Windows Registry Editor Version 5.00\r\n\r\n[HKEY_CURRENT_USER\\Software\\TestMock]\r\n\"Val\"=\"1\"\r\n";
+        let _ = std::fs::write(&test_file, sample_reg);
+
+        let backups = list_registry_backups();
+        assert!(backups.iter().any(|b| b.file_name == "test_cleanflow_backup_mock.reg"));
+
+        let target = backups.into_iter().find(|b| b.file_name == "test_cleanflow_backup_mock.reg").unwrap();
+        assert_eq!(target.entry_count, 1);
+        assert!(target.size_bytes > 0);
+
+        let del_res = delete_registry_backup(&test_file.to_string_lossy());
+        assert!(del_res.is_ok());
+        assert!(!test_file.exists());
     }
 }

@@ -1542,7 +1542,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         </svg>
       </div>
       <span class="app-brand-title">CleanFlow Pro</span>
-      <span class="app-version-badge">v0.1.1</span>
+      <span class="app-version-badge">v0.2.0</span>
     </div>
 
     <!-- Drive Switcher Pills -->
@@ -2018,6 +2018,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
                 清除已卸载程序残留的 MUICache 冗余、失效 OpenWith 右键打开方式及文件丢失的失效自启项：
               </div>
               <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" onclick="openRegistryBackupsModal()">
+                  <span class="icon"><svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></span>
+                  <span>快照时光机 (<span id="regBackupCountBadge">0</span>)</span>
+                </button>
                 <button class="btn btn-secondary" onclick="loadRegistryIssues()">
                   <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
                   <span>排查死链</span>
@@ -2130,6 +2134,20 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               正在检测系统活跃符号链接...
             </div>
           </div>
+
+          <!-- Registry Backup Snapshot Timeline in Tools Workspace -->
+          <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 16px; margin-top: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size: 13px; font-weight: 600; color: #fff;">注册表安全快照时光机 (.reg)</span>
+                <span class="badge-pill badge-safe" id="toolsRegistryBackupCount">0 个快照</span>
+              </div>
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="loadRegistryBackups()">刷新快照</button>
+            </div>
+            <div id="toolsRegistryBackupList" style="font-size: 11.5px; color: var(--text-secondary);">
+              正在检索注册表安全快照历史...
+            </div>
+          </div>
         </section>
 
       </div>
@@ -2211,7 +2229,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       <span>|</span>
       <span id="sbSelection">已选 0 项 (0 B)</span>
       <span>|</span>
-      <span>Rust 原生内核 v0.1.1 · <span style="color:var(--status-safe);">零后台常驻</span></span>
+      <span>Rust 原生内核 v0.2.0 · <span style="color:var(--status-safe);">零后台常驻</span></span>
     </div>
   </footer>
 
@@ -2247,6 +2265,98 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
         <button class="btn btn-secondary" onclick="closeConfirmModal()">取消</button>
         <button class="btn btn-primary" id="confirmModalOkBtn" onclick="onConfirmModalOk()">确认继续</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registry Backups Timeline Modal -->
+  <div class="fluent-modal-overlay" id="registryBackupsModal">
+    <div class="fluent-modal" style="width: 680px; max-width: 90vw;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:16px; font-weight:600; color:#fff;">注册表安全快照时光机</span>
+          <span class="badge-pill badge-safe">原子回滚保障</span>
+        </div>
+        <button class="inspector-close-btn" onclick="closeRegistryBackupsModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      <div style="font-size:12px; color:var(--text-secondary); margin-bottom:14px;">
+        每次清理死链前均自动生成标准 Windows .reg 格式快照。如遇软件异常，随时可一键还原至修改前状态。
+      </div>
+      <div id="modalRegistryBackupList" style="max-height: 380px; overflow-y: auto; display:flex; flex-direction:column; gap:8px;">
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; border-top:1px solid var(--stroke-divider); padding-top:12px;">
+        <span style="font-size:11.5px; color:var(--text-tertiary);">存放位置: %TEMP%\cleanflow_registry_backups</span>
+        <button class="btn btn-secondary" onclick="closeRegistryBackupsModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Migration Wizard Modal -->
+  <div class="fluent-modal-overlay" id="migrationWizardModal">
+    <div class="fluent-modal" style="width: 720px; max-width: 92vw;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:16px; font-weight:600; color:#fff;">目录无损跨盘搬家向导 (NTFS Junction)</span>
+          <span class="badge-pill badge-openwith">系统透明软链接</span>
+        </div>
+        <button class="inspector-close-btn" onclick="closeMigrationWizardModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      <div style="font-size:12px; color:var(--text-secondary); line-height:1.5; margin-bottom:14px;">
+        通过底层 NTFS 虚拟化将占用 C 盘的大型资产完整搬移到机械盘或从盘（如 D:/E: 盘），原位建立硬核透明符号链接，所有软件无感运行。
+      </div>
+
+      <!-- Quick AI & Developer Presets (Pillar 1 Integration) -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12px; font-weight:600; color:#fff; margin-bottom:6px;">推荐高价值搬迁预设 (点击一键填入)</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;" id="migrationPresetTags">
+        </div>
+      </div>
+
+      <!-- Source Directory Input & Target Drive -->
+      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:12px; margin-bottom:14px;">
+        <div>
+          <label style="font-size:11.5px; color:var(--text-secondary); display:block; margin-bottom:4px;">源目录绝对路径 (C: 盘)</label>
+          <div style="display:flex; gap:6px;">
+            <input type="text" id="customMigrateSource" placeholder="例如: C:\Users\EDY\.ollama\models" style="flex:1; background:var(--fill-subtle); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:6px 10px; color:#fff; font-size:12px; outline:none; font-family:var(--font-mono);" oninput="onMigrateSourceInput()">
+            <button class="btn btn-secondary" style="padding:4px 10px; font-size:11px;" onclick="analyzeCustomMigrationPath()">检测体积</button>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:11.5px; color:var(--text-secondary); display:block; margin-bottom:4px;">搬迁目标驱动器</label>
+          <select id="customMigrateTargetDrive" style="width:100%; background:var(--fill-subtle); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:6px 10px; color:#fff; font-size:12px; outline:none;">
+          </select>
+        </div>
+      </div>
+
+      <!-- Mutual-Exclusion Process Inspector & Path Status -->
+      <div id="migratePathInspectionCard" style="background:var(--fill-subtle); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:12px; margin-bottom:14px; font-size:12px;">
+        <div style="color:var(--text-tertiary);">请输入待搬迁路径或点击上方预设开始健康检测...</div>
+      </div>
+
+      <!-- Migration Action & Progress Indicator -->
+      <div id="migrationProgressContainer" style="display:none; margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-secondary); margin-bottom:4px;">
+          <span id="migrationStatusLabel">正在极速多线程无缓存拷贝...</span>
+          <span id="migrationPercentLabel" style="color:#60cdff; font-weight:600;">0%</span>
+        </div>
+        <div style="height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
+          <div id="migrationProgressBar" style="height:100%; width:0%; background:linear-gradient(90deg, #0078d4, #00f2fe); transition:width 200ms ease;"></div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--stroke-divider); padding-top:14px;">
+        <span style="font-size:11.5px; color:var(--text-tertiary);">原子事务回滚保护 · 支持随时无损还原</span>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-secondary" onclick="closeMigrationWizardModal()">取消</button>
+          <button class="btn btn-primary" id="startMigrationBtn" onclick="executeCustomMigration()">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z"/></svg></span>
+            <span>开始无损搬迁</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -2856,7 +2966,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       const report = {
         generated_at: new Date().toISOString(),
         device: 'Windows PC (x86_64)',
-        engine_version: 'CleanFlow Pro v0.1.1',
+        engine_version: 'CleanFlow Pro v0.2.0',
         summary: {
           total_reclaimable_bytes: state.scanResult ? state.scanResult.total_size_bytes : 0,
           total_reclaimable_formatted: formatBytes(state.scanResult ? state.scanResult.total_size_bytes : 0),
@@ -4196,13 +4306,122 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       }
     }
 
+    function escapeJsString(s) {
+      return (s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function formatUnixTimestamp(ts) {
+      if (!ts) return '-';
+      const num = parseInt(ts, 10);
+      if (isNaN(num)) return ts;
+      const d = new Date(num * 1000);
+      return d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0') + ' ' +
+        String(d.getHours()).padStart(2, '0') + ':' +
+        String(d.getMinutes()).padStart(2, '0') + ':' +
+        String(d.getSeconds()).padStart(2, '0');
+    }
+
+    // High-Value Migration Presets (Pillar 1)
+    const MIGRATION_PRESETS = [
+      { name: 'Ollama 本地模型', path: 'C:\\Users\\EDY\\.ollama\\models', note: 'AI 核心资产' },
+      { name: 'HuggingFace 权重', path: 'C:\\Users\\EDY\\.cache\\huggingface\\hub', note: 'AI 缓存' },
+      { name: 'PyTorch Hub 模型', path: 'C:\\Users\\EDY\\.cache\\torch\\hub', note: 'AI 权重' },
+      { name: 'Steam 游戏库', path: 'C:\\Program Files (x86)\\Steam\\steamapps\\common', note: '大型游戏' },
+      { name: 'Unity Hub 编辑器', path: 'C:\\Program Files\\Unity\\Hub\\Editor', note: '游戏引擎' },
+      { name: 'VS 安装包缓存', path: 'C:\\ProgramData\\Microsoft\\VisualStudio\\Packages', note: '开发套件' },
+      { name: '微信聊天资产', path: 'C:\\Users\\EDY\\Documents\\WeChat Files', note: '聊天附件' },
+      { name: 'Android SDK', path: 'C:\\Users\\EDY\\AppData\\Local\\Android\\Sdk', note: '移动端开发' }
+    ];
+
+    let migrationPollTimer = null;
+
+    function openMigrationWizardModal() {
+      const modal = document.getElementById('migrationWizardModal');
+      if (!modal) return;
+
+      // Populate Target Drive Options from available disks
+      const driveSelect = document.getElementById('customMigrateTargetDrive');
+      if (driveSelect) {
+        driveSelect.innerHTML = '';
+        const nonCDrives = (state.disks || []).filter(d => d.letter.toUpperCase() !== 'C');
+        const candidateDrives = nonCDrives.length > 0 ? nonCDrives : (state.disks || []);
+        candidateDrives.forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.letter;
+          opt.textContent = `${d.letter}: 驱动器 (剩余 ${formatBytes(d.free_bytes)} / 共 ${formatBytes(d.total_bytes)})`;
+          driveSelect.appendChild(opt);
+        });
+      }
+
+      // Render preset tags
+      renderMigrationPresets();
+
+      // Reset fields
+      const srcInput = document.getElementById('customMigrateSource');
+      if (srcInput) srcInput.value = '';
+      const card = document.getElementById('migratePathInspectionCard');
+      if (card) card.innerHTML = '<div style="color:var(--text-tertiary);">请输入待搬迁路径或点击上方预设开始健康检测...</div>';
+      const progressBox = document.getElementById('migrationProgressContainer');
+      if (progressBox) progressBox.style.display = 'none';
+      const startBtn = document.getElementById('startMigrationBtn');
+      if (startBtn) startBtn.disabled = false;
+
+      modal.classList.add('active');
+    }
+
+    function closeMigrationWizardModal() {
+      const modal = document.getElementById('migrationWizardModal');
+      if (modal) modal.classList.remove('active');
+      if (migrationPollTimer) {
+        clearInterval(migrationPollTimer);
+        migrationPollTimer = null;
+      }
+    }
+
+    function renderMigrationPresets() {
+      const container = document.getElementById('migrationPresetTags');
+      if (!container) return;
+      container.innerHTML = '';
+      MIGRATION_PRESETS.forEach(p => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-secondary';
+        btn.style.padding = '3px 8px';
+        btn.style.fontSize = '11px';
+        btn.innerHTML = `<span style="font-weight:600; color:#fff;">${escapeHtml(p.name)}</span> <span style="color:var(--text-tertiary); font-size:10px;">(${escapeHtml(p.note)})</span>`;
+        btn.onclick = () => selectMigrationPreset(p.path);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectMigrationPreset(presetPath) {
+      const srcInput = document.getElementById('customMigrateSource');
+      if (srcInput) {
+        srcInput.value = presetPath;
+        analyzeCustomMigrationPath();
+      }
+    }
+
+    let migrateInputDebounce = null;
+    function onMigrateSourceInput() {
+      if (migrateInputDebounce) clearTimeout(migrateInputDebounce);
+      migrateInputDebounce = setTimeout(() => {
+        analyzeCustomMigrationPath();
+      }, 500);
+    }
+
     async function analyzeCustomMigrationPath() {
-      const src = document.getElementById('customMigrateSource').value.trim();
+      const src = (document.getElementById('customMigrateSource')?.value || '').trim();
+      const card = document.getElementById('migratePathInspectionCard');
       if (!src) {
-        showToast('请输入需要分析的目录路径');
+        if (card) card.innerHTML = '<div style="color:var(--text-tertiary);">请输入待搬迁路径或点击上方预设开始健康检测...</div>';
         return;
       }
-      showToast('正在分析该路径体积与排查占用锁...');
+
+      if (card) card.innerHTML = '<div style="color:var(--text-secondary);">正在对目标目录执行互斥进程扫描与体积预检...</div>';
+
       try {
         const res = await fetch('/api/check-path', {
           method: 'POST',
@@ -4210,51 +4429,309 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           body: JSON.stringify({ path: src })
         });
         const data = await res.json();
-        if (data.exists) {
-          inspectItem({
-            name: src.split('\\').pop() || '目录资产',
-            path: src,
-            size_bytes: data.size_bytes,
-            file_count: data.file_count,
-            category: '待搬迁目录'
-          });
-          showToast(`已分析: 体积 ${formatBytes(data.size_bytes)}，包含 ${data.file_count} 个文件`);
+        if (!data.exists) {
+          if (card) card.innerHTML = `
+            <div style="background:rgba(255,255,255,0.04); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:10px; color:var(--text-tertiary);">
+              <div style="font-weight:600; color:#fff; margin-bottom:2px;">未检测到物理目录</div>
+              <div>指定路径当前在系统中不存在或尚未生成缓存。若应用刚安装，可在首次运行后再执行搬迁。</div>
+            </div>
+          `;
+          return;
+        }
+
+        if (data.is_junction) {
+          if (card) card.innerHTML = `
+            <div style="background:rgba(0,120,212,0.12); border:1px solid rgba(0,120,212,0.3); border-radius:var(--radius-sm); padding:10px; color:#60cdff;">
+              <div style="font-weight:600; margin-bottom:2px;">已是系统虚拟联接 (Junction)</div>
+              <div>该目录已经成功建立了符号重定向，物理数据已存储在从盘，无需重复迁移。</div>
+            </div>
+          `;
+          return;
+        }
+
+        const locks = data.locking_processes || [];
+        if (locks.length > 0) {
+          let lockButtons = locks.map(p => `
+            <span class="tag-pill" style="background:rgba(255,255,255,0.08); color:#fff; display:inline-flex; align-items:center; gap:6px; padding:3px 8px; margin:2px;">
+              <span>${escapeHtml(p.name)} (PID: ${p.pid})</span>
+              <button class="btn btn-danger" style="padding:1px 6px; font-size:10px;" onclick="killLockingProcess('${escapeJsString(p.name)}')">结束</button>
+            </span>
+          `).join('');
+
+          if (card) card.innerHTML = `
+            <div style="background:rgba(255,153,164,0.1); border:1px solid rgba(255,153,164,0.3); border-radius:var(--radius-sm); padding:10px; color:#ff99a4;">
+              <div style="font-weight:600; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                <span class="status-dot-pulse" style="background:#ff99a4;"></span>
+                <span>互斥进程告警: 检测到 ${locks.length} 个运行中的程序正在占用此目录</span>
+              </div>
+              <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:8px;">
+                为保障数据完整性并防止写入中断，搬迁前必须退出占用应用。您可以手动退出或点击下方快捷结束：
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:4px;">${lockButtons}</div>
+            </div>
+          `;
         } else {
-          showToast('分析失败: ' + (data.error || '路径不存在'));
+          if (card) card.innerHTML = `
+            <div style="background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.25); border-radius:var(--radius-sm); padding:10px; color:#22c55e;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:6px; font-weight:600;">
+                  <span class="icon" style="width:14px; height:14px;"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                  <span>预检互斥通过：无活跃进程独占此目录</span>
+                </div>
+                <span class="tag-pill tag-blue" style="font-size:11px;">${formatBytes(data.size_bytes)} (${data.file_count} 个文件)</span>
+              </div>
+              <div style="font-size:11.5px; color:var(--text-secondary); margin-top:4px;">
+                资产已就绪，搬迁过程中支持随时安全原子回滚。
+              </div>
+            </div>
+          `;
         }
       } catch (e) {
-        showToast('请求异常: ' + e.message);
+        if (card) card.innerHTML = `<div style="color:var(--status-danger);">预检异常: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    async function killLockingProcess(procName) {
+      try {
+        const res = await fetch('/api/kill-process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: procName })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`已结束占用进程: ${procName}`);
+          setTimeout(() => analyzeCustomMigrationPath(), 600);
+        } else {
+          showToast(`结束进程失败: ${data.error || '权限不足'}`);
+        }
+      } catch (e) {
+        showToast(`操作失败: ${e.message}`);
       }
     }
 
     function executeCustomMigration() {
-      const src = document.getElementById('customMigrateSource').value.trim();
-      const targetDrive = document.getElementById('customMigrateTargetDrive').value;
+      const src = (document.getElementById('customMigrateSource')?.value || '').trim();
+      const targetDrive = document.getElementById('customMigrateTargetDrive')?.value;
       if (!src) {
         showToast('请填写需要搬迁的源目录绝对路径');
         return;
       }
-      openConfirmModal('Junction 虚拟化搬家确认', `即将把目录 <br><b>${escapeHtml(src)}</b><br> 完整搬迁至 <b>${targetDrive}</b> 驱动器，并在原位自动创建 NTFS Junction。<br><br>所有软件、环境变量均不受影响，完全无感照常运行。`, async () => {
+      if (!targetDrive) {
+        showToast('请选择目标驱动器');
+        return;
+      }
+
+      openConfirmModal('Junction 虚拟化搬家确认', `即将把目录 <br><b>${escapeHtml(src)}</b><br> 完整搬迁至 <b>${targetDrive}: 盘</b>，并在原位自动创建 NTFS Junction。<br><br>所有软件、快捷方式均不受影响，完全无感照常运行。`, async () => {
         closeConfirmModal();
-        showToast('正在执行跨驱动器搬家与虚拟化...');
+
+        const progressContainer = document.getElementById('migrationProgressContainer');
+        const progressBar = document.getElementById('migrationProgressBar');
+        const percentLabel = document.getElementById('migrationPercentLabel');
+        const statusLabel = document.getElementById('migrationStatusLabel');
+        const startBtn = document.getElementById('startMigrationBtn');
+
+        if (progressContainer) progressContainer.style.display = 'block';
+        if (startBtn) startBtn.disabled = true;
+        if (progressBar) progressBar.style.width = '2%';
+        if (percentLabel) percentLabel.innerText = '准备中...';
+        if (statusLabel) statusLabel.innerText = '正在初始化底层传输与建立事务快照...';
+
         try {
-          const res = await fetch('/api/migrate', {
+          const res = await fetch('/api/migrate-start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ source_path: src, target_drive: targetDrive })
           });
           const data = await res.json();
+          if (!data.success) {
+            showToast('启动搬迁任务失败: ' + (data.error || '未知错误'));
+            if (progressContainer) progressContainer.style.display = 'none';
+            if (startBtn) startBtn.disabled = false;
+            return;
+          }
+
+          // Polling migration status
+          migrationPollTimer = setInterval(async () => {
+            try {
+              const statusRes = await fetch('/api/migrate-status');
+              const status = await statusRes.json();
+
+              if (progressBar) progressBar.style.width = `${Math.min(100, Math.max(0, status.percent))}%`;
+              if (percentLabel) percentLabel.innerText = `${status.percent.toFixed(1)}%`;
+              if (statusLabel) statusLabel.innerText = status.current_file || '正在传输...';
+
+              if (status.state === 'COMPLETED') {
+                clearInterval(migrationPollTimer);
+                migrationPollTimer = null;
+                if (progressBar) progressBar.style.width = '100%';
+                if (percentLabel) percentLabel.innerText = '100%';
+                if (statusLabel) statusLabel.innerText = '搬迁完成! 已建立透明符号联接';
+
+                showToast(`搬迁成功！已在原位建立 NTFS Junction`);
+                setTimeout(() => {
+                  closeMigrationWizardModal();
+                  loadActiveJunctions();
+                  refreshDisks();
+                  runScan();
+                }, 1200);
+              } else if (status.state === 'FAILED') {
+                clearInterval(migrationPollTimer);
+                migrationPollTimer = null;
+                showToast(`搬迁失败: ${status.error_msg || '未知错误'}`);
+                if (statusLabel) statusLabel.innerText = `失败: ${status.error_msg || '未知错误'}`;
+                if (startBtn) startBtn.disabled = false;
+              }
+            } catch (e) {
+              console.error('获取搬迁进度异常', e);
+            }
+          }, 600);
+        } catch (e) {
+          showToast('搬迁启动请求异常: ' + e.message);
+          if (progressContainer) progressContainer.style.display = 'none';
+          if (startBtn) startBtn.disabled = false;
+        }
+      });
+    }
+
+    // ==========================================
+    // Registry Backup Snapshot Timeline & Restore (Pillar 2)
+    // ==========================================
+    state.registryBackups = [];
+
+    async function loadRegistryBackups() {
+      try {
+        const res = await fetch('/api/registry/backups');
+        state.registryBackups = await res.json();
+        renderRegistryBackupsUI();
+      } catch (e) {
+        console.error('加载注册表备份失败', e);
+      }
+    }
+
+    function renderRegistryBackupsUI() {
+      const count = state.registryBackups.length;
+      const countLabel = `${count} 个快照`;
+
+      const countBadge = document.getElementById('toolsRegistryBackupCount');
+      if (countBadge) countBadge.innerText = countLabel;
+
+      const subviewBadge = document.getElementById('regBackupCountBadge');
+      if (subviewBadge) subviewBadge.innerText = count;
+
+      // Render Tools Workspace List
+      const toolsContainer = document.getElementById('toolsRegistryBackupList');
+      if (toolsContainer) {
+        if (count === 0) {
+          toolsContainer.innerHTML = '<div style="padding: 12px 0; color: var(--text-tertiary); text-align: center;">尚未生成任何注册表安全快照（执行死链修复时将自动创建）</div>';
+        } else {
+          let html = '<table class="data-grid"><thead><tr><th>快照文件名</th><th>记录时间</th><th style="width:100px; text-align:center;">备份键数</th><th style="width:100px; text-align:right;">文件大小</th><th style="width:160px; text-align:center;">操作</th></tr></thead><tbody>';
+          state.registryBackups.forEach(b => {
+            const timeStr = formatUnixTimestamp(b.created_at);
+            const sizeStr = formatBytes(b.size_bytes);
+            html += `
+              <tr>
+                <td><span class="path-text" title="${escapeHtml(b.file_path)}">${escapeHtml(b.file_name)}</span></td>
+                <td style="color: var(--text-secondary); font-family: var(--font-mono); font-size:11px;">${escapeHtml(timeStr)}</td>
+                <td style="text-align: center;"><span class="tag-pill tag-blue" style="font-size:10.5px;">${b.entry_count} 项</span></td>
+                <td style="text-align: right; font-family: var(--font-mono); color: var(--text-secondary);">${sizeStr}</td>
+                <td style="text-align: center; display:flex; gap:4px; justify-content:center;">
+                  <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="restoreRegistryBackup('${escapeJsString(b.file_path)}')">还原</button>
+                  <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapeJsString(b.file_path)}')">定位</button>
+                  <button class="btn btn-danger" style="padding: 2px 8px; font-size: 11px;" onclick="deleteRegistryBackup('${escapeJsString(b.file_path)}')">删除</button>
+                </td>
+              </tr>
+            `;
+          });
+          html += '</tbody></table>';
+          toolsContainer.innerHTML = html;
+        }
+      }
+
+      // Render Modal List
+      const modalContainer = document.getElementById('modalRegistryBackupList');
+      if (modalContainer) {
+        if (count === 0) {
+          modalContainer.innerHTML = '<div style="padding: 30px; color: var(--text-tertiary); text-align: center;">当前没有注册表历史快照</div>';
+        } else {
+          let html = '';
+          state.registryBackups.forEach(b => {
+            const timeStr = formatUnixTimestamp(b.created_at);
+            const sizeStr = formatBytes(b.size_bytes);
+            html += `
+              <div style="background:var(--fill-subtle); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; flex-direction:column; gap:3px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-weight:600; font-size:12.5px; color:#fff;">${escapeHtml(b.file_name)}</span>
+                    <span class="tag-pill tag-blue" style="font-size:10.5px;">${b.entry_count} 处键值</span>
+                    <span style="font-size:11px; color:var(--text-tertiary); font-family:var(--font-mono);">${sizeStr}</span>
+                  </div>
+                  <div style="font-size:11px; color:var(--text-tertiary); font-family:var(--font-mono);">${escapeHtml(timeStr)} · ${escapeHtml(b.file_path)}</div>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn btn-primary" style="padding:3px 10px; font-size:11px;" onclick="restoreRegistryBackup('${escapeJsString(b.file_path)}')">一键还原</button>
+                  <button class="btn btn-secondary" style="padding:3px 8px; font-size:11px;" onclick="revealInExplorer('${escapeJsString(b.file_path)}')">定位</button>
+                  <button class="btn btn-danger" style="padding:3px 8px; font-size:11px;" onclick="deleteRegistryBackup('${escapeJsString(b.file_path)}')">删除</button>
+                </div>
+              </div>
+            `;
+          });
+          modalContainer.innerHTML = html;
+        }
+      }
+    }
+
+    function openRegistryBackupsModal() {
+      loadRegistryBackups();
+      document.getElementById('registryBackupsModal')?.classList.add('active');
+    }
+
+    function closeRegistryBackupsModal() {
+      document.getElementById('registryBackupsModal')?.classList.remove('active');
+    }
+
+    function restoreRegistryBackup(path) {
+      openConfirmModal('一键还原注册表快照', `确定要将该注册表快照完整还原回系统吗？<br><br><span style="font-family:var(--font-mono); font-size:11px; color:#60cdff;">${escapeHtml(path)}</span><br><br>系统将通过 Windows reg 原生命令行将之前备份的键值原子恢复。`, async () => {
+        closeConfirmModal();
+        showToast('正在还原注册表快照...');
+        try {
+          const res = await fetch('/api/registry/backups/restore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ backup_path: path })
+          });
+          const data = await res.json();
           if (data.success) {
-            showToast(`搬迁成功！已在原位建立 Junction，释放 ${formatBytes(data.bytes_freed || 0)}`);
-            document.getElementById('customMigrateSource').value = '';
-            loadActiveJunctions();
-            refreshDisks();
-            runScan();
+            showToast('注册表快照已成功还原！');
+            loadRegistryIssues();
+            loadRegistryBackups();
           } else {
-            showToast('搬迁失败: ' + (data.error || '未知错误'));
+            showToast('还原失败: ' + (data.error || '未知错误'));
           }
         } catch (e) {
-          showToast('搬迁异常: ' + e.message);
+          showToast('还原异常: ' + e.message);
+        }
+      });
+    }
+
+    function deleteRegistryBackup(path) {
+      openConfirmModal('删除注册表快照', `确定要彻底删除该快照文件吗？删除后将无法基于此快照回滚。`, async () => {
+        closeConfirmModal();
+        try {
+          const res = await fetch('/api/registry/backups/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ backup_path: path })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast('快照已删除');
+            loadRegistryBackups();
+          } else {
+            showToast('删除失败: ' + (data.error || '未知错误'));
+          }
+        } catch (e) {
+          showToast('删除异常: ' + e.message);
         }
       });
     }
@@ -4503,6 +4980,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       loadSystemMaintenance();
       loadInstalledApps();
       loadGiantFiles();
+      loadRegistryBackups();
     });
   </script>
 </body>

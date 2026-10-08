@@ -463,6 +463,66 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                         send_json_response(request, err_json);
                     }
                 }
+            } else if url == "/api/registry/backups" && method == Method::Get {
+                let records = crate::registry::list_registry_backups();
+                let json = serde_json::to_string(&records).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/registry/backups/restore" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct RegistryBackupActionReq {
+                    backup_path: String,
+                }
+
+                match serde_json::from_str::<RegistryBackupActionReq>(&content) {
+                    Ok(req) => match crate::registry::restore_registry_backup(&req.backup_path) {
+                        Ok(()) => {
+                            send_json_response(request, r#"{"success": true, "message": "注册表快照还原成功"}"#.to_string());
+                        }
+                        Err(e) => {
+                            let err_json = serde_json::json!({
+                                "success": false,
+                                "error": e.to_string(),
+                            })
+                            .to_string();
+                            send_json_response(request, err_json);
+                        }
+                    },
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
+            } else if url == "/api/registry/backups/delete" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct RegistryBackupActionReq {
+                    backup_path: String,
+                }
+
+                match serde_json::from_str::<RegistryBackupActionReq>(&content) {
+                    Ok(req) => match crate::registry::delete_registry_backup(&req.backup_path) {
+                        Ok(()) => {
+                            send_json_response(request, r#"{"success": true}"#.to_string());
+                        }
+                        Err(e) => {
+                            let err_json = serde_json::json!({
+                                "success": false,
+                                "error": e.to_string(),
+                            })
+                            .to_string();
+                            send_json_response(request, err_json);
+                        }
+                    },
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
             } else if url == "/api/docker/status" && method == Method::Get {
                 let status = crate::docker::get_docker_status();
                 let json = serde_json::to_string(&status).unwrap_or_else(|_| "{}".to_string());
