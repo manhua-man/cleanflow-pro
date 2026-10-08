@@ -500,6 +500,178 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                         send_json_response(request, res_json);
                     }
                 }
+            } else if url == "/api/startup/list" && method == Method::Get {
+                let items = crate::startup::get_startup_items();
+                let json = serde_json::to_string(&items).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/startup/remove" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct StartupRemoveReq {
+                    source: String,
+                    name: String,
+                    location: String,
+                }
+
+                match serde_json::from_str::<StartupRemoveReq>(&content) {
+                    Ok(req) => match crate::startup::remove_startup_item(&req.source, &req.name, &req.location) {
+                        Ok(_) => {
+                            send_json_response(request, r#"{"success": true}"#.to_string());
+                        }
+                        Err(e) => {
+                            let err_json = serde_json::json!({ "success": false, "error": e }).to_string();
+                            send_json_response(request, err_json);
+                        }
+                    },
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
+            } else if url == "/api/apps/list" && method == Method::Get {
+                let apps = crate::apps::get_installed_apps();
+                let json = serde_json::to_string(&apps).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/apps/leftovers" && method == Method::Get {
+                let leftovers = crate::apps::scan_app_leftovers();
+                let json = serde_json::to_string(&leftovers).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/apps/uninstall" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct AppUninstallReq {
+                    uninstall_string: String,
+                }
+
+                match serde_json::from_str::<AppUninstallReq>(&content) {
+                    Ok(req) => match crate::apps::launch_uninstaller(&req.uninstall_string) {
+                        Ok(_) => {
+                            send_json_response(request, r#"{"success": true}"#.to_string());
+                        }
+                        Err(e) => {
+                            let err_json = serde_json::json!({ "success": false, "error": e }).to_string();
+                            send_json_response(request, err_json);
+                        }
+                    },
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
+            } else if url == "/api/system/maintenance" && method == Method::Get {
+                let status = crate::system_tools::get_system_maintenance_status();
+                let json = serde_json::to_string(&status).unwrap_or_else(|_| "{}".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/system/recycle-bin/empty" && method == Method::Post {
+                match crate::system_tools::empty_recycle_bin() {
+                    Ok(bytes) => {
+                        let res_json = serde_json::json!({ "success": true, "bytes_freed": bytes }).to_string();
+                        send_json_response(request, res_json);
+                    }
+                    Err(e) => {
+                        let err_json = serde_json::json!({ "success": false, "error": e }).to_string();
+                        send_json_response(request, err_json);
+                    }
+                }
+            } else if url == "/api/system/flush-dns" && method == Method::Post {
+                match crate::system_tools::flush_dns() {
+                    Ok(msg) => {
+                        let res_json = serde_json::json!({ "success": true, "message": msg }).to_string();
+                        send_json_response(request, res_json);
+                    }
+                    Err(e) => {
+                        let err_json = serde_json::json!({ "success": false, "error": e }).to_string();
+                        send_json_response(request, err_json);
+                    }
+                }
+            } else if url == "/api/system/empty-dirs/scan" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct EmptyDirsScanReq {
+                    target_dir: String,
+                }
+
+                let target = match serde_json::from_str::<EmptyDirsScanReq>(&content) {
+                    Ok(req) => req.target_dir,
+                    Err(_) => {
+                        let temp = std::env::var("LOCALAPPDATA").unwrap_or_default() + "\\Temp";
+                        temp
+                    }
+                };
+
+                let empty_dirs = crate::system_tools::scan_empty_directories(&target);
+                let json = serde_json::to_string(&empty_dirs).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/system/empty-dirs/clean" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct EmptyDirsCleanReq {
+                    paths: Vec<String>,
+                }
+
+                match serde_json::from_str::<EmptyDirsCleanReq>(&content) {
+                    Ok(req) => {
+                        let (cleaned, errs) = crate::system_tools::clean_empty_directories(&req.paths);
+                        let res_json = serde_json::json!({ "success": true, "cleaned_count": cleaned, "errors": errs }).to_string();
+                        send_json_response(request, res_json);
+                    }
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
+            } else if url == "/api/duplicates/scan" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct DupScanReq {
+                    target_dir: String,
+                    #[serde(default = "default_min_sz")]
+                    min_size_mb: u64,
+                }
+                fn default_min_sz() -> u64 { 1 }
+
+                match serde_json::from_str::<DupScanReq>(&content) {
+                    Ok(req) => {
+                        let min_bytes = req.min_size_mb * 1024 * 1024;
+                        let groups = crate::duplicates::scan_duplicate_files(&req.target_dir, min_bytes);
+                        let json = serde_json::to_string(&groups).unwrap_or_else(|_| "[]".to_string());
+                        send_json_response(request, json);
+                    }
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
+            } else if url == "/api/duplicates/clean" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct DupCleanReq {
+                    paths: Vec<String>,
+                }
+
+                match serde_json::from_str::<DupCleanReq>(&content) {
+                    Ok(req) => {
+                        let (freed, count, errs) = crate::duplicates::delete_duplicate_files(&req.paths);
+                        let res_json = serde_json::json!({ "success": true, "bytes_freed": freed, "files_deleted": count, "errors": errs }).to_string();
+                        send_json_response(request, res_json);
+                    }
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
             } else if url == "/api/shutdown" && method == Method::Post {
                 running_clone.store(false, Ordering::SeqCst);
                 let res_json = r#"{"success": true, "message": "已关闭"}"#;

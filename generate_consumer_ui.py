@@ -1297,76 +1297,101 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     <!-- Left Navigation Bar -->
     <nav class="desktop-navigation">
       <div>
-        <div class="nav-group-title">核心空间治理</div>
+        <div class="nav-group-title">核心空间专清</div>
         <ul class="nav-list">
-          <li class="nav-item active" onclick="switchTab('overview')">
+          <li class="nav-item active" data-tab="overview" onclick="switchTab('overview')">
             <div class="nav-item-left">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg></span>
               <span>空间概览</span>
             </div>
-            <span class="nav-badge" id="badgeOverview">21.5 GB</span>
+            <span class="nav-badge" id="badgeOverview">27.6 GB</span>
           </li>
-          <li class="nav-item" onclick="switchTab('devcache')">
+          <li class="nav-item" data-tab="devcache" onclick="switchTab('devcache')">
             <div class="nav-item-left">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg></span>
               <span>开发与设计专清</span>
             </div>
-            <span class="nav-badge" id="badgeDevCache">1.3 GB</span>
+            <span class="nav-badge" id="badgeDevCache">4.6 GB</span>
           </li>
-          <li class="nav-item" onclick="switchTab('office')">
+          <li class="nav-item" data-tab="office" onclick="switchTab('office')">
             <div class="nav-item-left">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg></span>
               <span>微信与社交专清</span>
             </div>
             <span class="nav-badge" id="badgeOffice">1.4 GB</span>
           </li>
-          <li class="nav-item" onclick="switchTab('docker')">
+          <li class="nav-item" data-tab="docker" onclick="switchTab('docker')">
             <div class="nav-item-left">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg></span>
               <span>Docker 虚拟镜像</span>
             </div>
-            <span class="nav-badge" id="badgeDocker">27.8 GB</span>
+            <span class="nav-badge" id="badgeDocker">185 MB</span>
           </li>
-          <li class="nav-item" onclick="switchTab('browser')">
+          <li class="nav-item" data-tab="browser" onclick="switchTab('browser')">
             <div class="nav-item-left">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></span>
               <span>浏览器深度专清</span>
             </div>
-            <span class="nav-badge" id="badgeBrowser">856 MB</span>
+            <span class="nav-badge" id="badgeBrowser">854 MB</span>
           </li>
-          <li class="nav-item" onclick="switchTab('registry')">
+        </ul>
+
+        <div class="nav-group-title" style="margin-top: 14px;">通用系统管家</div>
+        <ul class="nav-list">
+          <li class="nav-item" data-tab="startup" onclick="switchTab('startup')">
             <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-1 8h-3v3h-2v-3h-3v-2h3v-3h2v3h3v2z"/></svg></span>
-              <span>注册表死链修复</span>
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg></span>
+              <span>开机自启治理</span>
             </div>
-            <span class="nav-badge" id="badgeRegistry">0</span>
+            <span class="nav-badge" id="badgeStartup">21 项</span>
+          </li>
+          <li class="nav-item" data-tab="apps" onclick="switchTab('apps')">
+            <div class="nav-item-left">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg></span>
+              <span>软件与卸载残留</span>
+            </div>
+            <span class="nav-badge" id="badgeApps">170 款</span>
+          </li>
+          <li class="nav-item" data-tab="system" onclick="switchTab('system')">
+            <div class="nav-item-left">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/></svg></span>
+              <span>系统通用维护</span>
+            </div>
+            <span class="nav-badge" id="badgeSystemMaint">回收站</span>
+          </li>
+          <li class="nav-item" data-tab="duplicates" onclick="switchTab('duplicates')">
+            <div class="nav-item-left">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></span>
+              <span>全盘重复文件</span>
+            </div>
+            <span class="nav-badge" id="badgeDuplicates">去重</span>
           </li>
         </ul>
 
         <div class="nav-group-title" style="margin-top: 14px;">高级虚拟化与索引</div>
         <ul class="nav-list">
-          <li class="nav-item" onclick="switchTab('giant')">
+          <li class="nav-item" data-tab="giant" onclick="switchTab('giant')">
             <div class="nav-item-left">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span>
               <span>大文件全盘雷达</span>
             </div>
             <span class="nav-badge" id="badgeGiantFiles">89</span>
           </li>
-          <li class="nav-item" onclick="switchTab('migration')">
+          <li class="nav-item" data-tab="migration" onclick="switchTab('migration')">
             <div class="nav-item-left">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z"/></svg></span>
               <span>目录无损搬家</span>
             </div>
             <span class="nav-badge">Junction</span>
           </li>
-          <li class="nav-item" onclick="switchTab('vacuum')">
+          <li class="nav-item" data-tab="vacuum" onclick="switchTab('vacuum')">
             <div class="nav-item-left">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 3C7.58 3 4 4.79 4 7v10c0 2.21 3.58 4 8 4s8-1.79 8-4V7c0-2.21-3.58-4-8-4zm0 2c3.87 0 6 1.5 6 2s-2.13 2-6 2-6-1.5-6-2 2.13-2 6-2zm0 14c-3.87 0-6-1.5-6-2v-1.85c1.47.78 3.61 1.25 6 1.25s4.53-.47 6-1.25V17c0 .5-2.13 2-6 2zm0-4c-3.87 0-6-1.5-6-2v-1.85c1.47.78 3.61 1.25 6 1.25s4.53-.47 6-1.25V13c0 .5-2.13 2-6 2z"/></svg></span>
               <span>数据库碎片收缩</span>
             </div>
             <span class="nav-badge">SQLite</span>
           </li>
-          <li class="nav-item" onclick="switchTab('rules')">
+          <li class="nav-item" data-tab="rules" onclick="switchTab('rules')">
             <div class="nav-item-left">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></span>
               <span>自定义规则引擎</span>
@@ -2106,6 +2131,290 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           </div>
         </section>
 
+        <!-- 9. Startup Items Pane -->
+        <section class="workspace-pane" id="pane-startup">
+          <div class="workspace-header">
+            <div class="workspace-title-box">
+              <h1>开机自启动与后台驻留治理</h1>
+              <p>管控 Windows 开机随系统自动启动的常驻软件，识别重度消耗内存/CPU 的后台进程与失效死链</p>
+            </div>
+            <div class="workspace-controls">
+              <button class="btn btn-secondary" onclick="loadStartupItems()">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
+                <span>刷新自启项</span>
+              </button>
+              <button class="btn btn-primary" onclick="cleanDeadStartupItems()">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
+                <span>一键清理失效死链</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+            <div class="feature-card" style="cursor: default;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-blue">
+                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+                </div>
+                <div class="feature-card-metric" id="startupTotalMetric"><span class="metric-num">21</span><span class="metric-unit">项</span></div>
+              </div>
+              <div class="feature-card-body">
+                <div class="card-title">当前自启动项总计</div>
+                <div class="card-desc">包含 HKCU、HKLM 及启动文件夹注册项目</div>
+              </div>
+            </div>
+            <div class="feature-card" style="cursor: default;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-purple">
+                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                </div>
+                <div class="feature-card-metric" id="startupHighImpactMetric"><span class="metric-num" style="color:#ffaa46;">12</span><span class="metric-unit">项</span></div>
+              </div>
+              <div class="feature-card-body">
+                <div class="card-title">高影响常驻后台</div>
+                <div class="card-desc">浏览器预载、网盘同步、游戏客户端等重度进程</div>
+              </div>
+            </div>
+            <div class="feature-card" style="cursor: default;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-cyan">
+                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
+                </div>
+                <div class="feature-card-metric" id="startupDeadMetric"><span class="metric-num" style="color:#6ccb5f;">0</span><span class="metric-unit">项</span></div>
+              </div>
+              <div class="feature-card-body">
+                <div class="card-title">失效死链自启</div>
+                <div class="card-desc">原程序已删除但启动项仍残留的幽灵条目</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="data-grid-container" style="flex: 1;">
+            <table class="data-grid">
+              <thead>
+                <tr>
+                  <th style="width: 220px;">软件名称</th>
+                  <th>启动命令行 / 指令</th>
+                  <th style="width: 120px;">注册源</th>
+                  <th style="width: 120px; text-align: center;">开机影响</th>
+                  <th style="width: 100px; text-align: center;">状态</th>
+                  <th style="width: 100px; text-align: center;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="startupTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 10. Installed Apps & Leftovers Pane -->
+        <section class="workspace-pane" id="pane-apps">
+          <div class="workspace-header">
+            <div class="workspace-title-box">
+              <h1>已安装软件与卸载残留排查</h1>
+              <p>检阅系统已安装软件资产，排查软件卸载后遗留在 AppData 的孤立无主残留目录</p>
+            </div>
+            <div class="workspace-controls">
+              <button class="btn btn-secondary" onclick="loadInstalledApps()">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
+                <span>刷新应用列表</span>
+              </button>
+              <button class="btn btn-primary" onclick="loadAppLeftovers()">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span>
+                <span>排查卸载残留</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div class="filter-tabs" id="appsFilterTabs">
+              <div class="filter-tab active" onclick="setAppsView('installed', this)">全部已装软件 (<span id="appsCountLabel">170</span>)</div>
+              <div class="filter-tab" onclick="setAppsView('leftovers', this)">卸载孤立残留 (<span id="leftoversCountLabel">排查</span>)</div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="appsSearchInput" oninput="filterAppsTable()" placeholder="快速搜索软件名称或发布商..." style="width: 220px; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 5px 10px; color: #fff; font-size: 11.5px; outline: none;">
+            </div>
+          </div>
+
+          <div class="data-grid-container" style="flex: 1;">
+            <table class="data-grid" id="installedAppsTable">
+              <thead>
+                <tr>
+                  <th style="width: 260px;">软件名称</th>
+                  <th style="width: 120px;">版本号</th>
+                  <th style="width: 180px;">发布厂商</th>
+                  <th style="width: 120px; text-align: right;">占用体积</th>
+                  <th>安装路径 / 位置</th>
+                  <th style="width: 120px; text-align: center;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="installedAppsTableBody"></tbody>
+            </table>
+
+            <table class="data-grid" id="appLeftoversTable" style="display: none;">
+              <thead>
+                <tr>
+                  <th style="width: 220px;">残留文件夹</th>
+                  <th>关联物理路径</th>
+                  <th style="width: 120px; text-align: right;">占用体积</th>
+                  <th style="width: 90px; text-align: right;">文件数</th>
+                  <th style="width: 220px;">判定原因</th>
+                  <th style="width: 120px; text-align: center;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="appLeftoversTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 11. Universal System Maintenance Pane -->
+        <section class="workspace-pane" id="pane-system">
+          <div class="workspace-header">
+            <div class="workspace-title-box">
+              <h1>Windows 系统底座通用维护箱</h1>
+              <p>一键清空全盘回收站、刷新本地 DNS 解析缓存、清理 Windows 预读与系统错误报告</p>
+            </div>
+            <div class="workspace-controls">
+              <button class="btn btn-secondary" onclick="loadSystemMaintenance()">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
+                <span>刷新系统状态</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+            <!-- Maint Card 1: Recycle Bin -->
+            <div class="feature-card" style="cursor: default; padding: 20px;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-cyan" style="width:44px; height:44px;">
+                  <svg style="width:24px; height:24px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
+                </div>
+                <div class="feature-card-metric" id="maintRecycleBinMetric"><span class="metric-num">380.8</span><span class="metric-unit">MB</span></div>
+              </div>
+              <div class="feature-card-body" style="margin-top:14px;">
+                <div class="card-title" style="font-size:15px;">全盘回收站深度清空</div>
+                <div class="card-desc" style="font-size:12px; margin-top:4px;">跨所有本地 NTFS 盘符彻底清空回收站中积压的历史删除文件，释放物理存储空间</div>
+              </div>
+              <div style="margin-top: 18px;">
+                <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="emptyRecycleBinNow()">
+                  <span>立即清空全盘回收站</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Maint Card 2: DNS Flush -->
+            <div class="feature-card" style="cursor: default; padding: 20px;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-green" style="width:44px; height:44px;">
+                  <svg style="width:24px; height:24px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                </div>
+                <div class="feature-card-metric"><span class="metric-num" style="color:#6ccb5f; font-size:22px;">就绪</span></div>
+              </div>
+              <div class="feature-card-body" style="margin-top:14px;">
+                <div class="card-title" style="font-size:15px;">本地 DNS 网络解析缓存刷新</div>
+                <div class="card-desc" style="font-size:12px; margin-top:4px;">清除本地网络解析堆积脏数据，快速解决特定网页打不开、域名指向陈旧与请求假死</div>
+              </div>
+              <div style="margin-top: 18px;">
+                <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="flushDnsNow()">
+                  <span>一键刷新 DNS 缓存</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Maint Card 3: Prefetch & WER -->
+            <div class="feature-card" style="cursor: default; padding: 20px;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-purple" style="width:44px; height:44px;">
+                  <svg style="width:24px; height:24px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                </div>
+                <div class="feature-card-metric" id="maintSystemLogsMetric"><span class="metric-num">WER</span><span class="metric-unit">日志</span></div>
+              </div>
+              <div class="feature-card-body" style="margin-top:14px;">
+                <div class="card-title" style="font-size:15px;">Windows 预读与错误报告清理</div>
+                <div class="card-desc" style="font-size:12px; margin-top:4px;">清理 C:\Windows\Prefetch 预取历史和 WER 系统错误队列，保持核心引导盘轻量</div>
+              </div>
+              <div style="margin-top: 18px;">
+                <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="cleanCategoryItems('system')">
+                  <span>清理系统冗余组件</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Maint Card 4: Empty Folders -->
+            <div class="feature-card" style="cursor: default; padding: 20px;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-blue" style="width:44px; height:44px;">
+                  <svg style="width:24px; height:24px; fill:currentColor;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                </div>
+                <div class="feature-card-metric"><span class="metric-num" id="emptyDirsCountLabel">0</span><span class="metric-unit">目录</span></div>
+              </div>
+              <div class="feature-card-body" style="margin-top:14px;">
+                <div class="card-title" style="font-size:15px;">孤立幽灵空目录清理</div>
+                <div class="card-desc" style="font-size:12px; margin-top:4px;">扫描 Temp 及缓存目录下不含任何文件和子目录的冗余空壳文件夹并安全移除</div>
+              </div>
+              <div style="margin-top: 18px; display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="flex: 1; justify-content: center;" onclick="scanEmptyDirs()">
+                  <span>排查空目录</span>
+                </button>
+                <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="cleanEmptyDirs()">
+                  <span>一键清除</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 12. Duplicate Files Finder Pane -->
+        <section class="workspace-pane" id="pane-duplicates">
+          <div class="workspace-header">
+            <div class="workspace-title-box">
+              <h1>全盘重复文件查找与智选去重</h1>
+              <p>基于双阶段 MD5 精确比对，毫秒级发现磁盘或下载目录中完全相同的文件副本，智能推荐保留</p>
+            </div>
+            <div class="workspace-controls">
+              <button class="btn btn-primary" onclick="cleanSelectedDuplicates()">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
+                <span id="btnCleanDupsText">一键去重清理</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 14px 16px; display: flex; gap: 12px; align-items: flex-end;">
+            <div style="flex: 2;">
+              <label style="font-size: 11.5px; color: var(--text-secondary); display: block; margin-bottom: 5px;">排查目标路径</label>
+              <input type="text" id="dupScanPathInput" style="width: 100%; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 6px 10px; color: #fff; font-size: 12px; outline: none; font-family: var(--font-mono);">
+            </div>
+            <div style="flex: 1;">
+              <label style="font-size: 11.5px; color: var(--text-secondary); display: block; margin-bottom: 5px;">最小文件阈值</label>
+              <select id="dupMinSizeSelect" style="width: 100%; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 6px 10px; color: #fff; font-size: 12px; outline: none;">
+                <option value="1">大于 1 MB</option>
+                <option value="10">大于 10 MB</option>
+                <option value="50">大于 50 MB</option>
+                <option value="100">大于 100 MB</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" style="height: 32px; padding: 0 16px;" onclick="runDuplicatesScan()">
+              <span>开始排查重复</span>
+            </button>
+          </div>
+
+          <div class="data-grid-container" style="flex: 1;">
+            <table class="data-grid">
+              <thead>
+                <tr>
+                  <th class="col-checkbox"><input type="checkbox" checked onchange="toggleSelectAllDups(this)"></th>
+                  <th style="width: 260px;">文件哈希 / 特征组</th>
+                  <th>物理存储路径</th>
+                  <th style="width: 120px; text-align: right;">单个体积</th>
+                  <th style="width: 140px; text-align: center;">去重建议</th>
+                  <th style="width: 90px; text-align: center;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="duplicatesTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+</section>
+
       </div>
 
       <!-- Right Master-Detail Inspector Drawer -->
@@ -2281,7 +2590,488 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       setTimeout(() => { t.remove(); }, 3200);
     }
 
-    // Tab Switching
+    
+    // ==========================================
+    // Universal Generic Modules State & Methods
+    // ==========================================
+    state.startupItems = [];
+    state.installedApps = [];
+    state.appLeftovers = [];
+    state.emptyDirs = [];
+    state.duplicateGroups = [];
+    state.selectedDups = new Set();
+    state.appsViewMode = 'installed';
+
+    // 1. Startup Items
+    async function loadStartupItems() {
+      try {
+        const res = await fetch('/api/startup/list');
+        state.startupItems = await res.json();
+        renderStartupTable();
+      } catch (e) {
+        showToast('加载自启项失败: ' + e.message);
+      }
+    }
+
+    function renderStartupTable() {
+      const tbody = document.getElementById('startupTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      let highCount = 0;
+      let deadCount = 0;
+
+      state.startupItems.forEach(item => {
+        if (item.impact.includes('高影响')) highCount++;
+        if (!item.exists) deadCount++;
+
+        const tr = document.createElement('tr');
+        const impactBadge = !item.exists 
+          ? '<span class="tag-pill" style="background:rgba(255,255,255,0.1); color:#aaa;">失效死链</span>'
+          : (item.impact.includes('高') ? '<span class="tag-pill" style="background:rgba(255,100,100,0.15); color:#ff6464; border:1px solid rgba(255,100,100,0.3);">高影响</span>'
+          : (item.impact.includes('中') ? '<span class="tag-pill tag-blue">中等影响</span>'
+          : '<span class="tag-pill tag-green">轻量启动</span>'));
+
+        const statusText = item.exists 
+          ? '<span style="color:var(--status-safe); font-size:11px;">正常</span>' 
+          : '<span style="color:#ff6464; font-size:11px; font-weight:600;">文件丢失</span>';
+
+        tr.innerHTML = `
+          <td><span style="font-weight:600; color:#fff;">${escapeHtml(item.name)}</span></td>
+          <td><span class="path-text" title="${escapeHtml(item.command)}">${escapeHtml(item.command)}</span></td>
+          <td style="font-size:11px; color:var(--text-secondary);">${escapeHtml(item.source)}</td>
+          <td style="text-align:center;">${impactBadge}</td>
+          <td style="text-align:center;">${statusText}</td>
+          <td style="text-align:center;">
+            <button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="removeStartupItem('${escapeHtml(item.source)}', '${escapeHtml(item.name)}', '${escapeHtml(item.location).replace(/\\/g, '\\\\')}')">移除</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (document.getElementById('startupTotalMetric')) {
+        document.getElementById('startupTotalMetric').innerHTML = `<span class="metric-num">${state.startupItems.length}</span><span class="metric-unit">项</span>`;
+      }
+      if (document.getElementById('startupHighImpactMetric')) {
+        document.getElementById('startupHighImpactMetric').innerHTML = `<span class="metric-num" style="color:#ffaa46;">${highCount}</span><span class="metric-unit">项</span>`;
+      }
+      if (document.getElementById('startupDeadMetric')) {
+        document.getElementById('startupDeadMetric').innerHTML = `<span class="metric-num" style="color:#6ccb5f;">${deadCount}</span><span class="metric-unit">项</span>`;
+      }
+      if (document.getElementById('badgeStartup')) {
+        document.getElementById('badgeStartup').innerText = `${state.startupItems.length} 项`;
+      }
+      if (document.getElementById('overviewStartupCount')) {
+        document.getElementById('overviewStartupCount').innerText = `${state.startupItems.length} 项常驻`;
+      }
+    }
+
+    async function removeStartupItem(source, name, location) {
+      openConfirmModal('移除自启动项', `确定要从系统启动列表中移除自启项 [${name}] 吗？`, async () => {
+        closeConfirmModal();
+        try {
+          const res = await fetch('/api/startup/remove', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ source, name, location })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast(`已成功移除自启动项 [${name}]`);
+            loadStartupItems();
+          } else {
+            showToast('移除失败: ' + (data.error || '未知错误'));
+          }
+        } catch (e) {
+          showToast('请求异常: ' + e.message);
+        }
+      });
+    }
+
+    async function cleanDeadStartupItems() {
+      const deadItems = state.startupItems.filter(i => !i.exists);
+      if (deadItems.length === 0) {
+        showToast('当前未发现失效死链自启项');
+        return;
+      }
+      openConfirmModal('清理失效自启项', `共发现 ${deadItems.length} 个文件已丢失的失效启动项，确定一键清除吗？`, async () => {
+        closeConfirmModal();
+        let cleaned = 0;
+        for (const item of deadItems) {
+          try {
+            await fetch('/api/startup/remove', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ source: item.source, name: item.name, location: item.location })
+            });
+            cleaned++;
+          } catch(e) {}
+        }
+        showToast(`已清理 ${cleaned} 个失效死链`);
+        loadStartupItems();
+      });
+    }
+
+    // 2. Installed Apps & Leftovers
+    async function loadInstalledApps() {
+      try {
+        const res = await fetch('/api/apps/list');
+        state.installedApps = await res.json();
+        renderAppsTable();
+      } catch (e) {
+        showToast('加载已装软件列表失败: ' + e.message);
+      }
+    }
+
+    async function loadAppLeftovers() {
+      try {
+        showToast('正在排查卸载后残留数据...');
+        const res = await fetch('/api/apps/leftovers');
+        state.appLeftovers = await res.json();
+        if (document.getElementById('leftoversCountLabel')) {
+          document.getElementById('leftoversCountLabel').innerText = `${state.appLeftovers.length} 处`;
+        }
+        setAppsView('leftovers');
+        renderLeftoversTable();
+        showToast(`排查完成，发现 ${state.appLeftovers.length} 处疑似孤立数据残留`);
+      } catch (e) {
+        showToast('排查残留失败: ' + e.message);
+      }
+    }
+
+    function setAppsView(mode, el) {
+      state.appsViewMode = mode;
+      document.querySelectorAll('#appsFilterTabs .filter-tab').forEach(t => t.classList.remove('active'));
+      if (el) el.classList.add('active');
+      else {
+        const idx = mode === 'installed' ? 0 : 1;
+        const tabs = document.querySelectorAll('#appsFilterTabs .filter-tab');
+        if (tabs[idx]) tabs[idx].classList.add('active');
+      }
+
+      if (mode === 'installed') {
+        document.getElementById('installedAppsTable').style.display = 'table';
+        document.getElementById('appLeftoversTable').style.display = 'none';
+        renderAppsTable();
+      } else {
+        document.getElementById('installedAppsTable').style.display = 'none';
+        document.getElementById('appLeftoversTable').style.display = 'table';
+        renderLeftoversTable();
+      }
+    }
+
+    function filterAppsTable() {
+      if (state.appsViewMode === 'installed') renderAppsTable();
+      else renderLeftoversTable();
+    }
+
+    function renderAppsTable() {
+      const tbody = document.getElementById('installedAppsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const q = (document.getElementById('appsSearchInput')?.value || '').toLowerCase();
+
+      state.installedApps.forEach(app => {
+        if (q && !app.name.toLowerCase().includes(q) && !app.publisher.toLowerCase().includes(q)) return;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="font-weight:600; color:#fff;">${escapeHtml(app.name)}</span></td>
+          <td style="font-size:11px; color:var(--text-secondary);">${escapeHtml(app.version || '-')}</td>
+          <td style="font-size:11px; color:var(--text-secondary);">${escapeHtml(app.publisher || '-')}</td>
+          <td style="text-align:right; font-family:var(--font-mono); font-weight:600; color:#60cdff;">${app.size_bytes > 0 ? formatBytes(app.size_bytes) : '-'}</td>
+          <td><span class="path-text" title="${escapeHtml(app.install_location)}">${escapeHtml(app.install_location || '-')}</span></td>
+          <td style="text-align:center;">
+            ${app.uninstall_string ? `<button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="runUninstallApp('${escapeHtml(app.uninstall_string).replace(/\\/g, '\\\\')}')">卸载</button>` : '-'}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (document.getElementById('appsCountLabel')) {
+        document.getElementById('appsCountLabel').innerText = state.installedApps.length;
+      }
+      if (document.getElementById('badgeApps')) {
+        document.getElementById('badgeApps').innerText = `${state.installedApps.length} 款`;
+      }
+      if (document.getElementById('overviewAppsCount')) {
+        document.getElementById('overviewAppsCount').innerText = `${state.installedApps.length} 款纳管`;
+      }
+    }
+
+    function renderLeftoversTable() {
+      const tbody = document.getElementById('appLeftoversTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const q = (document.getElementById('appsSearchInput')?.value || '').toLowerCase();
+
+      state.appLeftovers.forEach(item => {
+        if (q && !item.folder_name.toLowerCase().includes(q) && !item.path.toLowerCase().includes(q)) return;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="font-weight:600; color:#ffaa46;">${escapeHtml(item.folder_name)}</span></td>
+          <td><span class="path-text" title="${escapeHtml(item.path)}">${escapeHtml(item.path)}</span></td>
+          <td style="text-align:right; font-family:var(--font-mono); font-weight:600; color:#60cdff;">${formatBytes(item.size_bytes)}</td>
+          <td style="text-align:right; font-family:var(--font-mono); color:var(--text-tertiary);">${item.file_count}</td>
+          <td style="font-size:11.5px; color:var(--text-secondary);">${escapeHtml(item.reason)}</td>
+          <td style="text-align:center;">
+            <button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="cleanSingleLeftover('${escapeHtml(item.path).replace(/\\/g, '\\\\')}')">清理残留</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function runUninstallApp(uninstallString) {
+      openConfirmModal('启动应用卸载向导', '即将调用该应用程序原生卸载向导，确认启动吗？', async () => {
+        closeConfirmModal();
+        try {
+          const res = await fetch('/api/apps/uninstall', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uninstall_string: uninstallString })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast('已唤起官方卸载程序');
+          } else {
+            showToast('调用卸载程序失败: ' + (data.error || '未知错误'));
+          }
+        } catch(e) {
+          showToast('异常: ' + e.message);
+        }
+      });
+    }
+
+    async function cleanSingleLeftover(path) {
+      openConfirmModal('清理孤立数据残留', `即将删除遗留文件夹 ${path}，确认继续吗？`, async () => {
+        closeConfirmModal();
+        try {
+          const res = await fetch('/api/clean', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paths: [path] })
+          });
+          const data = await res.json();
+          showToast(`已清理释放 ${formatBytes(data.bytes_freed)}`);
+          loadAppLeftovers();
+        } catch(e) {
+          showToast('清理失败: ' + e.message);
+        }
+      });
+    }
+
+    // 3. System Universal Maintenance
+    async function loadSystemMaintenance() {
+      try {
+        const res = await fetch('/api/system/maintenance');
+        const data = await res.json();
+        if (data && data.recycle_bin) {
+          if (document.getElementById('maintRecycleBinMetric')) {
+            document.getElementById('maintRecycleBinMetric').innerHTML = formatMetricHtml(data.recycle_bin.size_bytes);
+          }
+          if (document.getElementById('overviewRecycleBinSize')) {
+            document.getElementById('overviewRecycleBinSize').innerText = formatBytes(data.recycle_bin.size_bytes);
+          }
+          if (document.getElementById('badgeSystemMaint')) {
+            document.getElementById('badgeSystemMaint').innerText = formatBytes(data.recycle_bin.size_bytes);
+          }
+        }
+      } catch (e) {
+        showToast('获取系统维护状态失败: ' + e.message);
+      }
+    }
+
+    async function emptyRecycleBinNow() {
+      openConfirmModal('清空回收站确认', '即将清空全盘回收站中的所有文件，此操作不可撤销，确认清空吗？', async () => {
+        closeConfirmModal();
+        showToast('正在清空全盘回收站...');
+        try {
+          const res = await fetch('/api/system/recycle-bin/empty', { method: 'POST' });
+          const data = await res.json();
+          if (data.success) {
+            showToast(`回收站已清空，释放 ${formatBytes(data.bytes_freed)} 空间`);
+            loadSystemMaintenance();
+            refreshDisks();
+          } else {
+            showToast('清空失败: ' + (data.error || '未知错误'));
+          }
+        } catch(e) {
+          showToast('清空异常: ' + e.message);
+        }
+      });
+    }
+
+    async function flushDnsNow() {
+      showToast('正在刷新本地 DNS 解析缓存...');
+      try {
+        const res = await fetch('/api/system/flush-dns', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showToast('本地 DNS 解析缓存已成功刷新！');
+        } else {
+          showToast('刷新 DNS 失败: ' + (data.error || '未知错误'));
+        }
+      } catch (e) {
+        showToast('刷新异常: ' + e.message);
+      }
+    }
+
+    async function scanEmptyDirs() {
+      showToast('正在扫描临时目录中的孤立空目录...');
+      try {
+        const res = await fetch('/api/system/empty-dirs/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target_dir: '' })
+        });
+        state.emptyDirs = await res.json();
+        if (document.getElementById('emptyDirsCountLabel')) {
+          document.getElementById('emptyDirsCountLabel').innerText = `${state.emptyDirs.length}`;
+        }
+        showToast(`扫描完毕，发现 ${state.emptyDirs.length} 个空目录`);
+      } catch(e) {
+        showToast('扫描空目录失败: ' + e.message);
+      }
+    }
+
+    async function cleanEmptyDirs() {
+      if (state.emptyDirs.length === 0) {
+        showToast('当前未发现待清理的空目录，请先排查');
+        return;
+      }
+      openConfirmModal('清理空目录', `即将安全移除 ${state.emptyDirs.length} 个 0 字节孤立空目录，确认继续吗？`, async () => {
+        closeConfirmModal();
+        try {
+          const res = await fetch('/api/system/empty-dirs/clean', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paths: state.emptyDirs })
+          });
+          const data = await res.json();
+          showToast(`已成功移除 ${data.cleaned_count} 个空目录`);
+          state.emptyDirs = [];
+          if (document.getElementById('emptyDirsCountLabel')) {
+            document.getElementById('emptyDirsCountLabel').innerText = '0';
+          }
+        } catch(e) {
+          showToast('清理失败: ' + e.message);
+        }
+      });
+    }
+
+    // 4. Duplicate Files Finder
+    async function runDuplicatesScan() {
+      const pathInput = document.getElementById('dupScanPathInput');
+      const minMb = parseInt(document.getElementById('dupMinSizeSelect')?.value || '1', 10);
+      let targetDir = pathInput ? pathInput.value.trim() : '';
+
+      showToast('正在进行全盘双阶段特征哈希比对排查...');
+      try {
+        const res = await fetch('/api/duplicates/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target_dir: targetDir, min_size_mb: minMb })
+        });
+        state.duplicateGroups = await res.json();
+        renderDuplicatesTable();
+        showToast(`排查完毕，发现 ${state.duplicateGroups.length} 组重复文件`);
+      } catch(e) {
+        showToast('排查失败: ' + e.message);
+      }
+    }
+
+    function renderDuplicatesTable() {
+      const tbody = document.getElementById('duplicatesTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      state.selectedDups.clear();
+
+      let totalWasted = 0;
+
+      state.duplicateGroups.forEach(grp => {
+        totalWasted += grp.wasted_bytes;
+
+        grp.files.forEach((f, idx) => {
+          const tr = document.createElement('tr');
+          const isRecKeep = f.is_recommended_keep;
+          if (!isRecKeep) state.selectedDups.add(f.path);
+
+          tr.innerHTML = `
+            <td class="col-checkbox">
+              <input type="checkbox" ${!isRecKeep ? 'checked' : ''} onchange="toggleDupFile('${escapeHtml(f.path)}', this.checked)">
+            </td>
+            <td><span style="font-family:var(--font-mono); font-size:11px; color:#aaa;">${grp.hash.substring(0, 16)}...</span></td>
+            <td><span class="path-text" title="${escapeHtml(f.path)}">${escapeHtml(f.path)}</span></td>
+            <td style="text-align:right; font-family:var(--font-mono); font-weight:600; color:#60cdff;">${formatBytes(f.size_bytes)}</td>
+            <td style="text-align:center;">
+              ${isRecKeep 
+                ? '<span class="tag-pill tag-green">推荐保留</span>' 
+                : '<span class="tag-pill tag-orange">冗余副本</span>'}
+            </td>
+            <td style="text-align:center;">
+              <button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="revealInExplorer('${escapeHtml(f.path)}')">定位</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+
+      updateDuplicatesSelectionText();
+    }
+
+    function toggleDupFile(path, checked) {
+      if (checked) state.selectedDups.add(path);
+      else state.selectedDups.delete(path);
+      updateDuplicatesSelectionText();
+    }
+
+    function toggleSelectAllDups(master) {
+      const chk = master.checked;
+      state.duplicateGroups.forEach(grp => {
+        grp.files.forEach(f => {
+          if (!f.is_recommended_keep) {
+            if (chk) state.selectedDups.add(f.path);
+            else state.selectedDups.delete(f.path);
+          }
+        });
+      });
+      renderDuplicatesTable();
+    }
+
+    function updateDuplicatesSelectionText() {
+      const btnText = document.getElementById('btnCleanDupsText');
+      if (btnText) {
+        btnText.innerText = `一键去重清理 (${state.selectedDups.size} 项)`;
+      }
+    }
+
+    async function cleanSelectedDuplicates() {
+      if (state.selectedDups.size === 0) {
+        showToast('请选择待清理的重复副本');
+        return;
+      }
+      openConfirmModal('清理重复文件副本', `确定要彻底删除选中的 ${state.selectedDups.size} 个重复副本文件吗？`, async () => {
+        closeConfirmModal();
+        try {
+          const res = await fetch('/api/duplicates/clean', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paths: Array.from(state.selectedDups) })
+          });
+          const data = await res.json();
+          showToast(`去重完成，释放 ${formatBytes(data.bytes_freed)} 空间`);
+          runDuplicatesScan();
+          refreshDisks();
+        } catch(e) {
+          showToast('清理失败: ' + e.message);
+        }
+      });
+    }
+// Tab Switching
     function switchTab(tabId) {
       state.currentTab = tabId;
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -2297,6 +3087,19 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       const items = document.querySelectorAll('.nav-item');
       if (items[navMap[tabId]]) items[navMap[tabId]].classList.add('active');
 
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      const activeNav = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
+      if (activeNav) activeNav.classList.add('active');
+
+      if (tabId === 'startup') loadStartupItems();
+      if (tabId === 'apps') { loadInstalledApps(); }
+      if (tabId === 'system') loadSystemMaintenance();
+      if (tabId === 'duplicates') {
+        const defPath = document.getElementById('dupScanPathInput');
+        if (defPath && !defPath.value) {
+          defPath.value = 'C:\\Users\\EDY\\Downloads';
+        }
+      }
       if (tabId === 'giant' && state.giantFiles.length === 0) loadGiantFiles();
       if (tabId === 'registry' && state.registryIssues.length === 0) loadRegistryIssues();
       if (tabId === 'migration') loadActiveJunctions();
@@ -3544,6 +4347,9 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       refreshDisks();
       runScan();
       loadActiveJunctions();
+      loadStartupItems();
+      loadSystemMaintenance();
+      loadInstalledApps();
     });
   </script>
 </body>
