@@ -1534,7 +1534,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         </svg>
       </div>
       <span class="app-brand-title">CleanFlow Pro</span>
-      <span class="app-version-badge">v2.0</span>
+      <span class="app-version-badge">v0.1.1</span>
     </div>
 
     <!-- Drive Switcher Pills -->
@@ -2203,7 +2203,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       <span>|</span>
       <span id="sbSelection">已选 0 项 (0 B)</span>
       <span>|</span>
-      <span>Rust 原生内核 v0.1.0 · <span style="color:var(--status-safe);">零后台常驻</span></span>
+      <span>Rust 原生内核 v0.1.1 · <span style="color:var(--status-safe);">零后台常驻</span></span>
     </div>
   </footer>
 
@@ -2848,7 +2848,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       const report = {
         generated_at: new Date().toISOString(),
         device: 'Windows PC (x86_64)',
-        engine_version: 'CleanFlow Pro v0.1.0',
+        engine_version: 'CleanFlow Pro v0.1.1',
         summary: {
           total_reclaimable_bytes: state.scanResult ? state.scanResult.total_size_bytes : 0,
           total_reclaimable_formatted: formatBytes(state.scanResult ? state.scanResult.total_size_bytes : 0),

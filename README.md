@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20(x64)-0078d4.svg)](#)
 [![Rust](https://img.shields.io/badge/Rust-2021%20Edition-dea584.svg)](https://www.rust-lang.org/)
-[![Release](https://img.shields.io/badge/Release-v0.1.0-success.svg)](#)
+[![Release](https://img.shields.io/badge/Release-v0.1.1-success.svg)](#)
 
 CleanFlow Pro 是一款基于 Rust 原生内核打造的高性能、工业级 Windows 磁盘空间资产治理桌面软件。软件采用原生单文件便携式架构（压缩包仅 ~2 MB，解压即用），完全零外部运行环境依赖（无需 Node.js / Python / WebView2 运行时），深度融合 Windows 11 Fluent Design 与 Nordic Mica 深色玻璃拟态视觉规范。
 
@@ -56,6 +56,7 @@ graph TD
 
 ### 1. 极速空间清理 (Workspace 1: Clean)
 * **环形空间健康度仪表盘**：动态感知系统盘余量与可回收规模。
+* **多维分类光谱占比条 (Spectrum Bar)**：动态呈现多色比例光谱，直观展现系统临时、现代开发、办公通讯、浏览器、数据库等维度的色彩编码分布，配备胶囊药丸图例与精确体积百分比。
 * **六大场景深度专清**：
   * **系统冗余与临时垃圾**：用户 `%LOCALAPPDATA%\Temp`、Windows 更新补丁与错误报告。
   * **现代开发套件缓存**：Cargo、Pip、Gradle、Android Studio、Cursor、Unity 编译缓存。
@@ -65,6 +66,10 @@ graph TD
   * **孤立空目录扫描**：快速清理嵌套深层的 0 字节幽灵空壳目录。
 
 ### 2. 空间透视与去重 (Workspace 2: Analyze)
+* **大文件全盘 Treemap 空间矩形树图 (标杆级)**：
+  * 对标 WizTree / DaisyDisk / WinDirStat 工业级空间树图，按文件物理尺寸动态比例自适应划分 12 栅格矩阵色块。
+  * 数据库资产（青色高光）、虚拟机磁盘（紫色高光）、安装包（琥珀橙）、压缩归档（宝蓝色）分类分色。
+  * **防截断双层检查条 (2-Row Inspector Strip)**：悬停/点击色块时联动呈现文件名、体积占比、绝对物理路径与治理建议，内置原生 `[定位目录]`、`[复制绝对路径]`、`[VACUUM 压缩]`、`[Junction 搬家]` 快捷按钮，并与下方明细表格双向平滑联动。
 * **大文件全盘雷达**：多线程并行检出全盘 100 MB+ 巨型沉淀资产，支持数据库、虚拟机磁盘、安装包与压缩包精准分类。
 * **重复文件智选去重**：
   * 基于双阶段特征比对算法（文件体积初筛 + 4KB 头部哈希 + 完整 MD5 校验）。
@@ -105,7 +110,7 @@ graph TD
 ## 安装与分发方式
 
 ### 方式 A：便携免安装（开箱即用）
-1. 下载 `CleanFlow-Pro-v0.1.0-win64.zip` 并解压。
+1. 下载 `CleanFlow-Pro-v0.1.1-win64.zip` 并解压。
 2. 双击 `cleanflow.exe` 或 `start-cleanflow.cmd` 即可直接启动。
 
 ### 方式 B：一键系统安装向导
