@@ -2010,10 +2010,6 @@ HTML_CONTENT = r'''<!DOCTYPE html>
                 清除已卸载程序残留的 MUICache 冗余、失效 OpenWith 右键打开方式及文件丢失的失效自启项：
               </div>
               <div style="display: flex; gap: 8px;">
-                <button class="btn btn-secondary" onclick="openRegistryBackupsModal()">
-                  <span class="icon"><svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></span>
-                  <span>快照时光机 (<span id="regBackupCountBadge">0</span>)</span>
-                </button>
                 <button class="btn btn-secondary" onclick="loadRegistryIssues()">
                   <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
                   <span>排查死链</span>
@@ -2124,20 +2120,6 @@ HTML_CONTENT = r'''<!DOCTYPE html>
             </div>
             <div id="toolsJunctionList" style="font-size: 11.5px; color: var(--text-secondary);">
               正在检测系统活跃符号链接...
-            </div>
-          </div>
-
-          <!-- Registry Backup Snapshot Timeline in Tools Workspace -->
-          <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 16px; margin-top: 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size: 13px; font-weight: 600; color: #fff;">注册表安全快照时光机 (.reg)</span>
-                <span class="badge-pill badge-safe" id="toolsRegistryBackupCount">0 个快照</span>
-              </div>
-              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="loadRegistryBackups()">刷新快照</button>
-            </div>
-            <div id="toolsRegistryBackupList" style="font-size: 11.5px; color: var(--text-secondary);">
-              正在检索注册表安全快照历史...
             </div>
           </div>
         </section>
@@ -2257,30 +2239,6 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
         <button class="btn btn-secondary" onclick="closeConfirmModal()">取消</button>
         <button class="btn btn-primary" id="confirmModalOkBtn" onclick="onConfirmModalOk()">确认继续</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Registry Backups Timeline Modal -->
-  <div class="fluent-modal-overlay" id="registryBackupsModal">
-    <div class="fluent-modal" style="width: 680px; max-width: 90vw;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:16px; font-weight:600; color:#fff;">注册表安全快照时光机</span>
-          <span class="badge-pill badge-safe">原子回滚保障</span>
-        </div>
-        <button class="inspector-close-btn" onclick="closeRegistryBackupsModal()">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </div>
-      <div style="font-size:12px; color:var(--text-secondary); margin-bottom:14px;">
-        每次清理死链前均自动生成标准 Windows .reg 格式快照。如遇软件异常，随时可一键还原至修改前状态。
-      </div>
-      <div id="modalRegistryBackupList" style="max-height: 380px; overflow-y: auto; display:flex; flex-direction:column; gap:8px;">
-      </div>
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; border-top:1px solid var(--stroke-divider); padding-top:12px;">
-        <span style="font-size:11.5px; color:var(--text-tertiary);">存放位置: %TEMP%\cleanflow_registry_backups</span>
-        <button class="btn btn-secondary" onclick="closeRegistryBackupsModal()">关闭</button>
       </div>
     </div>
   </div>
@@ -4586,148 +4544,6 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       });
     }
 
-    // ==========================================
-    // Registry Backup Snapshot Timeline & Restore (Pillar 2)
-    // ==========================================
-    state.registryBackups = [];
-
-    async function loadRegistryBackups() {
-      try {
-        const res = await fetch('/api/registry/backups');
-        state.registryBackups = await res.json();
-        renderRegistryBackupsUI();
-      } catch (e) {
-        console.error('加载注册表备份失败', e);
-      }
-    }
-
-    function renderRegistryBackupsUI() {
-      const count = state.registryBackups.length;
-      const countLabel = `${count} 个快照`;
-
-      const countBadge = document.getElementById('toolsRegistryBackupCount');
-      if (countBadge) countBadge.innerText = countLabel;
-
-      const subviewBadge = document.getElementById('regBackupCountBadge');
-      if (subviewBadge) subviewBadge.innerText = count;
-
-      // Render Tools Workspace List
-      const toolsContainer = document.getElementById('toolsRegistryBackupList');
-      if (toolsContainer) {
-        if (count === 0) {
-          toolsContainer.innerHTML = '<div style="padding: 12px 0; color: var(--text-tertiary); text-align: center;">尚未生成任何注册表安全快照（执行死链修复时将自动创建）</div>';
-        } else {
-          let html = '<table class="data-grid"><thead><tr><th>快照文件名</th><th>记录时间</th><th style="width:100px; text-align:center;">备份键数</th><th style="width:100px; text-align:right;">文件大小</th><th style="width:160px; text-align:center;">操作</th></tr></thead><tbody>';
-          state.registryBackups.forEach(b => {
-            const timeStr = formatUnixTimestamp(b.created_at);
-            const sizeStr = formatBytes(b.size_bytes);
-            html += `
-              <tr>
-                <td><span class="path-text" title="${escapeHtml(b.file_path)}">${escapeHtml(b.file_name)}</span></td>
-                <td style="color: var(--text-secondary); font-family: var(--font-mono); font-size:11px;">${escapeHtml(timeStr)}</td>
-                <td style="text-align: center;"><span class="tag-pill tag-blue" style="font-size:10.5px;">${b.entry_count} 项</span></td>
-                <td style="text-align: right; font-family: var(--font-mono); color: var(--text-secondary);">${sizeStr}</td>
-                <td style="text-align: center; display:flex; gap:4px; justify-content:center;">
-                  <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="restoreRegistryBackup('${escapeJsString(b.file_path)}')">还原</button>
-                  <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapeJsString(b.file_path)}')">定位</button>
-                  <button class="btn btn-danger" style="padding: 2px 8px; font-size: 11px;" onclick="deleteRegistryBackup('${escapeJsString(b.file_path)}')">删除</button>
-                </td>
-              </tr>
-            `;
-          });
-          html += '</tbody></table>';
-          toolsContainer.innerHTML = html;
-        }
-      }
-
-      // Render Modal List
-      const modalContainer = document.getElementById('modalRegistryBackupList');
-      if (modalContainer) {
-        if (count === 0) {
-          modalContainer.innerHTML = '<div style="padding: 30px; color: var(--text-tertiary); text-align: center;">当前没有注册表历史快照</div>';
-        } else {
-          let html = '';
-          state.registryBackups.forEach(b => {
-            const timeStr = formatUnixTimestamp(b.created_at);
-            const sizeStr = formatBytes(b.size_bytes);
-            html += `
-              <div style="background:var(--fill-subtle); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
-                <div style="display:flex; flex-direction:column; gap:3px;">
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-weight:600; font-size:12.5px; color:#fff;">${escapeHtml(b.file_name)}</span>
-                    <span class="tag-pill tag-blue" style="font-size:10.5px;">${b.entry_count} 处键值</span>
-                    <span style="font-size:11px; color:var(--text-tertiary); font-family:var(--font-mono);">${sizeStr}</span>
-                  </div>
-                  <div style="font-size:11px; color:var(--text-tertiary); font-family:var(--font-mono);">${escapeHtml(timeStr)} · ${escapeHtml(b.file_path)}</div>
-                </div>
-                <div style="display:flex; gap:6px;">
-                  <button class="btn btn-primary" style="padding:3px 10px; font-size:11px;" onclick="restoreRegistryBackup('${escapeJsString(b.file_path)}')">一键还原</button>
-                  <button class="btn btn-secondary" style="padding:3px 8px; font-size:11px;" onclick="revealInExplorer('${escapeJsString(b.file_path)}')">定位</button>
-                  <button class="btn btn-danger" style="padding:3px 8px; font-size:11px;" onclick="deleteRegistryBackup('${escapeJsString(b.file_path)}')">删除</button>
-                </div>
-              </div>
-            `;
-          });
-          modalContainer.innerHTML = html;
-        }
-      }
-    }
-
-    function openRegistryBackupsModal() {
-      loadRegistryBackups();
-      document.getElementById('registryBackupsModal')?.classList.add('active');
-    }
-
-    function closeRegistryBackupsModal() {
-      document.getElementById('registryBackupsModal')?.classList.remove('active');
-    }
-
-    function restoreRegistryBackup(path) {
-      openConfirmModal('一键还原注册表快照', `确定要将该注册表快照完整还原回系统吗？<br><br><span style="font-family:var(--font-mono); font-size:11px; color:#60cdff;">${escapeHtml(path)}</span><br><br>系统将通过 Windows reg 原生命令行将之前备份的键值原子恢复。`, async () => {
-        closeConfirmModal();
-        showToast('正在还原注册表快照...');
-        try {
-          const res = await fetch('/api/registry/backups/restore', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ backup_path: path })
-          });
-          const data = await res.json();
-          if (data.success) {
-            showToast('注册表快照已成功还原！');
-            loadRegistryIssues();
-            loadRegistryBackups();
-          } else {
-            showToast('还原失败: ' + (data.error || '未知错误'));
-          }
-        } catch (e) {
-          showToast('还原异常: ' + e.message);
-        }
-      });
-    }
-
-    function deleteRegistryBackup(path) {
-      openConfirmModal('删除注册表快照', `确定要彻底删除该快照文件吗？删除后将无法基于此快照回滚。`, async () => {
-        closeConfirmModal();
-        try {
-          const res = await fetch('/api/registry/backups/delete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ backup_path: path })
-          });
-          const data = await res.json();
-          if (data.success) {
-            showToast('快照已删除');
-            loadRegistryBackups();
-          } else {
-            showToast('删除失败: ' + (data.error || '未知错误'));
-          }
-        } catch (e) {
-          showToast('删除异常: ' + e.message);
-        }
-      });
-    }
-
     async function rollbackJunction(src) {
       openConfirmModal('还原 Junction 联接确认', `确定要将软链接还原回原始 C: 盘真实目录吗？`, async () => {
         closeConfirmModal();
@@ -4972,7 +4788,6 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       loadSystemMaintenance();
       loadInstalledApps();
       loadGiantFiles();
-      loadRegistryBackups();
     });
   </script>
 </body>
