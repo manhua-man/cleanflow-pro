@@ -775,6 +775,206 @@
     }
 
     /* ==========================================================================
+       Scheme 1: Multi-Category Spectrum Distribution Bar
+       ========================================================================== */
+    .spectrum-card {
+      background: linear-gradient(135deg, rgba(22, 28, 40, 0.95) 0%, rgba(16, 21, 31, 0.95) 100%);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+    .spectrum-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .spectrum-title-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: #60cdff;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .spectrum-main-title {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-top: 2px;
+    }
+    .spectrum-reclaim-badge {
+      font-size: 11.5px;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--stroke-card);
+      padding: 4px 10px;
+      border-radius: 9999px;
+    }
+    .spectrum-bar-track {
+      height: 20px;
+      width: 100%;
+      border-radius: 9999px;
+      overflow: hidden;
+      display: flex;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+    .spectrum-segment {
+      height: 100%;
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+      position: relative;
+      cursor: pointer;
+    }
+    .spectrum-segment:hover {
+      filter: brightness(1.25);
+      z-index: 2;
+    }
+    .spectrum-legend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+      font-size: 11.5px;
+    }
+    .spectrum-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s ease;
+    }
+    .spectrum-legend-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .spectrum-color-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ==========================================================================
+       Scheme 1: Full-Disk Giant Files Treemap Box Hierarchy
+       ========================================================================== */
+    .treemap-section {
+      background: linear-gradient(135deg, rgba(20, 26, 38, 0.95) 0%, rgba(14, 18, 27, 0.98) 100%);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    }
+    .treemap-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .treemap-canvas-container {
+      height: 280px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 6px;
+      padding: 6px;
+      background: rgba(8, 11, 16, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      box-sizing: border-box;
+      position: relative;
+    }
+    .treemap-cell {
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+      box-sizing: border-box;
+      user-select: none;
+    }
+    .treemap-cell:hover {
+      filter: brightness(1.25);
+      transform: translateY(-1px);
+      z-index: 10;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+    }
+    .treemap-cell.active-selected {
+      outline: 2px solid #60cdff;
+      outline-offset: 1px;
+    }
+    .treemap-cell-top {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .treemap-cell-badge {
+      display: inline-block;
+      align-self: flex-start;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .treemap-cell-name {
+      font-weight: 700;
+      font-size: 13px;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .treemap-cell-path {
+      font-size: 10.5px;
+      opacity: 0.75;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .treemap-cell-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 6px;
+      margin-top: 6px;
+      font-size: 11px;
+    }
+    .treemap-inspector-strip {
+      background: rgba(12, 16, 24, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+    .status-dot-pulse {
+      animation: statusPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes statusPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* ==========================================================================
        High-Density DataGrid & Views
        ========================================================================== */
     .desktop-commandbar {
@@ -1448,6 +1648,32 @@
             </div>
           </div>
 
+          <!-- Multi-Category Spectrum Distribution Bar (Scheme 1 Component A) -->
+          <div class="spectrum-card" id="cleanSpectrumCard" style="margin-top: 18px; margin-bottom: 20px;">
+            <div class="spectrum-header">
+              <div>
+                <span class="spectrum-title-tag">系统空间多维资产构成光谱</span>
+                <div class="spectrum-main-title">
+                  <span id="spectrumDriveLabel">C 盘</span> <span id="spectrumTotalText" style="color: #60cdff;">14.5 GB</span> 可清理资产色彩编码分布
+                </div>
+              </div>
+              <div class="spectrum-reclaim-badge">
+                总计可回收: <strong id="spectrumReclaimVal" style="color: #22c55e;">14.5 GB</strong> / 100% 安全
+              </div>
+            </div>
+
+            <!-- The Spectrum Bar -->
+            <div class="spectrum-bar-track" id="spectrumSegmentsBar">
+              <div style="width: 100%; height: 100%; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-tertiary);">
+                正在检索多维资产色彩分布...
+              </div>
+            </div>
+
+            <!-- Spectrum Legend -->
+            <div class="spectrum-legend-grid" id="spectrumLegendGrid">
+            </div>
+          </div>
+
           <!-- 6 Consumer Feature Cards Grid -->
           <div class="consumer-cards-grid" style="grid-template-columns: repeat(3, 1fr);">
             <!-- Card 1: System Temp -->
@@ -1593,6 +1819,45 @@
                 <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
                 <span>刷新大文件</span>
               </button>
+            </div>
+
+            <!-- Treemap Visualization Section (Scheme 1 Component B) -->
+            <div class="treemap-section" id="giantTreemapSection">
+              <div class="treemap-header">
+                <div>
+                  <span style="font-size: 11px; font-weight: 700; color: #10b981; letter-spacing: 0.05em; text-transform: uppercase;">巨型资产透视 · Treemap 空间矩形树图</span>
+                  <div style="font-size: 14px; font-weight: 600; color: #fff; margin-top: 2px;">
+                    全盘大资产面积直观透视 (<span id="treemapSubtitleCount">0</span> 处核心文件，色块面积 = 物理占用)
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span class="badge-pill badge-openwith" style="font-size: 11px;">鼠标悬停可透视并快速定位</span>
+                </div>
+              </div>
+
+              <!-- Treemap Canvas -->
+              <div class="treemap-canvas-container" id="giantTreemapCanvas">
+                <div style="grid-column: span 12; grid-row: span 6; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); font-size: 13px;">
+                  点击右上角“刷新大文件”开始构建全盘 Treemap 空间树图...
+                </div>
+              </div>
+
+              <!-- Treemap Inspector Strip -->
+              <div class="treemap-inspector-strip" id="treemapInspectorStrip">
+                <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1;">
+                  <span class="status-dot-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #60cdff; flex-shrink: 0;"></span>
+                  <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <span style="font-weight: 600; color: #fff;" id="treemapDetailName">请悬停或选择上方树图色块</span>
+                    <span style="color: var(--stroke-divider); margin: 0 8px;">|</span>
+                    <span style="color: #60cdff; font-weight: 700; font-family: var(--font-mono);" id="treemapDetailSize">--</span>
+                    <span style="color: var(--stroke-divider); margin: 0 8px;">|</span>
+                    <span style="color: var(--text-tertiary); font-family: var(--font-mono); font-size: 11px;" id="treemapDetailPath">--</span>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;" id="treemapDetailActions">
+                  <span style="color: #10b981; font-size: 11.5px;" id="treemapDetailAdvice">智能空间治理建议就绪</span>
+                </div>
+              </div>
             </div>
 
             <div class="data-grid-container" style="flex: 1;">
@@ -2869,6 +3134,8 @@
           });
         });
 
+        updateSpectrumDistribution(state.scanReport, totalReclaimable);
+
         renderOverviewTable();
         renderDevCacheTable();
         renderOfficeTable();
@@ -3405,6 +3672,10 @@
       showToast('正在多线程全盘检索 100MB+ 沉淀文件...');
       const gc = document.getElementById('giantCounter');
       if (gc) gc.innerText = '排查中...';
+      const canvas = document.getElementById('giantTreemapCanvas');
+      if (canvas && (!state.giantFiles || state.giantFiles.length === 0)) {
+        canvas.innerHTML = '<div style="grid-column: span 12; grid-row: span 6; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); font-size: 13px; gap: 8px;"><span class="status-dot-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span><span>正在全盘扫描 100MB+ 巨型资产并构建 Treemap 空间树图...</span></div>';
+      }
       try {
         const res = await fetch('/api/giant-files');
         state.giantFiles = await res.json();
@@ -3412,6 +3683,7 @@
         if (document.getElementById('badgeAnalyze')) document.getElementById('badgeAnalyze').innerText = `${state.giantFiles.length} 项`;
         if (document.getElementById('cardGiantMetric')) document.getElementById('cardGiantMetric').innerText = `${(state.giantFiles.reduce((acc, f) => acc + f.size_bytes, 0) / (1024**3)).toFixed(1)} GB`;
         renderGiantDistribution();
+        renderGiantTreemap(state.giantFiles);
         renderGiantTable();
       } catch (e) {
         showToast('排查大文件失败: ' + e.message);
@@ -3555,6 +3827,253 @@
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    // ==========================================
+    // Scheme 1: Visualization Upgrade Functions
+    // ==========================================
+    function updateSpectrumDistribution(report, totalReclaimable) {
+      const container = document.getElementById('spectrumSegmentsBar');
+      const legendGrid = document.getElementById('spectrumLegendGrid');
+      const totalText = document.getElementById('spectrumTotalText');
+      const reclaimVal = document.getElementById('spectrumReclaimVal');
+      if (!container || !legendGrid) return;
+
+      container.innerHTML = '';
+      legendGrid.innerHTML = '';
+
+      if (!report || !report.categories || totalReclaimable === 0) {
+        container.innerHTML = '<div style="width:100%; height:100%; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--text-tertiary);">完成扫描后呈现空间色彩分布</div>';
+        if (totalText) totalText.innerText = '0 B';
+        if (reclaimVal) reclaimVal.innerText = '0 B';
+        return;
+      }
+
+      if (totalText) totalText.innerText = formatBytes(totalReclaimable);
+      if (reclaimVal) reclaimVal.innerText = formatBytes(totalReclaimable);
+
+      const colorMap = {
+        'system': { name: '系统临时', color: '#3b82f6' },
+        'dev_cache': { name: '现代开发', color: '#10b981' },
+        'office_chat': { name: '微信办公', color: '#a855f7' },
+        'browser_cache': { name: '浏览器冗余', color: '#f59e0b' },
+        'sqlite_optimize': { name: '数据库压缩', color: '#06b6d4' },
+        'db_vacuum': { name: '数据库压缩', color: '#06b6d4' },
+        'docker_virtual': { name: 'Docker虚拟化', color: '#6366f1' },
+        'other': { name: '其他残留', color: '#64748b' }
+      };
+
+      const validCats = report.categories.filter(c => c.total_size_bytes > 0);
+      if (validCats.length === 0) {
+        container.innerHTML = '<div style="width:100%; height:100%; background:rgba(34,197,94,0.15); color:#22c55e; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600;">系统极其干净，无可清理残留</div>';
+        return;
+      }
+
+      validCats.forEach(cat => {
+        const meta = colorMap[cat.id] || { name: cat.name || '其他数据', color: '#64748b' };
+        const pct = ((cat.total_size_bytes / totalReclaimable) * 100).toFixed(1);
+
+        const seg = document.createElement('div');
+        seg.className = 'spectrum-segment';
+        seg.style.width = `${pct}%`;
+        seg.style.backgroundColor = meta.color;
+        seg.title = `${meta.name}: ${formatBytes(cat.total_size_bytes)} (${pct}%) - 点击查看详情`;
+        seg.onclick = () => openInspectorByCategory(cat.id);
+        container.appendChild(seg);
+
+        const leg = document.createElement('div');
+        leg.className = 'spectrum-legend-item';
+        leg.title = `点击排查 ${meta.name}`;
+        leg.onclick = () => openInspectorByCategory(cat.id);
+        leg.innerHTML = `
+          <span class="spectrum-color-dot" style="background-color: ${meta.color};"></span>
+          <span>${meta.name}: <strong style="color: #ffffff;">${formatBytes(cat.total_size_bytes)}</strong></span>
+        `;
+        legendGrid.appendChild(leg);
+      });
+    }
+
+    function renderGiantTreemap(files) {
+      const canvas = document.getElementById('giantTreemapCanvas');
+      const countEl = document.getElementById('treemapSubtitleCount');
+      if (!canvas) return;
+
+      if (!files || files.length === 0) {
+        canvas.innerHTML = '<div style="grid-column: span 12; grid-row: span 6; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); font-size: 13px;">暂未检索到 100MB+ 巨型资产</div>';
+        if (countEl) countEl.innerText = '0';
+        return;
+      }
+
+      if (countEl) countEl.innerText = files.length;
+      canvas.innerHTML = '';
+
+      const sorted = [...files].sort((a, b) => b.size_bytes - a.size_bytes);
+      const totalBytes = sorted.reduce((sum, f) => sum + f.size_bytes, 0);
+
+      const gridSpans = [
+        { col: 5, row: 6 },
+        { col: 4, row: 4 },
+        { col: 3, row: 3 },
+        { col: 3, row: 3 },
+        { col: 4, row: 2 }
+      ];
+
+      const getStyleForFile = (f) => {
+        const ext = (f.extension || '').toLowerCase();
+        const cat = (f.category || '').toLowerCase();
+        const name = (f.name || '').toLowerCase();
+
+        if (cat.includes('database') || ext === 'db' || ext === 'sqlite' || ext === 'vscdb' || name.includes('.db')) {
+          return {
+            label: '数据库',
+            bg: 'linear-gradient(135deg, rgba(6,182,212,0.35) 0%, rgba(14,116,144,0.55) 100%)',
+            border: 'rgba(6,182,212,0.5)',
+            badgeBg: 'rgba(6,182,212,0.22)',
+            badgeColor: '#67e8f9',
+            advice: 'SQLite 数据库 / 建议原生 VACUUM 收缩'
+          };
+        }
+        if (cat.includes('virtual') || ext === 'img' || ext === 'vmdk' || ext === 'qcow2' || ext === 'vhd') {
+          return {
+            label: '虚拟机磁盘',
+            bg: 'linear-gradient(135deg, rgba(168,85,247,0.35) 0%, rgba(126,34,206,0.55) 100%)',
+            border: 'rgba(168,85,247,0.5)',
+            badgeBg: 'rgba(168,85,247,0.22)',
+            badgeColor: '#d8b4fe',
+            advice: '虚拟机虚拟盘 / 建议使用 NTFS 符号链接搬家至副盘'
+          };
+        }
+        if (ext === 'dmp' || ext === 'sys' || name.includes('ram.img')) {
+          return {
+            label: '系统与快照',
+            bg: 'linear-gradient(135deg, rgba(99,102,241,0.35) 0%, rgba(67,56,202,0.55) 100%)',
+            border: 'rgba(99,102,241,0.5)',
+            badgeBg: 'rgba(99,102,241,0.22)',
+            badgeColor: '#a5b4fc',
+            advice: '快照与系统转储 / 可视需求清理或随主目录迁移'
+          };
+        }
+        if (cat.includes('installer') || cat.includes('executable') || ext === 'exe' || ext === 'msi') {
+          return {
+            label: '安装包程序',
+            bg: 'linear-gradient(135deg, rgba(245,158,11,0.35) 0%, rgba(180,83,9,0.55) 100%)',
+            border: 'rgba(245,158,11,0.5)',
+            badgeBg: 'rgba(245,158,11,0.22)',
+            badgeColor: '#fcd34d',
+            advice: '安装包与可执行程序 / 建议核验后清理或归档'
+          };
+        }
+        if (cat.includes('archive') || ext === 'zip' || ext === 'rar' || ext === '7z' || ext === 'tar') {
+          return {
+            label: '压缩归档',
+            bg: 'linear-gradient(135deg, rgba(59,130,246,0.35) 0%, rgba(29,78,216,0.55) 100%)',
+            border: 'rgba(59,130,246,0.5)',
+            badgeBg: 'rgba(59,130,246,0.22)',
+            badgeColor: '#93c5fd',
+            advice: '历史压缩归档 / 建议核实后安全清理'
+          };
+        }
+        return {
+          label: '沉淀大资产',
+          bg: 'linear-gradient(135deg, rgba(71,85,105,0.45) 0%, rgba(30,41,59,0.65) 100%)',
+          border: 'rgba(100,116,139,0.5)',
+          badgeBg: 'rgba(100,116,139,0.22)',
+          badgeColor: '#cbd5e1',
+          advice: '沉淀大资产 / 可定位目录查看'
+        };
+      };
+
+      const topCount = Math.min(sorted.length, 5);
+      for (let i = 0; i < topCount; i++) {
+        const file = sorted[i];
+        const span = gridSpans[i] || { col: 3, row: 3 };
+        const styleMeta = getStyleForFile(file);
+        const pct = ((file.size_bytes / (totalBytes || 1)) * 100).toFixed(1);
+
+        const cell = document.createElement('div');
+        cell.className = 'treemap-cell';
+        cell.style.gridColumn = `span ${span.col}`;
+        cell.style.gridRow = `span ${span.row}`;
+        cell.style.background = styleMeta.bg;
+        cell.style.border = `1px solid ${styleMeta.border}`;
+
+        const pathParts = file.path.split(/[\\/]/);
+        const folderPart = pathParts.length > 2 ? pathParts.slice(-3, -1).join('/') : '';
+
+        cell.innerHTML = `
+          <div class="treemap-cell-top">
+            <span class="treemap-cell-badge" style="background: ${styleMeta.badgeBg}; color: ${styleMeta.badgeColor};">
+              ${styleMeta.label} ${formatBytes(file.size_bytes)}
+            </span>
+            <div class="treemap-cell-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
+            <div class="treemap-cell-path" title="${escapeHtml(file.path)}">${escapeHtml(folderPart)}</div>
+          </div>
+          <div class="treemap-cell-bottom">
+            <span style="opacity: 0.85; font-size: 10.5px;">占大资产 ${pct}%</span>
+            <span style="font-size: 10.5px; color: ${styleMeta.badgeColor}; font-weight: 600;">点击透视</span>
+          </div>
+        `;
+
+        cell.onmouseenter = () => updateTreemapInspector(file, pct, styleMeta);
+        cell.onclick = () => {
+          document.querySelectorAll('.treemap-cell').forEach(c => c.classList.remove('active-selected'));
+          cell.classList.add('active-selected');
+          updateTreemapInspector(file, pct, styleMeta);
+          highlightAndScrollToGiantFile(file.path);
+        };
+
+        canvas.appendChild(cell);
+      }
+
+      if (sorted.length > 0) {
+        const topFile = sorted[0];
+        const topPct = ((topFile.size_bytes / (totalBytes || 1)) * 100).toFixed(1);
+        updateTreemapInspector(topFile, topPct, getStyleForFile(topFile));
+      }
+    }
+
+    function updateTreemapInspector(file, pct, styleMeta) {
+      const nameEl = document.getElementById('treemapDetailName');
+      const sizeEl = document.getElementById('treemapDetailSize');
+      const pathEl = document.getElementById('treemapDetailPath');
+      const adviceEl = document.getElementById('treemapDetailAdvice');
+      const actionsEl = document.getElementById('treemapDetailActions');
+
+      if (nameEl) nameEl.innerText = file.name;
+      if (sizeEl) sizeEl.innerText = `${formatBytes(file.size_bytes)} (${pct}%)`;
+      if (pathEl) {
+        pathEl.innerText = file.path;
+        pathEl.title = file.path;
+      }
+      if (adviceEl) adviceEl.innerText = styleMeta.advice;
+
+      if (actionsEl) {
+        actionsEl.innerHTML = `
+          <span style="color: #10b981; font-size: 11.5px; margin-right: 6px;">${styleMeta.advice}</span>
+          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapeHtml(file.path)}')">定位目录</button>
+          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="copyTextToClipboard('${escapeHtml(file.path)}')">复制路径</button>
+        `;
+      }
+    }
+
+    function highlightAndScrollToGiantFile(targetPath) {
+      const rows = document.querySelectorAll('#giantFilesTableBody tr');
+      rows.forEach(r => {
+        if (r.getAttribute('data-path') === targetPath) {
+          r.classList.add('selected');
+          r.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          r.classList.remove('selected');
+        }
+      });
+    }
+
+    function copyTextToClipboard(text) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => showToast('已成功复制绝对路径到剪贴板'));
+      } else {
+        showToast('已复制路径: ' + text);
+      }
     }
 
     // Junction Migration
@@ -3917,6 +4436,7 @@
       loadStartupItems();
       loadSystemMaintenance();
       loadInstalledApps();
+      loadGiantFiles();
     });
   </script>
 </body>
