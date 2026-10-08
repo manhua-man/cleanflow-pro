@@ -16,72 +16,52 @@
    - 启动即工作，关闭即完全释放系统资源。
 3. **100% 数据安全与无损可退 (Safety First)**
    - **注册表安全底线**：任何删除指令执行前，系统自动生成标准 Windows `.reg` 备份文件，支持用户随时双击回滚。
-   - **搬迁无损底线**：基于 Windows NTFS 原生 Directory Junction 技术，保持原始物理联接点不变，杜绝应用程序路径失效。
+   - **搬迁无损底线**：基于 Windows NTFS 原生 Directory Junction 技术与事务型暂存重命名，保持原始物理联接点不变，杜绝应用程序路径失效与文件损坏。
    - **应用缓存专清底线**：严格区分用户数据与离线缓存，坚决不清除 Cookie、登录凭据、聊天记录数据库与浏览器书签。
 
 ---
 
-## 二、当前版本已交付稳定特性矩阵 (v1.2)
+## 二、当前版本已交付稳定特性矩阵 (v0.1.1 Delivered Matrix)
 
-| 模块名称 | 核心能力 | 本机实测检出 / 治理效果 | 安全保障措施 |
+| 模块名称 | 核心能力 | 本机实测检出 / 治理效果 | 架构与安全保障措施 |
 | :--- | :--- | :--- | :--- |
-| **空间健康体检与清理** | 系统垃圾、临时文件、开发包、数据库一站式聚合体检与一键治理 | **7.2 GB** 可释放 | 智能推荐勾选，防误删白名单机制 |
-| **主流浏览器深度专清** | 覆盖 Edge、Chrome、360 浏览器的离线页面、媒体与编译代码缓存 | **881.7 MB** (5 处核心缓存) | 严格保护 Cookie、登录态与书签 |
-| **注册表冗余与失效残留** | 扫描失效 MUICache、无效 OpenWith 打开方式、死链卸载项 | **196 处** 真实残留项 | 修复前自动导出时间戳 `.reg` 恢复备份 |
-| **目录无损搬家 (Junction)** | C 盘大体积目录向大容量磁盘转移并原位建立虚拟联接点 | **13.9 GB** 资产迁移潜能 | NTFS 原生硬联接，对上层程序完全透明 |
-| **大文件雷达 (100MB+)** | C 盘及全盘深层沉淀文件索引，类型占比分层条形图谱 | 检出 **91 个** 大资产 (**30.4 GB**) | 支持直接定位资源管理器及一键安全粉碎 |
-| **开发与编译缓存治理** | npm、pnpm、Unity Package、Gradle、Cargo 依赖包集中释放 | **515.9 MB** 构建依赖缓存 | 仅清理全局存储与 tarball，不坏本地项目 |
-| **SQLite 数据库碎片收缩** | 飞书、Chrome、VSCode 等长期高频读写数据库 VACUUM 整理 | **4.0 GB** 碎片压缩空间 | 执行 `PRAGMA page_count` 安全收缩闲置页 |
-| **自定义规则引擎** | 支持用户以环境变量通配符灵活自定义专有清理路径 | 动态追加并持久化配置 | 路径有效性校验，热加载即时生效 |
+| **空间健康体检与清理** | 系统垃圾、临时文件、开发包、数据库一站式聚合体检与一键治理 | **15.8 GB** 可治理资产 | 智能推荐勾选，多场景分级标签，防误删白名单机制 |
+| **全盘交互式 Treemap 树图** | Windows 11 Fluent 2 亚克力玻璃拟态全盘空间占比拓扑透视 | 实时下钻与悬浮浮层 | 320px 专业视窗，颜色编码语义化绑定，双行属性检视条 |
+| **重复文件多核流式查重** | 64 KB 自适应流式缓冲 + Rayon 工作窃取多核流式并行哈希 | 秒级完成海量重复候选归并 | 最短路径智选保留，I/O 系统调用开销锐减 87.5% |
+| **注册表并发极速巡检与清理** | 预缓存 App Paths + 递归流式解析 + `std::thread::scope` 五线程并发 | 耗时从 3.27s 降至 **0.90s** (3.6x 提升) | 修复前自动导出时间戳 `.reg` 恢复备份，Rayon 并行批处理 |
+| **目录事务型搬家 (Junction)** | C 盘大目录转移至大容量磁盘并建立虚拟联接，支持 1-Click 回滚 | 160MB 实测 2.1s 闭环完成 | 事务型暂存重命名 + 自动无损回滚 + `/J /DCOPY:DAT` 零缓存多线程 |
+| **SQLite 数据库碎片收缩** | 飞书、Chrome、Cursor 等高频读写数据库 VACUUM 物理收缩 | 释放 4.05 GB 游离碎片 | 原生 `PRAGMA freelist_count` 与 WAL 日志智能安全避让 |
+| **系统极客工具箱** | 开机启动项纳管、Docker 虚拟化专清、系统回收站清理、软件盘点 | 聚合全能系统治理 | 原生 Windows API 与轻量化注册表解析，无第三方运行库依赖 |
 
 ---
 
-## 三、待推进特性与迭代规划目录 (Categorized Feature Backlog)
+## 三、v0.2.0 里程碑四大核心支柱规划 (v0.2.0 Architecture Roadmap)
 
-### 专项一：大文件雷达深层交互与文件级治理 (Giant Files Radar)
-- **F1.1: 文件详情侧边抽屉 / 属性卡片**
-  - 单击大文件条目唤起侧边信息卡片，展示创建时间、最后修改时间、最后访问时间。
-  - 显示当前文件是否正被某些系统进程锁定或独占打开。
-- **F1.2: 原生资源管理器右键上下文菜单**
-  - 支持快捷操作：在 Windows 资源管理器中打开并高亮选中目标文件 (`explorer.exe /select, <path>`)。
-  - 一键复制文件绝对路径至系统剪贴板。
-  - 提供快速计算文件 SHA256 / MD5 哈希校验和能力，方便排查重复包。
-- **F1.3: 时间跨度与冷热资产切片**
-  - 增加时间维度过滤器：`超过 1 年未访问 (极冷资产)`、`6 个月至 1 年`、`最近 3 个月内活跃`。
-  - 支持多磁盘跨盘快速切换雷达扫描 (C: / D: / E:)。
+### 支柱 1：AI 开发者与高容量数字资产专属搬迁预设 (AI & High-Value Asset Presets)
+- **HuggingFace 权重存储**：`%USERPROFILE%\.cache\huggingface\hub` (动辄 20GB - 100GB 大模型权重)。
+- **Ollama 本地模型镜像**：`%USERPROFILE%\.ollama\models` (本地大模型镜像集中存储)。
+- **PyTorch / TorchHub 预训练模型**：`%USERPROFILE%\.cache\torch\hub`。
+- **Unity Hub 多版本引擎编辑器**：`C:\Program Files\Unity\Hub\Editor` (单个引擎 8GB - 20GB)。
+- **Steam 游戏库与着色器缓存**：`C:\Program Files (x86)\Steam\steamapps\common` 与 `shadercache`。
 
-### 专项二：主流与国产浏览器深度专清扩充 (Browser Hygiene)
-- **F2.1: 国产主流浏览器规则库扩充**
-  - **QQ 浏览器**：`%LOCALAPPDATA%\Tencent\QQBrowser\User Data\Default\Cache` 及代码缓存。
-  - **搜狗高速浏览器**：`%APPDATA%\SogouExplorer\Webkit\Cache`。
-  - **夸克桌面端 (Quark PC)**：`%LOCALAPPDATA%\Quark\User Data\Default\Cache`。
-- **F2.2: 极客与开源系浏览器专清**
-  - **Brave 浏览器**：`%LOCALAPPDATA%\BraveSoftware\Brave-Browser\User Data\Default\Cache`。
-  - **Mozilla Firefox**：`%LOCALAPPDATA%\Mozilla\Firefox\Profiles\*.default*\cache2` 结构解析。
-- **F2.3: 浏览器专清维度细化**
-  - 独立拆分：网页媒体缓存 (Media Cache)、JS/WASM 编译代码缓存 (Code Cache)、GPU 着色器缓存 (GPUCache)、崩溃转储日志 (Crashpad)。
+### 支柱 2：注册表备份快照可视化时间轴与一键导入复原 (Registry Snapshot Timeline)
+- **备份时间轴面板**：在注册表工作区直观呈现 `%TEMP%\cleanflow_registry_backups\` 下的历史备份列表、创建时间戳与受影响项数。
+- **原生 1-Click 复原闭环**：前端点击“恢复该快照”，后端直接调用 `reg.exe import` 秒级完整写回，提供无懈可击的系统容灾体验。
+- **资源管理器一键定位**：支持直接打开文件夹选中目标 `.reg` 文件，便于用户手动审核备份内容。
 
-### 专项三：目录无损搬家高价值预设库扩充 (Junction Studio)
-- **F3.1: 开发者与高容量软件预设拓展**
-  - **Steam 游戏下载库与着色器缓存**：`C:\Program Files (x86)\Steam\steamapps\common` 及 `shadercache`。
-  - **Unity Hub 多版本编辑器存储**：`C:\Program Files\Unity\Hub\Editor` (单个版本常达 5GB-15GB)。
-  - **Visual Studio 共享组件与下载缓存**：`C:\ProgramData\Microsoft\VisualStudio\Packages`。
-  - **HuggingFace 与 AI 模型权重缓存**：`C:\Users\<User>\.cache\huggingface\hub`。
-  - **Node.js 全局缓存与 pnpm Store**：`%LOCALAPPDATA%\pnpm\store`。
-- **F3.2: 搬迁前进程互斥检查**
-  - 搬迁开始前自动检测源目录下是否有文件正被正在运行的软件占用（如微信运行中禁止搬迁微信数据目录）。
-  - 提供温和的进程识别与一键辅助关闭或等待机制，避免因文件锁定导致复制中断。
+### 支柱 3：搬家前运行中进程互斥主动检测与温和接管 (Pre-Flight Mutual-Exclusion Inspector)
+- **进程句柄检测**：在启动搬家前，自动扫描是否有进程正在占用源目录（如微信对应的 `WeChat.exe`, `xwechat.exe`，Android 对应的 `adb.exe`, `qemu-system-x86_64.exe`）。
+- **友好交互指引**：主动列出占用进程名与 PID，提供“协助安全关闭进程并继续”或“暂不关闭取消操作”，提升迁移成功率与用户亲和度。
 
-### 专项四：注册表治理深度与容灾机制 (Registry Cleaner)
-- **F4.1: 更多高危与冗余键位安全排查**
-  - **无效 COM / ActiveX 接口残留**：排查 `HKCR\CLSID` 中 InprocServer32 指向已删除 DLL / OCX 的死链。
-  - **失效服务残留项**：排查 `HKLM\SYSTEM\CurrentControlSet\Services` 中 ImagePath 指向已被彻底删除的可执行文件的无主服务项。
-- **F4.2: 注册表备份可视化管理面板**
-  - 在注册表工作区内嵌“历史备份时间轴”，列出所有生成的 `.reg` 备份文件及其生成时间、包含项数。
-  - 提供 `一键还原该备份` 按钮，直接调用 Windows `reg.exe import` 完成极速无损复原。
+### 支柱 4：应用卸载深层残留猎手 (Residual Trace Hunter)
+- **已卸载应用残留目录排查**：排查 `%LOCALAPPDATA%`, `%APPDATA%`, `%PROGRAMDATA%` 中主程序已被彻底删除的陈旧数据孤岛。
+- **白名单机制**：内置严格系统服务与驱动级保护列表，确保深度清理零误伤。
 
-### 专项五：性能极致优化与系统协同 (Performance & Engine)
-- **F5.1: NTFS USN Journal / MFT 极速扫描适配**
-  - 针对大文件雷达，探索引入 Windows NTFS 卷的 USN Change Journal 或 MFT 解析，使全盘大文件检索从数秒缩减至毫秒级。
-- **F5.2: 扫描任务并发与 CPU 亲和度控制**
-  - 确保深度扫描在后台进行时 CPU 占用稳定在可控区间（<15%），保证日常办公、游戏、编程不受丝毫卡顿干扰。
+---
+
+## 四、实施排期与演进计划 (Phased Implementation Plan)
+
+- **Phase 1 (v0.2.0-alpha)**: 扩展 AI / LLM / Steam 大资产专属搬迁预设与识别引擎。
+- **Phase 2 (v0.2.0-beta)**: 落地注册表快照管理时间轴、1-Click 导入恢复 API 与前端视图联动。
+- **Phase 3 (v0.2.0-rc)**: 集成搬迁前进程互斥主动检测与一键温和关闭工作流。
+- **Phase 4 (v0.2.0-final)**: 全量测试验证、便携包与 Inno Setup 安装向导双轨自动化打包交付。
