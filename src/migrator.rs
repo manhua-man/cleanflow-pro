@@ -227,19 +227,8 @@ pub fn start_migration_task(source_str: String, target_drive_str: String) -> Res
                     return;
                 }
 
-                // Create NTFS Directory Junction (mklink /J "source" "destination")
-                let mklink_cmd = format!(
-                    "mklink /J \"{}\" \"{}\"",
-                    thread_src.to_string_lossy(),
-                    thread_dst.to_string_lossy()
-                );
-
-                let link_status = Command::new("cmd")
-                    .args(["/C", &mklink_cmd])
-                    .status();
-
-                match link_status {
-                    Ok(l_st) if l_st.success() => {
+                match create_ntfs_junction(&thread_src, &thread_dst) {
+                    Ok(()) => {
                         let record = JunctionRecord {
                             id: format!("{}_{}", thread_drive, thread_dest_dir_name),
                             name: thread_folder_name,
@@ -261,16 +250,6 @@ pub fn start_migration_task(source_str: String, target_drive_str: String) -> Res
                         s.percent = 100.0;
                         s.current_file = "搬迁完成! 已建立透明符号联接".to_string();
                     }
-                    Ok(l_st) => {
-                        // Rollback: Restore original source folder from staging
-                        let _ = fs::rename(&staging_dir, &thread_src);
-                        let _ = fs::remove_dir_all(&thread_dst);
-
-                        let mut s = thread_state.lock().unwrap();
-                        s.is_active = false;
-                        s.state = "FAILED".to_string();
-                        s.error_msg = Some(format!("创建目录联接失败，退出码: {:?}。已安全自动回滚源目录。", l_st.code()));
-                    }
                     Err(e) => {
                         // Rollback: Restore original source folder from staging
                         let _ = fs::rename(&staging_dir, &thread_src);
@@ -279,7 +258,7 @@ pub fn start_migration_task(source_str: String, target_drive_str: String) -> Res
                         let mut s = thread_state.lock().unwrap();
                         s.is_active = false;
                         s.state = "FAILED".to_string();
-                        s.error_msg = Some(format!("调用 cmd mklink 失败: {}。已安全自动回滚源目录。", e));
+                        s.error_msg = Some(format!("{}。已安全自动回滚源目录。", e));
                     }
                 }
             }
@@ -370,23 +349,11 @@ pub fn migrate_to_drive<P: AsRef<Path>>(source: P, target_drive_letter: &str) ->
         bail!("源目录被运行中的应用进程锁定（无法重命名）: {}。源数据毫发无损，请完全关闭对应软件后重试。", e);
     }
 
-    // 3. Create NTFS Directory Junction (mklink /J "source" "destination")
-    let mklink_cmd = format!(
-        "mklink /J \"{}\" \"{}\"",
-        src.to_string_lossy(),
-        dst.to_string_lossy()
-    );
-
-    let link_status = Command::new("cmd")
-        .args(["/C", &mklink_cmd])
-        .status()
-        .context("执行 mklink 创建目录联接失败")?;
-
-    if !link_status.success() {
-        // Rollback
+    // 3. Create NTFS Directory Junction
+    if let Err(e) = create_ntfs_junction(src, &dst) {
         let _ = fs::rename(&staging_dir, src);
         let _ = fs::remove_dir_all(&dst);
-        bail!("创建目录联接失败，退出码: {:?}。已安全自动回滚源目录。", link_status.code());
+        bail!("{}。已安全自动回滚源目录。", e);
     }
 
     // 4. Remove staging directory
@@ -476,6 +443,25 @@ pub fn rollback_junction(source_path_str: &str) -> Result<u64> {
     let _ = unregister_junction(source_path_str);
 
     Ok(target_size)
+}
+
+pub fn create_ntfs_junction<P: AsRef<Path>, Q: AsRef<Path>>(source: P, destination: Q) -> Result<()> {
+    let src = source.as_ref().to_str().context("源路径转字符串失败")?;
+    let dst = destination.as_ref().to_str().context("目标路径转字符串失败")?;
+
+    let output = Command::new("cmd")
+        .args(["/C", "mklink", "/J", src, dst])
+        .output()
+        .context("执行系统 cmd mklink 失败")?;
+
+    if output.status.success() {
+        Ok(())
+    } else {
+        let err = String::from_utf8_lossy(&output.stderr).to_string();
+        let out = String::from_utf8_lossy(&output.stdout).to_string();
+        let msg = if !err.trim().is_empty() { err } else { out };
+        bail!("创建 NTFS 目录联接失败: {}", msg.trim());
+    }
 }
 
 pub fn is_junction<P: AsRef<Path>>(path: P) -> bool {
@@ -594,5 +580,23 @@ mod tests {
     fn test_get_migration_status_idle() {
         let st = get_migration_status();
         assert!(!st.is_active || st.state == "COMPLETED" || st.state == "FAILED" || st.state == "IDLE");
+    }
+
+    #[test]
+    fn test_create_and_detect_junction() {
+        let temp = std::env::temp_dir();
+        let target_dir = temp.join("cleanflow_test_target_dir");
+        let link_dir = temp.join("cleanflow_test_link_dir");
+
+        let _ = fs::remove_dir_all(&target_dir);
+        let _ = fs::remove_dir(&link_dir);
+        let _ = fs::create_dir_all(&target_dir);
+
+        let res = create_ntfs_junction(&link_dir, &target_dir);
+        assert!(res.is_ok(), "create_ntfs_junction failed: {:?}", res.err());
+        assert!(is_junction(&link_dir));
+
+        let _ = fs::remove_dir(&link_dir);
+        let _ = fs::remove_dir_all(&target_dir);
     }
 }
