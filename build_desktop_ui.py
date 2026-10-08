@@ -815,48 +815,58 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       border-radius: 9999px;
     }
     .spectrum-bar-track {
-      height: 20px;
+      height: 24px;
       width: 100%;
       border-radius: 9999px;
       overflow: hidden;
       display: flex;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
     }
     .spectrum-segment {
       height: 100%;
       transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
       position: relative;
       cursor: pointer;
+      border-right: 2px solid rgba(10, 13, 19, 0.85);
+      box-sizing: border-box;
+    }
+    .spectrum-segment:last-child {
+      border-right: none;
     }
     .spectrum-segment:hover {
-      filter: brightness(1.25);
+      filter: brightness(1.3);
       z-index: 2;
+      box-shadow: 0 0 12px currentColor;
     }
     .spectrum-legend-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       margin-top: 14px;
       font-size: 11.5px;
     }
     .spectrum-legend-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       color: var(--text-secondary);
       cursor: pointer;
-      padding: 4px 8px;
-      border-radius: var(--radius-sm);
-      transition: background 0.15s ease;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .spectrum-legend-item:hover {
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
     }
     .spectrum-color-dot {
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       flex-shrink: 0;
     }
@@ -880,7 +890,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       align-items: center;
     }
     .treemap-canvas-container {
-      height: 280px;
+      height: 320px;
       width: 100%;
       display: grid;
       grid-template-columns: repeat(12, 1fr);
@@ -894,23 +904,24 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       position: relative;
     }
     .treemap-cell {
-      border-radius: 6px;
-      padding: 10px;
+      border-radius: 8px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
       box-sizing: border-box;
       user-select: none;
+      backdrop-filter: blur(12px);
     }
     .treemap-cell:hover {
-      filter: brightness(1.25);
-      transform: translateY(-1px);
+      filter: brightness(1.28);
+      transform: translateY(-2px);
       z-index: 10;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.65);
     }
     .treemap-cell.active-selected {
       outline: 2px solid #60cdff;
@@ -919,21 +930,21 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     .treemap-cell-top {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
     }
     .treemap-cell-badge {
       display: inline-block;
       align-self: flex-start;
       font-size: 10.5px;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 2px 8px;
       border-radius: 4px;
       letter-spacing: 0.02em;
       white-space: nowrap;
     }
     .treemap-cell-name {
       font-weight: 700;
-      font-size: 13px;
+      font-size: 13.5px;
       color: #ffffff;
       white-space: nowrap;
       overflow: hidden;
@@ -958,14 +969,35 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       font-size: 11px;
     }
     .treemap-inspector-strip {
-      background: rgba(12, 16, 24, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(14, 18, 28, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: var(--radius-sm);
-      padding: 10px 14px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+    .treemap-inspector-row1 {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 12px;
+      gap: 12px;
+    }
+    .treemap-inspector-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+    }
+    .treemap-inspector-row2 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 11.5px;
     }
     .status-dot-pulse {
       animation: statusPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -1843,20 +1875,26 @@ HTML_CONTENT = r'''<!DOCTYPE html>
                 </div>
               </div>
 
-              <!-- Treemap Inspector Strip -->
+              <!-- Treemap Inspector Strip (2-Row Robust Layout) -->
               <div class="treemap-inspector-strip" id="treemapInspectorStrip">
-                <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1;">
-                  <span class="status-dot-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #60cdff; flex-shrink: 0;"></span>
-                  <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    <span style="font-weight: 600; color: #fff;" id="treemapDetailName">请悬停或选择上方树图色块</span>
-                    <span style="color: var(--stroke-divider); margin: 0 8px;">|</span>
-                    <span style="color: #60cdff; font-weight: 700; font-family: var(--font-mono);" id="treemapDetailSize">--</span>
-                    <span style="color: var(--stroke-divider); margin: 0 8px;">|</span>
-                    <span style="color: var(--text-tertiary); font-family: var(--font-mono); font-size: 11px;" id="treemapDetailPath">--</span>
+                <div class="treemap-inspector-row1">
+                  <div class="treemap-inspector-meta">
+                    <span class="status-dot-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #60cdff; flex-shrink: 0;"></span>
+                    <span style="font-weight: 600; font-size: 13.5px; color: #fff;" id="treemapDetailName">请悬停或选择上方树图色块</span>
+                    <span class="tag-pill tag-blue" id="treemapDetailSize" style="font-family: var(--font-mono); font-weight: 700; padding: 2px 8px;">--</span>
+                    <span class="tag-pill" id="treemapDetailCategory" style="background: rgba(255,255,255,0.08); color: #d4dbe8;">核心资产</span>
+                  </div>
+                  <div style="display: flex; gap: 8px; align-items: center;" id="treemapDetailActions">
+                    <!-- Populated by JS -->
                   </div>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;" id="treemapDetailActions">
-                  <span style="color: #10b981; font-size: 11.5px;" id="treemapDetailAdvice">智能空间治理建议就绪</span>
+                <div class="treemap-inspector-row2">
+                  <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; color: var(--text-tertiary); font-family: var(--font-mono); font-size: 11px;">
+                    <span style="color: #60cdff; font-weight: 600;">存储路径:</span> <span id="treemapDetailPath">--</span>
+                  </div>
+                  <div style="flex-shrink: 0; color: #10b981; font-weight: 500;" id="treemapDetailAdvice">
+                    智能空间治理建议就绪
+                  </div>
                 </div>
               </div>
             </div>
@@ -3871,24 +3909,26 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       }
 
       validCats.forEach(cat => {
-        const meta = colorMap[cat.id] || { name: cat.name || '其他数据', color: '#64748b' };
+        let displayName = colorMap[cat.id]?.name || cat.name || '其他数据';
+        if (displayName.includes('Junction') || displayName.includes('搬家')) displayName = '跨盘迁移 (Junction)';
+        const meta = colorMap[cat.id] || { name: displayName, color: '#64748b' };
         const pct = ((cat.total_size_bytes / totalReclaimable) * 100).toFixed(1);
 
         const seg = document.createElement('div');
         seg.className = 'spectrum-segment';
         seg.style.width = `${pct}%`;
         seg.style.backgroundColor = meta.color;
-        seg.title = `${meta.name}: ${formatBytes(cat.total_size_bytes)} (${pct}%) - 点击查看详情`;
+        seg.title = `${displayName}: ${formatBytes(cat.total_size_bytes)} (${pct}%) - 点击查看详情`;
         seg.onclick = () => openInspectorByCategory(cat.id);
         container.appendChild(seg);
 
         const leg = document.createElement('div');
         leg.className = 'spectrum-legend-item';
-        leg.title = `点击排查 ${meta.name}`;
+        leg.title = `点击排查 ${displayName}`;
         leg.onclick = () => openInspectorByCategory(cat.id);
         leg.innerHTML = `
           <span class="spectrum-color-dot" style="background-color: ${meta.color};"></span>
-          <span>${meta.name}: <strong style="color: #ffffff;">${formatBytes(cat.total_size_bytes)}</strong></span>
+          <span>${displayName}: <strong style="color: #ffffff;">${formatBytes(cat.total_size_bytes)}</strong> <span style="opacity: 0.7; font-size: 10.5px; font-family: var(--font-mono);">(${pct}%)</span></span>
         `;
         legendGrid.appendChild(leg);
       });
@@ -3924,24 +3964,24 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         const cat = (f.category || '').toLowerCase();
         const name = (f.name || '').toLowerCase();
 
-        if (cat.includes('database') || ext === 'db' || ext === 'sqlite' || ext === 'vscdb' || name.includes('.db')) {
+        if (cat.includes('database') || ext === 'db' || ext === 'sqlite' || ext === 'vscdb' || ext === 'wal' || name.includes('.db') || name.includes('.vscdb') || name.includes('sqlite') || name.includes('-wal')) {
           return {
             label: '数据库',
             bg: 'linear-gradient(135deg, rgba(6,182,212,0.35) 0%, rgba(14,116,144,0.55) 100%)',
             border: 'rgba(6,182,212,0.5)',
             badgeBg: 'rgba(6,182,212,0.22)',
             badgeColor: '#67e8f9',
-            advice: 'SQLite 数据库 / 建议原生 VACUUM 收缩'
+            advice: 'SQLite 数据库 · 建议原生 VACUUM 收缩'
           };
         }
-        if (cat.includes('virtual') || ext === 'img' || ext === 'vmdk' || ext === 'qcow2' || ext === 'vhd') {
+        if (cat.includes('virtual') || ext === 'img' || ext === 'vmdk' || ext === 'qcow2' || ext === 'vhd' || ext === 'vhdx' || name.includes('.img')) {
           return {
             label: '虚拟机磁盘',
             bg: 'linear-gradient(135deg, rgba(168,85,247,0.35) 0%, rgba(126,34,206,0.55) 100%)',
             border: 'rgba(168,85,247,0.5)',
             badgeBg: 'rgba(168,85,247,0.22)',
             badgeColor: '#d8b4fe',
-            advice: '虚拟机虚拟盘 / 建议使用 NTFS 符号链接搬家至副盘'
+            advice: '虚拟机虚拟盘 · 建议使用 NTFS 符号链接搬家至副盘'
           };
         }
         if (ext === 'dmp' || ext === 'sys' || name.includes('ram.img')) {
@@ -3951,7 +3991,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
             border: 'rgba(99,102,241,0.5)',
             badgeBg: 'rgba(99,102,241,0.22)',
             badgeColor: '#a5b4fc',
-            advice: '快照与系统转储 / 可视需求清理或随主目录迁移'
+            advice: '快照与系统转储 · 可视需求清理或随主目录迁移'
           };
         }
         if (cat.includes('installer') || cat.includes('executable') || ext === 'exe' || ext === 'msi') {
@@ -3961,7 +4001,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
             border: 'rgba(245,158,11,0.5)',
             badgeBg: 'rgba(245,158,11,0.22)',
             badgeColor: '#fcd34d',
-            advice: '安装包与可执行程序 / 建议核验后清理或归档'
+            advice: '安装包与可执行程序 · 建议核验后清理或归档'
           };
         }
         if (cat.includes('archive') || ext === 'zip' || ext === 'rar' || ext === '7z' || ext === 'tar') {
@@ -3971,7 +4011,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
             border: 'rgba(59,130,246,0.5)',
             badgeBg: 'rgba(59,130,246,0.22)',
             badgeColor: '#93c5fd',
-            advice: '历史压缩归档 / 建议核实后安全清理'
+            advice: '历史压缩归档 · 建议核实后安全清理'
           };
         }
         return {
@@ -3980,7 +4020,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           border: 'rgba(100,116,139,0.5)',
           badgeBg: 'rgba(100,116,139,0.22)',
           badgeColor: '#cbd5e1',
-          advice: '沉淀大资产 / 可定位目录查看'
+          advice: '沉淀大资产 · 可定位目录查看'
         };
       };
 
@@ -4036,12 +4076,18 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     function updateTreemapInspector(file, pct, styleMeta) {
       const nameEl = document.getElementById('treemapDetailName');
       const sizeEl = document.getElementById('treemapDetailSize');
+      const catEl = document.getElementById('treemapDetailCategory');
       const pathEl = document.getElementById('treemapDetailPath');
       const adviceEl = document.getElementById('treemapDetailAdvice');
       const actionsEl = document.getElementById('treemapDetailActions');
 
       if (nameEl) nameEl.innerText = file.name;
       if (sizeEl) sizeEl.innerText = `${formatBytes(file.size_bytes)} (${pct}%)`;
+      if (catEl) {
+        catEl.innerText = styleMeta.label;
+        catEl.style.backgroundColor = styleMeta.badgeBg;
+        catEl.style.color = styleMeta.badgeColor;
+      }
       if (pathEl) {
         pathEl.innerText = file.path;
         pathEl.title = file.path;
@@ -4049,10 +4095,21 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       if (adviceEl) adviceEl.innerText = styleMeta.advice;
 
       if (actionsEl) {
+        const ext = (file.extension || '').toLowerCase();
+        const isDb = ext === 'db' || ext === 'sqlite' || ext === 'vscdb' || file.name.includes('.vscdb') || file.name.includes('.db');
+        const isVm = ext === 'img' || ext === 'vmdk' || ext === 'qcow2' || file.name.includes('.img');
+
+        let extraBtn = '';
+        if (isDb) {
+          extraBtn = `<button class="btn btn-primary" style="padding: 2px 10px; font-size: 11px;" onclick="openInspectorByCategory('sqlite_optimize')">VACUUM 压缩</button>`;
+        } else if (isVm) {
+          extraBtn = `<button class="btn btn-primary" style="padding: 2px 10px; font-size: 11px;" onclick="switchTab('tools')">Junction 搬家</button>`;
+        }
+
         actionsEl.innerHTML = `
-          <span style="color: #10b981; font-size: 11.5px; margin-right: 6px;">${styleMeta.advice}</span>
-          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapeHtml(file.path)}')">定位目录</button>
-          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="copyTextToClipboard('${escapeHtml(file.path)}')">复制路径</button>
+          ${extraBtn}
+          <button class="btn btn-secondary" style="padding: 2px 10px; font-size: 11px;" onclick="revealInExplorer('${escapeHtml(file.path)}')">定位目录</button>
+          <button class="btn btn-secondary" style="padding: 2px 10px; font-size: 11px;" onclick="copyTextToClipboard('${escapeHtml(file.path)}')">复制绝对路径</button>
         `;
       }
     }
