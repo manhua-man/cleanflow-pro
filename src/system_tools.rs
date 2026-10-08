@@ -104,20 +104,6 @@ public class Win32RecycleBin {
     Ok(freed)
 }
 
-pub fn flush_dns() -> Result<String, String> {
-    let output = Command::new("ipconfig")
-        .arg("/flushdns")
-        .output()
-        .map_err(|e| format!("执行 ipconfig 失败: {}", e))?;
-
-    if output.status.success() {
-        let text = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        Ok(text)
-    } else {
-        let err = String::from_utf8_lossy(&output.stderr).trim().to_string();
-        Err(if err.is_empty() { "刷新 DNS 缓存失败".to_string() } else { err })
-    }
-}
 
 pub fn get_system_maintenance_status() -> SystemMaintenanceStatus {
     let rb = get_recycle_bin_stats();
@@ -186,8 +172,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_flush_dns() {
-        let res = flush_dns();
-        assert!(res.is_ok(), "DNS flush should succeed on Windows");
+    fn test_get_recycle_bin_stats() {
+        let stats = get_recycle_bin_stats();
+        let _ = stats.size_bytes;
+        let _ = stats.file_count;
     }
 }

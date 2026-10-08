@@ -577,17 +577,6 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                         send_json_response(request, err_json);
                     }
                 }
-            } else if url == "/api/system/flush-dns" && method == Method::Post {
-                match crate::system_tools::flush_dns() {
-                    Ok(msg) => {
-                        let res_json = serde_json::json!({ "success": true, "message": msg }).to_string();
-                        send_json_response(request, res_json);
-                    }
-                    Err(e) => {
-                        let err_json = serde_json::json!({ "success": false, "error": e }).to_string();
-                        send_json_response(request, err_json);
-                    }
-                }
             } else if url == "/api/system/empty-dirs/scan" && method == Method::Post {
                 let mut content = String::new();
                 let _ = request.as_reader().read_to_string(&mut content);

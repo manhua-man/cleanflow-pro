@@ -1329,105 +1329,35 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     <!-- Left Navigation Bar -->
     <nav class="desktop-navigation">
       <div>
-        <div class="nav-group-title">核心空间专清</div>
+        <div class="nav-group-title">核心功能视窗</div>
         <ul class="nav-list">
-          <li class="nav-item active" data-tab="overview" onclick="switchTab('overview')">
+          <li class="nav-item active" data-tab="clean" onclick="switchTab('clean')">
             <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg></span>
-              <span>空间概览</span>
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
+              <span>极速空间清理</span>
             </div>
-            <span class="nav-badge" id="badgeOverview">27.6 GB</span>
+            <span class="nav-badge" id="badgeClean">体检</span>
           </li>
-          <li class="nav-item" data-tab="devcache" onclick="switchTab('devcache')">
+          <li class="nav-item" data-tab="analyze" onclick="switchTab('analyze')">
             <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg></span>
-              <span>开发与设计专清</span>
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></span>
+              <span>空间透视与去重</span>
             </div>
-            <span class="nav-badge" id="badgeDevCache">4.6 GB</span>
+            <span class="nav-badge" id="badgeAnalyze">89 项</span>
           </li>
-          <li class="nav-item" data-tab="office" onclick="switchTab('office')">
-            <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg></span>
-              <span>微信与社交专清</span>
-            </div>
-            <span class="nav-badge" id="badgeOffice">1.4 GB</span>
-          </li>
-          <li class="nav-item" data-tab="docker" onclick="switchTab('docker')">
-            <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg></span>
-              <span>Docker 虚拟镜像</span>
-            </div>
-            <span class="nav-badge" id="badgeDocker">185 MB</span>
-          </li>
-          <li class="nav-item" data-tab="browser" onclick="switchTab('browser')">
-            <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></span>
-              <span>浏览器深度专清</span>
-            </div>
-            <span class="nav-badge" id="badgeBrowser">854 MB</span>
-          </li>
-        </ul>
-
-        <div class="nav-group-title" style="margin-top: 14px;">通用系统管家</div>
-        <ul class="nav-list">
-          <li class="nav-item" data-tab="startup" onclick="switchTab('startup')">
-            <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg></span>
-              <span>开机自启治理</span>
-            </div>
-            <span class="nav-badge" id="badgeStartup">21 项</span>
-          </li>
-          <li class="nav-item" data-tab="apps" onclick="switchTab('apps')">
-            <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg></span>
-              <span>软件与卸载残留</span>
-            </div>
-            <span class="nav-badge" id="badgeApps">170 款</span>
-          </li>
-          <li class="nav-item" data-tab="system" onclick="switchTab('system')">
-            <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/></svg></span>
-              <span>系统通用维护</span>
-            </div>
-            <span class="nav-badge" id="badgeSystemMaint">回收站</span>
-          </li>
-          <li class="nav-item" data-tab="duplicates" onclick="switchTab('duplicates')">
-            <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></span>
-              <span>全盘重复文件</span>
-            </div>
-            <span class="nav-badge" id="badgeDuplicates">去重</span>
-          </li>
-        </ul>
-
-        <div class="nav-group-title" style="margin-top: 14px;">高级虚拟化与索引</div>
-        <ul class="nav-list">
-          <li class="nav-item" data-tab="giant" onclick="switchTab('giant')">
+          <li class="nav-item" data-tab="purge" onclick="switchTab('purge')">
             <div class="nav-item-left">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span>
-              <span>大文件全盘雷达</span>
+              <span>残留与死链瘦身</span>
             </div>
-            <span class="nav-badge" id="badgeGiantFiles">89</span>
+            <span class="nav-badge" id="badgePurge">排查</span>
           </li>
-          <li class="nav-item" data-tab="migration" onclick="switchTab('migration')">
+          <li class="nav-item" data-tab="tools" onclick="switchTab('tools')">
             <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z"/></svg></span>
-              <span>目录无损搬家</span>
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg></span>
+              <span>深度极客工具箱</span>
             </div>
-            <span class="nav-badge">Junction</span>
-          </li>
-          <li class="nav-item" data-tab="vacuum" onclick="switchTab('vacuum')">
-            <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 3C7.58 3 4 4.79 4 7v10c0 2.21 3.58 4 8 4s8-1.79 8-4V7c0-2.21-3.58-4-8-4zm0 2c3.87 0 6 1.5 6 2s-2.13 2-6 2-6-1.5-6-2 2.13-2 6-2zm0 14c-3.87 0-6-1.5-6-2v-1.85c1.47.78 3.61 1.25 6 1.25s4.53-.47 6-1.25V17c0 .5-2.13 2-6 2zm0-4c-3.87 0-6-1.5-6-2v-1.85c1.47.78 3.61 1.25 6 1.25s4.53-.47 6-1.25V13c0 .5-2.13 2-6 2z"/></svg></span>
-              <span>数据库碎片收缩</span>
-            </div>
-            <span class="nav-badge">SQLite</span>
-          </li>
-          <li class="nav-item" data-tab="rules" onclick="switchTab('rules')">
-            <div class="nav-item-left">
-              <span class="icon"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></span>
-              <span>自定义规则引擎</span>
-            </div>
+            <span class="nav-badge" id="badgeTools">高级</span>
           </li>
         </ul>
       </div>
@@ -1452,9 +1382,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     <main class="content-canvas">
       <div class="workspace-wrapper">
 
-        <!-- 1. Consumer Overview Page -->
-        <section class="workspace-pane active" id="pane-overview">
-          
+        <!-- ======================================================== -->
+        <!-- WORKSPACE 1: 极速空间清理 (Clean) -->
+        <!-- ======================================================== -->
+        <section class="workspace-pane active" id="pane-clean">
           <!-- Hero Banner with Radial Space Gauge -->
           <div class="consumer-hero-banner">
             <div class="hero-left">
@@ -1473,7 +1404,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
                 </svg>
                 <div class="gauge-center-content">
                   <div class="gauge-val-row">
-                    <span class="gauge-value" id="heroReclaimNum">21.5</span>
+                    <span class="gauge-value" id="heroReclaimNum">29.8</span>
                     <span class="gauge-unit">GB</span>
                   </div>
                   <span class="gauge-label">可释放空间</span>
@@ -1485,12 +1416,17 @@ HTML_CONTENT = r'''<!DOCTYPE html>
                 <div class="hero-desc">
                   已聚合 Windows 临时文件、现代开发包管理器缓存及主流浏览器离线冗余，随时可一键无损回收。
                 </div>
-                <div class="hero-tags">
-                  <span class="badge-pill badge-safe">
+                <!-- Universal Status Pills -->
+                <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+                  <div class="system-status-pill" onclick="emptyRecycleBinNow()" title="全盘回收站状态" style="background: rgba(96, 205, 255, 0.12); border: 1px solid rgba(96, 205, 255, 0.3); border-radius: 9999px; padding: 4px 12px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <span style="color: #60cdff; font-weight: 600;">回收站:</span>
+                    <span style="color: #fff;" id="overviewRecycleBinSize">0 B</span>
+                  </div>
+                  <div class="badge-pill badge-safe">
                     <span class="icon" style="width:12px; height:12px;"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
                     100% 安全清理项已就绪
-                  </span>
-                  <span class="badge-pill badge-openwith">零后台常驻 · 本地原生引擎</span>
+                  </div>
+                  <div class="badge-pill badge-openwith">零后台常驻 · 本地原生引擎</div>
                 </div>
               </div>
             </div>
@@ -1498,7 +1434,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
             <div class="hero-right-actions">
               <button class="btn-hero-cta" onclick="executeCleanSelected()">
                 <span class="icon" style="width:18px; height:18px;"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
-                <span id="heroBtnCleanText">一键快速清理 (21.5 GB)</span>
+                <span id="heroBtnCleanText">一键快速清理 (16 GB)</span>
               </button>
               <div style="display: flex; gap: 8px;">
                 <button class="btn btn-secondary" style="padding: 6px 14px;" onclick="runScan()">
@@ -1513,15 +1449,15 @@ HTML_CONTENT = r'''<!DOCTYPE html>
             </div>
           </div>
 
-          <!-- 8 Consumer Feature Cards Grid -->
-          <div class="consumer-cards-grid">
+          <!-- 6 Consumer Feature Cards Grid -->
+          <div class="consumer-cards-grid" style="grid-template-columns: repeat(3, 1fr);">
             <!-- Card 1: System Temp -->
             <div class="feature-card" onclick="openInspectorByCategory('system')">
               <div class="feature-card-top">
                 <div class="card-icon-box icon-box-cyan">
                   <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
                 </div>
-                <div class="feature-card-metric" id="cardSystemMetric"><span class="metric-num">3.3</span><span class="metric-unit">GB</span></div>
+                <div class="feature-card-metric" id="cardSystemMetric"><span class="metric-num">4.8</span><span class="metric-unit">GB</span></div>
               </div>
               <div class="feature-card-body">
                 <div class="card-title">系统冗余与临时垃圾</div>
@@ -1529,17 +1465,17 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               </div>
               <div class="feature-card-footer">
                 <span class="badge-pill badge-safe">完全安全可清</span>
-                <span class="card-action-link"><span>查看详情</span><svg style="width:12px; height:12px; fill:currentColor; transition: transform 140ms ease;" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></span>
+                <span class="card-action-link"><span>查看详情</span><svg style="width:12px; height:12px; fill:currentColor;" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></span>
               </div>
             </div>
 
             <!-- Card 2: Dev Cache -->
-            <div class="feature-card" onclick="switchTab('devcache')">
+            <div class="feature-card" onclick="openInspectorByCategory('dev_cache')">
               <div class="feature-card-top">
                 <div class="card-icon-box icon-box-green">
                   <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
                 </div>
-                <div class="feature-card-metric" id="cardDevMetric"><span class="metric-num">1.3</span><span class="metric-unit">GB</span></div>
+                <div class="feature-card-metric" id="cardDevMetric"><span class="metric-num">5.3</span><span class="metric-unit">GB</span></div>
               </div>
               <div class="feature-card-body">
                 <div class="card-title">现代开发与设计套件</div>
@@ -1547,17 +1483,17 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               </div>
               <div class="feature-card-footer">
                 <span class="badge-pill badge-safe">可安全回收</span>
-                <span class="card-action-link"><span>管理缓存</span><svg style="width:12px; height:12px; fill:currentColor; transition: transform 140ms ease;" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></span>
+                <span class="card-action-link"><span>管理缓存</span><svg style="width:12px; height:12px; fill:currentColor;" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></span>
               </div>
             </div>
 
-            <!-- Card 3: WeChat & Office -->
-            <div class="feature-card" onclick="switchTab('office')">
+            <!-- Card 3: Office & Social -->
+            <div class="feature-card" onclick="openInspectorByCategory('office_chat')">
               <div class="feature-card-top">
                 <div class="card-icon-box icon-box-purple">
                   <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
                 </div>
-                <div class="feature-card-metric" id="cardOfficeMetric"><span class="metric-num">1.4</span><span class="metric-unit">GB</span></div>
+                <div class="feature-card-metric" id="cardOfficeMetric"><span class="metric-num">1.5</span><span class="metric-unit">GB</span></div>
               </div>
               <div class="feature-card-body">
                 <div class="card-title">微信与办公深度专清</div>
@@ -1565,904 +1501,327 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               </div>
               <div class="feature-card-footer">
                 <span class="badge-pill badge-safe">聊天记录无损</span>
-                <span class="card-action-link"><span>立即专清</span><svg style="width:12px; height:12px; fill:currentColor; transition: transform 140ms ease;" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></span>
+                <span class="card-action-link"><span>立即专清</span><svg style="width:12px; height:12px; fill:currentColor;" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></span>
               </div>
             </div>
 
-            <!-- Card 4: Docker Virtual Engine -->
-            <div class="feature-card" onclick="switchTab('docker')">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-blue">
-                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg>
-                </div>
-                <div class="feature-card-metric" id="cardDockerMetric"><span class="metric-num">27.8</span><span class="metric-unit">GB</span></div>
-              </div>
-              <div class="feature-card-body">
-                <div class="card-title">Docker 虚拟镜像治理</div>
-                <div class="card-desc">构建缓存 (Buildx)、废弃镜像、孤立数据卷及宿主运行日志</div>
-              </div>
-              <div class="feature-card-footer">
-                <span class="badge-pill badge-safe">虚拟化减负</span>
-                <span class="card-action-link"><span>镜像治理</span><svg style="width:12px; height:12px; fill:currentColor; transition: transform 140ms ease;" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></span>
-              </div>
-            </div>
-
-            <!-- Card 5: Browser Cache -->
-            <div class="feature-card" onclick="switchTab('browser')">
+            <!-- Card 4: Browser Cache -->
+            <div class="feature-card" onclick="openInspectorByCategory('browser_cache')">
               <div class="feature-card-top">
                 <div class="card-icon-box icon-box-orange">
                   <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
                 </div>
-                <div class="feature-card-metric" id="cardBrowserMetric">856.7 MB</div>
+                <div class="feature-card-metric" id="cardBrowserMetric"><span class="metric-num">912.7</span><span class="metric-unit">MB</span></div>
               </div>
               <div class="feature-card-body">
                 <div class="card-title">主流浏览器深度专清</div>
-                <div class="card-desc">Edge、Chrome 离线网络媒体与 JS/WASM 编译代码缓存</div>
+                <div class="card-desc">Edge、Chrome 离线网络媒体与 IndexedDB 冗余数据</div>
               </div>
               <div class="feature-card-footer">
-                <span class="badge-pill badge-openwith">不影响登录态</span>
-                <span class="card-action-link">立即专清 ></span>
+                <span class="badge-pill badge-safe">历史记录保留</span>
+                <span class="card-action-link"><span>深度清理</span><svg style="width:12px; height:12px; fill:currentColor;" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></span>
               </div>
             </div>
 
-            <!-- Card 4: Giant Files Radar -->
-            <div class="feature-card" onclick="switchTab('giant')">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-blue">
-                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                </div>
-                <div class="feature-card-metric" id="cardGiantMetric">28.5 GB</div>
-              </div>
-              <div class="feature-card-body">
-                <div class="card-title">大文件全盘雷达</div>
-                <div class="card-desc">排查 89 个超大沉淀文件（数据库、虚拟机盘与安装包）</div>
-              </div>
-              <div class="feature-card-footer">
-                <span class="badge-pill badge-openwith">深度探查</span>
-                <span class="card-action-link">全盘排查 ></span>
-              </div>
-            </div>
-
-            <!-- Card 5: Junction Migration -->
-            <div class="feature-card" onclick="switchTab('migration')">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-purple">
-                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z"/></svg>
-                </div>
-                <div class="feature-card-metric" id="cardJunctionMetric">+13.3 GB</div>
-              </div>
-              <div class="feature-card-body">
-                <div class="card-title">目录无损搬家 (Junction)</div>
-                <div class="card-desc">Android 模拟器或微信数据无感搬迁至 D 盘，软件正常运行</div>
-              </div>
-              <div class="feature-card-footer">
-                <span class="badge-pill badge-junction">C 盘减负神器</span>
-                <span class="card-action-link">一键搬家 ></span>
-              </div>
-            </div>
-
-            <!-- Card 6: SQLite Vacuum -->
-            <div class="feature-card" onclick="switchTab('vacuum')">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-cyan">
-                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 3C7.58 3 4 4.79 4 7v10c0 2.21 3.58 4 8 4s8-1.79 8-4V7c0-2.21-3.58-4-8-4zm0 2c3.87 0 6 1.5 6 2s-2.13 2-6 2-6-1.5-6-2 2.13-2 6-2zm0 14c-3.87 0-6-1.5-6-2v-1.85c1.47.78 3.61 1.25 6 1.25s4.53-.47 6-1.25V17c0 .5-2.13 2-6 2zm0-4c-3.87 0-6-1.5-6-2v-1.85c1.47.78 3.61 1.25 6 1.25s4.53-.47 6-1.25V13c0 .5-2.13 2-6 2z"/></svg>
-                </div>
-                <div class="feature-card-metric" id="cardVacuumMetric">4.0 GB</div>
-              </div>
-              <div class="feature-card-body">
-                <div class="card-title">数据库碎片收缩 (VACUUM)</div>
-                <div class="card-desc">Cursor 状态库物理压缩，清理 Freelist 空闲页无损减负</div>
-              </div>
-              <div class="feature-card-footer">
-                <span class="badge-pill badge-safe">数据 100% 完整</span>
-                <span class="card-action-link">执行收缩 ></span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Quick Detailed Checklist Bar -->
-          <div class="desktop-commandbar">
-            <div class="commandbar-left">
-              <div class="search-box">
-                <span class="icon search-icon"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
-                <input type="text" id="overviewSearchInput" placeholder="搜索体检项目或路径..." oninput="filterOverviewTable()">
-              </div>
-              <div class="filter-tabs">
-                <div class="filter-tab active" onclick="setOverviewFilter('all', this)">全部项目</div>
-                <div class="filter-tab" onclick="setOverviewFilter('safe', this)">安全推荐项</div>
-                <div class="filter-tab" onclick="setOverviewFilter('dev', this)">开发工具</div>
-                <div class="filter-tab" onclick="setOverviewFilter('browser', this)">浏览器</div>
-              </div>
-            </div>
-            <span style="font-size:11.5px; color:var(--text-tertiary);" id="overviewCounter">就绪</span>
-          </div>
-
-          <!-- Clean Master DataGrid -->
-          <div class="data-grid-container" style="max-height: 380px;">
-            <table class="data-grid">
-              <thead>
-                <tr>
-                  <th class="col-checkbox"><input type="checkbox" id="selectAllOverview" onchange="toggleSelectAllOverview(this.checked)" checked></th>
-                  <th style="width: 180px;">清理项目</th>
-                  <th>关联绝对物理路径</th>
-                  <th style="width: 110px; text-align: right;">体积占用</th>
-                  <th style="width: 90px; text-align: right;">文件数</th>
-                  <th style="width: 90px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="overviewTableBody"></tbody>
-            </table>
-          </div>
-
-        </section>
-
-        <!-- 2. Dev Cache & IDE Studio -->
-        <section class="workspace-pane" id="pane-devcache">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>现代开发、IDE 与创意设计专清</h1>
-              <p>深度清理 JetBrains / Android Studio、Cursor / VS Code、Adobe 创意套件、Pip / Cargo / npm 及 Unity 编译依赖与媒体缓存</p>
-            </div>
-            <div class="workspace-controls">
-              <button class="btn btn-primary" onclick="cleanCategoryItems('dev_cache')">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
-                <span>一键专清开发与设计缓存</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Dev Sub-filter Bar -->
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div class="filter-tabs" id="devFilterTabs">
-              <div class="filter-tab active" onclick="setDevFilter('all', this)">全部开发资产</div>
-              <div class="filter-tab" onclick="setDevFilter('ide', this)">IDE 与编辑器 (Android Studio / Cursor)</div>
-              <div class="filter-tab" onclick="setDevFilter('pkg', this)">包管理生态 (pip / cargo / npm)</div>
-              <div class="filter-tab" onclick="setDevFilter('creative', this)">Adobe 创意套件 (Premiere / AE)</div>
-              <div class="filter-tab" onclick="setDevFilter('runtime', this)">构建运行时 (Gradle / Unity)</div>
-            </div>
-            <div style="font-size: 11.5px; color: var(--text-tertiary);" id="devSummaryCount">已扫描 0 个专清目标</div>
-          </div>
-
-          <div class="data-grid-container">
-            <table class="data-grid">
-              <thead>
-                <tr>
-                  <th class="col-checkbox"><input type="checkbox" checked onchange="toggleSelectAllCategory('dev_cache', this)"></th>
-                  <th style="width: 250px;">技术栈 / 软件模块</th>
-                  <th>关联物理路径</th>
-                  <th style="width: 110px; text-align: right;">占用体积</th>
-                  <th style="width: 90px; text-align: right;">文件数</th>
-                  <th style="width: 80px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="devCacheTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- Office & WeChat Cache -->
-        <section class="workspace-pane" id="pane-office">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>微信与办公社交软件深度专清</h1>
-              <p>深度清理微信 4.0 每日诊断 xlog、月度离线多媒体缓存、临时表情预览、微信 3.x 历史残存插件 (XPlugin) 及飞书容器缓存</p>
-            </div>
-            <div class="workspace-controls">
-              <button class="btn btn-primary" onclick="cleanCategoryItems('office_chat')">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
-                <span>一键专清办公社交缓存</span>
-              </button>
-            </div>
-          </div>
-          <div class="data-grid-container">
-            <table class="data-grid">
-              <thead>
-                <tr>
-                  <th class="col-checkbox"><input type="checkbox" checked onchange="toggleSelectAllCategory('office_chat', this)"></th>
-                  <th style="width: 240px;">清理项目 / 软件</th>
-                  <th>关联物理路径</th>
-                  <th style="width: 110px; text-align: right;">占用体积</th>
-                  <th style="width: 90px; text-align: right;">文件数</th>
-                  <th style="width: 80px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="officeTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- Docker Virtual Engine Studio -->
-        <section class="workspace-pane" id="pane-docker">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>Docker 桌面端与虚拟镜像治理</h1>
-              <p>排查 WSL2/Hyper-V 虚拟化存储、Docker 构建缓存 (Buildx)、废弃虚悬镜像及宿主机运行日志</p>
-            </div>
-            <div class="workspace-controls">
-              <button class="btn btn-secondary" onclick="loadDockerStatus()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
-                <span>刷新 Docker 状态</span>
-              </button>
-              <button class="btn btn-primary" onclick="pruneDocker('builder')">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
-                <span>清理构建缓存 (3.5 GB)</span>
-              </button>
-              <button class="btn btn-danger" onclick="pruneDocker('all')">
-                <span>全量系统瘦身 (27.8 GB)</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Docker Engine Stats 4-Card Row -->
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+            <!-- Card 5: Recycle Bin -->
             <div class="feature-card" style="cursor: default;">
               <div class="feature-card-top">
                 <div class="card-icon-box icon-box-blue">
-                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/></svg>
-                </div>
-                <div class="feature-card-metric" id="dockerImagesMetric"><span class="metric-num">20.5</span><span class="metric-unit">GB</span></div>
-              </div>
-              <div class="feature-card-body">
-                <div class="card-title">容器镜像资产 (Images)</div>
-                <div class="card-desc" id="dockerImagesDesc">37 个镜像 · 17.5 GB 可回收</div>
-              </div>
-            </div>
-
-            <div class="feature-card" style="cursor: default;">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-cyan">
-                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                </div>
-                <div class="feature-card-metric" id="dockerBuilderMetric"><span class="metric-num">3.56</span><span class="metric-unit">GB</span></div>
-              </div>
-              <div class="feature-card-body">
-                <div class="card-title">构建缓存 (Buildx)</div>
-                <div class="card-desc">256 个缓存块 · 100% 可安全释放</div>
-              </div>
-            </div>
-
-            <div class="feature-card" style="cursor: default;">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-purple">
-                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 3C7.58 3 4 4.79 4 7v10c0 2.21 3.58 4 8 4s8-1.79 8-4V7c0-2.21-3.58-4-8-4z"/></svg>
-                </div>
-                <div class="feature-card-metric" id="dockerVolumesMetric"><span class="metric-num">7.18</span><span class="metric-unit">GB</span></div>
-              </div>
-              <div class="feature-card-body">
-                <div class="card-title">持久化本地卷 (Volumes)</div>
-                <div class="card-desc" id="dockerVolumesDesc">30 个卷 · 6.8 GB 孤立未挂载</div>
-              </div>
-            </div>
-
-            <div class="feature-card" style="cursor: default;">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-orange">
                   <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
                 </div>
-                <div class="feature-card-metric" id="dockerLogsMetric"><span class="metric-num">182.4</span><span class="metric-unit">MB</span></div>
+                <div class="feature-card-metric" id="cardRecycleBinMetric"><span class="metric-num">0</span><span class="metric-unit">B</span></div>
               </div>
               <div class="feature-card-body">
-                <div class="card-title">宿主机与 VM 运行日志</div>
-                <div class="card-desc">115 个日常诊断与崩溃轮转日志</div>
+                <div class="card-title">全盘回收站深度清空</div>
+                <div class="card-desc">跨所有本地 NTFS 盘符彻底清空回收站历史删除文件</div>
+              </div>
+              <div class="feature-card-footer" style="padding-top: 8px;">
+                <button class="btn btn-secondary" style="width: 100%; justify-content: center; padding: 4px 10px; font-size: 11px;" onclick="emptyRecycleBinNow()">
+                  <span>立即清空回收站</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 6: Empty Folders -->
+            <div class="feature-card" style="cursor: default;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-purple">
+                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                </div>
+                <div class="feature-card-metric"><span class="metric-num" id="cardEmptyDirsMetric">0</span><span class="metric-unit">目录</span></div>
+              </div>
+              <div class="feature-card-body">
+                <div class="card-title">孤立幽灵空目录清理</div>
+                <div class="card-desc">扫描 Temp 及应用目录下 0 字节无文件孤立壳文件夹</div>
+              </div>
+              <div class="feature-card-footer" style="padding-top: 8px; display: flex; gap: 6px;">
+                <button class="btn btn-secondary" style="flex: 1; justify-content: center; padding: 4px 8px; font-size: 11px;" onclick="scanEmptyDirs()">
+                  <span>排查</span>
+                </button>
+                <button class="btn btn-primary" style="flex: 1; justify-content: center; padding: 4px 8px; font-size: 11px;" onclick="cleanEmptyDirs()">
+                  <span>清除</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ======================================================== -->
+        <!-- WORKSPACE 2: 空间透视与去重 (Analyze) -->
+        <!-- ======================================================== -->
+        <section class="workspace-pane" id="pane-analyze">
+          <div class="workspace-header">
+            <div class="workspace-title-box">
+              <h1>全盘空间透视与去重</h1>
+              <p>排查全盘巨型沉淀大文件与双阶段 MD5 重复副本，定位隐蔽空间大户</p>
+            </div>
+            <div class="workspace-controls">
+              <div class="filter-tabs" id="analyzeFilterTabs" style="margin: 0;">
+                <div class="filter-tab active" onclick="setAnalyzeSubView('giant', this)">大文件全盘雷达 (<span id="analyzeGiantCount">89</span>)</div>
+                <div class="filter-tab" onclick="setAnalyzeSubView('duplicates', this)">重复文件智选去重</div>
               </div>
             </div>
           </div>
 
-          <!-- Docker Local Files Table -->
-          <div class="data-grid-container" style="flex: 1;">
-            <table class="data-grid">
-              <thead>
-                <tr>
-                  <th class="col-checkbox"><input type="checkbox" checked onchange="toggleSelectAllCategory('docker_virtual', this)"></th>
-                  <th style="width: 240px;">清理项 / 资产名称</th>
-                  <th>关联物理路径</th>
-                  <th style="width: 110px; text-align: right;">占用体积</th>
-                  <th style="width: 90px; text-align: right;">文件数</th>
-                  <th style="width: 80px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="dockerTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- 3. Browser Cache -->
-        <section class="workspace-pane" id="pane-browser">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>主流浏览器深度专清</h1>
-              <p>安全清理 Microsoft Edge、Google Chrome 产生的离线网络多媒体与 JS/WASM 编译代码缓存，不影响历史记录与网站登录态</p>
-            </div>
-            <div class="workspace-controls">
-              <button class="btn btn-primary" onclick="cleanCategoryItems('browser_cache')">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
-                <span>清理浏览器缓存</span>
-              </button>
-            </div>
-          </div>
-          <div class="data-grid-container">
-            <table class="data-grid">
-              <thead>
-                <tr>
-                  <th class="col-checkbox"><input type="checkbox" checked></th>
-                  <th style="width: 220px;">浏览器 / 缓存类型</th>
-                  <th>磁盘物理路径</th>
-                  <th style="width: 110px; text-align: right;">占用体积</th>
-                  <th style="width: 90px; text-align: right;">文件数</th>
-                  <th style="width: 80px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="browserTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- 4. Registry Repair -->
-        <section class="workspace-pane" id="pane-registry">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>注册表冗余与失效残留修复</h1>
-              <p>排查已卸载历史软件的右键菜单残留、失效打开方式 (OpenWith) 及失效 MUICache，修复前自动生成可回滚 .reg 备份</p>
-            </div>
-            <div class="workspace-controls">
-              <button class="btn btn-secondary" onclick="loadRegistryIssues()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
-                <span>重新扫描注册表</span>
-              </button>
-              <button class="btn btn-primary" onclick="executeCleanRegistry()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
-                <span id="btnCleanRegistryLabel">一键安全修复 (0 项)</span>
-              </button>
-            </div>
-          </div>
-          <div class="desktop-commandbar">
-            <div class="commandbar-left">
-              <div class="search-box">
-                <span class="icon search-icon"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
-                <input type="text" id="registrySearchInput" placeholder="按路径或软件名过滤..." oninput="renderRegistryTable()">
+          <!-- Subview 1: Giant Files Radar -->
+          <div id="subviewGiantFiles" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="font-size: 12px; color: var(--text-secondary);">
+                当前识别到全盘大于 100 MB 的巨型文件资产，可定位所在目录或安全移除：
               </div>
-              <div class="filter-tabs">
-                <div class="filter-tab active" onclick="setRegistryFilter('all', this)">全部</div>
-                <div class="filter-tab" onclick="setRegistryFilter('mui', this)">应用缓存 (MUICache)</div>
-                <div class="filter-tab" onclick="setRegistryFilter('openwith', this)">右键打开方式 (OpenWith)</div>
-                <div class="filter-tab" onclick="setRegistryFilter('uninst', this)">失效卸载项 (Uninstall)</div>
-              </div>
-            </div>
-            <span style="font-size:11.5px; color:var(--text-tertiary);" id="registryCounter">准备就绪</span>
-          </div>
-          <div class="data-grid-container">
-            <table class="data-grid">
-              <thead>
-                <tr>
-                  <th class="col-checkbox"><input type="checkbox" onchange="toggleSelectAllRegistry(this.checked)" checked></th>
-                  <th style="width: 180px;">问题类型</th>
-                  <th>失效引用的物理路径</th>
-                  <th>注册表底层键路径</th>
-                  <th style="width: 100px;">风险等级</th>
-                  <th style="width: 80px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="registryTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- 5. Giant Files Radar -->
-        <section class="workspace-pane" id="pane-giant">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>大文件全盘雷达 (100MB+ 沉淀资产)</h1>
-              <p>毫秒级排查深层隐藏的大型虚拟机盘、历史安装包、开发数据库与孤立压缩包</p>
-            </div>
-            <div class="workspace-controls">
               <button class="btn btn-secondary" onclick="loadGiantFiles()">
                 <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
-                <span>刷新全盘雷达</span>
+                <span>刷新大文件</span>
               </button>
             </div>
+
+            <div class="data-grid-container" style="flex: 1;">
+              <table class="data-grid">
+                <thead>
+                  <tr>
+                    <th style="width: 260px;">文件名称</th>
+                    <th>物理存储路径</th>
+                    <th style="width: 130px; text-align: right;">文件体积</th>
+                    <th style="width: 140px; text-align: center;">最后修改时间</th>
+                    <th style="width: 140px; text-align: center;">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="giantFilesTableBody"></tbody>
+              </table>
+            </div>
           </div>
 
-          <!-- Type Distribution Segmented Bar -->
-          <div style="background:var(--bg-card); border:1px solid var(--stroke-card); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:10px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:12.5px; font-weight:600;">大文件资产类型占比与容量分层 (基于全盘检索)</span>
-              <span style="font-size:12px; color:#60cdff; font-weight:600;" id="giantTotalSubtitle">总计 0 GB (0 个文件)</span>
-            </div>
-            <div style="height:10px; background:rgba(255,255,255,0.06); border-radius:var(--radius-pill); overflow:hidden; display:flex;" id="giantDistributionBar">
-              <!-- Injected via JS -->
-            </div>
-            <div style="display:flex; flex-wrap:wrap; gap:12px; font-size:11.5px;" id="giantLegendList">
-              <!-- Injected via JS -->
-            </div>
-          </div>
-
-          <div class="desktop-commandbar">
-            <div class="commandbar-left">
-              <div class="search-box">
-                <span class="icon search-icon"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
-                <input type="text" id="giantSearchInput" placeholder="按文件名或后缀过滤..." oninput="filterGiantTable()">
+          <!-- Subview 2: Duplicate Files Finder -->
+          <div id="subviewDuplicates" style="display: none; flex-direction: column; gap: 14px; flex: 1;">
+            <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 14px 16px; display: flex; gap: 12px; align-items: flex-end;">
+              <div style="flex: 2;">
+                <label style="font-size: 11.5px; color: var(--text-secondary); display: block; margin-bottom: 5px;">排查目标路径</label>
+                <input type="text" id="dupScanPathInput" value="C:\\Users\\EDY\\Downloads" style="width: 100%; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 6px 10px; color: #fff; font-size: 12px; outline: none; font-family: var(--font-mono);">
               </div>
-              <div class="filter-tabs">
-                <div class="filter-tab active" onclick="setGiantSizeFilter('all', this)">全部大小</div>
-                <div class="filter-tab" onclick="setGiantSizeFilter('huge', this)">超大 (>1GB)</div>
-                <div class="filter-tab" onclick="setGiantSizeFilter('large', this)">大文件 (500M-1G)</div>
-                <div class="filter-tab" onclick="setGiantSizeFilter('med', this)">常规 (100M-500M)</div>
+              <div style="flex: 1;">
+                <label style="font-size: 11.5px; color: var(--text-secondary); display: block; margin-bottom: 5px;">最小文件阈值</label>
+                <select id="dupMinSizeSelect" style="width: 100%; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 6px 10px; color: #fff; font-size: 12px; outline: none;">
+                  <option value="1">大于 1 MB</option>
+                  <option value="10">大于 10 MB</option>
+                  <option value="50">大于 50 MB</option>
+                </select>
               </div>
-            </div>
-            <span style="font-size:11.5px; color:var(--text-tertiary);" id="giantCounter">加载中...</span>
-          </div>
-
-          <div class="data-grid-container">
-            <table class="data-grid">
-              <thead>
-                <tr>
-                  <th style="width: 240px;">文件名称</th>
-                  <th>磁盘绝对路径</th>
-                  <th style="width: 100px;">资产分类</th>
-                  <th style="width: 110px; text-align: right;">文件体积</th>
-                  <th style="width: 80px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="giantTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- 6. Junction Migration -->
-        <section class="workspace-pane" id="pane-migration">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>目录无损搬家 (Junction 虚拟化)</h1>
-              <p>将庞大资产搬迁至 D 盘或其它大容量驱动器，原位创建 NTFS Junction，软件无感照常运行</p>
-            </div>
-            <div class="workspace-controls">
-              <button class="btn btn-secondary" onclick="loadActiveJunctions()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
-                <span>刷新活动软链接</span>
+              <button class="btn btn-primary" style="height: 32px; padding: 0 16px;" onclick="runDuplicatesScan()">
+                <span>开始排查重复</span>
               </button>
-            </div>
-          </div>
-
-          <!-- Dual Drive Forecast Card -->
-          <div style="background:var(--bg-card); border:1px solid var(--stroke-card); border-radius:var(--radius-md); padding:18px; display:flex; flex-direction:column; gap:12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:13px; font-weight:600;">空间无损搬迁效益预测 (NTFS Junction 重定向)</span>
-              <span class="badge-pill badge-safe">100% 透明无损 · 原位创建虚拟联接点</span>
-            </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-              <div style="background:rgba(0,0,0,0.2); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:12px;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                  <span style="color:var(--text-secondary);">源磁盘 (C: 盘) 释放预测</span>
-                  <span style="color:var(--status-safe); font-weight:600;">预计释放 +13.3 GB</span>
-                </div>
-                <div style="height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; display:flex;">
-                  <div style="width:78%; background:#0078d4;"></div>
-                  <div style="width:7%; background:#00c7ff;"></div>
-                  <div style="width:15%; background:transparent;"></div>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); margin-top:6px;">
-                  <span>当前可用 33.0 GB</span>
-                  <span style="color:#60cdff;">搬迁后预计提升至 46.3 GB</span>
-                </div>
-              </div>
-              <div style="background:rgba(0,0,0,0.2); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:12px;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                  <span style="color:var(--text-secondary);">目标磁盘 (D: 盘) 承载状态</span>
-                  <span style="color:#60cdff; font-weight:600;">93.1 GB 充足容量</span>
-                </div>
-                <div style="height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; display:flex;">
-                  <div style="width:75%; background:var(--status-purple);"></div>
-                  <div style="width:25%; background:transparent;"></div>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); margin-top:6px;">
-                  <span>本地高速 SSD</span>
-                  <span>跨盘读写完全透明</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Custom Migration Input Box -->
-          <div style="background:var(--bg-card); border:1px solid var(--stroke-card); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px;">
-            <div style="font-weight:600; font-size:12.5px; color:var(--text-primary);">自定义任意目录一键搬家</div>
-            <div style="display:flex; gap:10px; align-items:center;">
-              <input type="text" id="customMigrateSource" placeholder="输入或粘贴需要搬迁的 C 盘目录绝对路径 (如 C:\Users\EDY\.android\avd)..." style="flex:1; background:var(--fill-subtle); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:7px 12px; color:#fff; font-size:12px; outline:none; font-family:var(--font-mono);">
-              <select id="customMigrateTargetDrive" style="background:var(--fill-subtle); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:7px 12px; color:#fff; font-size:12px; outline:none;">
-                <option value="D:">D 盘 (本地大容量磁盘)</option>
-                <option value="E:">E 盘</option>
-              </select>
-              <button class="btn btn-secondary" onclick="analyzeCustomMigrationPath()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></span>
-                <span>分析体积与进程占用</span>
-              </button>
-              <button class="btn btn-primary" onclick="executeCustomMigration()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z"/></svg></span>
-                <span>立即安全迁移并创建 Junction</span>
-              </button>
-            </div>
-          </div>
-
-          <div style="font-weight:600; font-size:13px; color:var(--text-primary); margin-top:4px;">当前活动的 Junction 目录联接 (已搬迁项)</div>
-          <div class="data-grid-container">
-            <table class="data-grid">
-              <thead>
-                <tr>
-                  <th style="width: 320px;">原始 C 盘虚拟路径</th>
-                  <th>实际物理存储位置</th>
-                  <th style="width: 140px;">创建时间</th>
-                  <th style="width: 140px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="activeJunctionsTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- 7. SQLite Vacuum -->
-        <section class="workspace-pane" id="pane-vacuum">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>SQLite 数据库碎片无损收缩</h1>
-              <p>对长期高频读写的 SQLite 数据库执行 VACUUM 命令，释放游离的 Freelist 闲置数据页</p>
-            </div>
-          </div>
-          <div class="data-grid-container">
-            <table class="data-grid">
-              <thead>
-                <tr>
-                  <th style="width: 220px;">数据库名称与用途</th>
-                  <th>底层数据库路径</th>
-                  <th style="width: 110px; text-align: right;">当前物理体积</th>
-                  <th style="width: 120px; text-align: center;">碎片释放潜能</th>
-                  <th style="width: 110px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="vacuumTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- 8. Custom Rules -->
-        <section class="workspace-pane" id="pane-rules">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>自定义规则引擎</h1>
-              <p>配置用户专属的项目构建缓存与特定临时目录匹配规则</p>
-            </div>
-            <div class="workspace-controls">
-              <button class="btn btn-secondary" onclick="renderCustomRulesTable()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
-                <span>刷新规则库</span>
-              </button>
-            </div>
-          </div>
-
-          <div style="background:var(--bg-card); border:1px solid var(--stroke-card); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px;">
-            <div style="font-weight:600; font-size:12.5px; color:var(--text-primary);">创建专属巡检清理规则</div>
-            <div style="display:flex; gap:12px; align-items:flex-end;">
-              <div style="flex:1;">
-                <label style="font-size:11.5px; color:var(--text-secondary); display:block; margin-bottom:5px;">规则名称</label>
-                <input type="text" id="ruleNameInput" placeholder="例如: Webpack dist 构建产物" style="width:100%; background:var(--fill-subtle); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:6px 10px; color:#fff; font-size:12px; outline:none;">
-              </div>
-              <div style="flex:2;">
-                <label style="font-size:11.5px; color:var(--text-secondary); display:block; margin-bottom:5px;">绝对路径模式 (支持 %LOCALAPPDATA% 等环境变量与通配符)</label>
-                <input type="text" id="rulePatternInput" placeholder="例如: %LOCALAPPDATA%\MyTool\cache\*" style="width:100%; background:var(--fill-subtle); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:6px 10px; color:#fff; font-size:12px; outline:none; font-family:var(--font-mono);">
-              </div>
-              <button class="btn btn-primary" style="height:32px; padding:0 14px;" onclick="submitCustomRule()">
-                <span>保存规则</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="data-grid-container" style="flex: 1;">
-            <table class="data-grid">
-              <thead>
-                <tr>
-                  <th style="width: 140px;">治理分类</th>
-                  <th style="width: 220px;">规则名称</th>
-                  <th>路径匹配模式 / 变量</th>
-                  <th style="width: 120px; text-align: center;">装载状态</th>
-                </tr>
-              </thead>
-              <tbody id="customRulesTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- 9. Startup Items Pane -->
-        <section class="workspace-pane" id="pane-startup">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>开机自启动与后台驻留治理</h1>
-              <p>管控 Windows 开机随系统自动启动的常驻软件，识别重度消耗内存/CPU 的后台进程与失效死链</p>
-            </div>
-            <div class="workspace-controls">
-              <button class="btn btn-secondary" onclick="loadStartupItems()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
-                <span>刷新自启项</span>
-              </button>
-              <button class="btn btn-secondary" onclick="exportStartupToCsv()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></span>
-                <span>导出自启清单</span>
-              </button>
-              <button class="btn btn-primary" onclick="cleanDeadStartupItems()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
-                <span>一键清理失效死链</span>
-              </button>
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
-            <div class="feature-card" style="cursor: default;">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-blue">
-                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
-                </div>
-                <div class="feature-card-metric" id="startupTotalMetric"><span class="metric-num">21</span><span class="metric-unit">项</span></div>
-              </div>
-              <div class="feature-card-body">
-                <div class="card-title">当前自启动项总计</div>
-                <div class="card-desc">包含 HKCU、HKLM 及启动文件夹注册项目</div>
-              </div>
-            </div>
-            <div class="feature-card" style="cursor: default;">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-purple">
-                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                </div>
-                <div class="feature-card-metric" id="startupHighImpactMetric"><span class="metric-num" style="color:#ffaa46;">12</span><span class="metric-unit">项</span></div>
-              </div>
-              <div class="feature-card-body">
-                <div class="card-title">高影响常驻后台</div>
-                <div class="card-desc">浏览器预载、网盘同步、游戏客户端等重度进程</div>
-              </div>
-            </div>
-            <div class="feature-card" style="cursor: default;">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-cyan">
-                  <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
-                </div>
-                <div class="feature-card-metric" id="startupDeadMetric"><span class="metric-num" style="color:#6ccb5f;">0</span><span class="metric-unit">项</span></div>
-              </div>
-              <div class="feature-card-body">
-                <div class="card-title">失效死链自启</div>
-                <div class="card-desc">原程序已删除但启动项仍残留的幽灵条目</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="data-grid-container" style="flex: 1;">
-            <table class="data-grid">
-              <thead>
-                <tr>
-                  <th style="width: 220px;">软件名称</th>
-                  <th>启动命令行 / 指令</th>
-                  <th style="width: 120px;">注册源</th>
-                  <th style="width: 120px; text-align: center;">开机影响</th>
-                  <th style="width: 100px; text-align: center;">状态</th>
-                  <th style="width: 100px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="startupTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- 10. Installed Apps & Leftovers Pane -->
-        <section class="workspace-pane" id="pane-apps">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>已安装软件与卸载残留排查</h1>
-              <p>检阅系统已安装软件资产，排查软件卸载后遗留在 AppData 的孤立无主残留目录</p>
-            </div>
-            <div class="workspace-controls">
-              <button class="btn btn-secondary" onclick="loadInstalledApps()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
-                <span>刷新应用列表</span>
-              </button>
-              <button class="btn btn-secondary" onclick="exportAppsToCsv()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></span>
-                <span>导出软件资产</span>
-              </button>
-              <button class="btn btn-primary" onclick="loadAppLeftovers()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span>
-                <span>排查卸载残留</span>
-              </button>
-            </div>
-          </div>
-
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div class="filter-tabs" id="appsFilterTabs">
-              <div class="filter-tab active" onclick="setAppsView('installed', this)">全部已装软件 (<span id="appsCountLabel">170</span>)</div>
-              <div class="filter-tab" onclick="setAppsView('leftovers', this)">卸载孤立残留 (<span id="leftoversCountLabel">排查</span>)</div>
-            </div>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <input type="text" id="appsSearchInput" oninput="filterAppsTable()" placeholder="快速搜索软件名称或发布商..." style="width: 220px; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 5px 10px; color: #fff; font-size: 11.5px; outline: none;">
-            </div>
-          </div>
-
-          <div class="data-grid-container" style="flex: 1;">
-            <table class="data-grid" id="installedAppsTable">
-              <thead>
-                <tr>
-                  <th style="width: 260px;">软件名称</th>
-                  <th style="width: 120px;">版本号</th>
-                  <th style="width: 180px;">发布厂商</th>
-                  <th style="width: 120px; text-align: right;">占用体积</th>
-                  <th>安装路径 / 位置</th>
-                  <th style="width: 120px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="installedAppsTableBody"></tbody>
-            </table>
-
-            <table class="data-grid" id="appLeftoversTable" style="display: none;">
-              <thead>
-                <tr>
-                  <th style="width: 220px;">残留文件夹</th>
-                  <th>关联物理路径</th>
-                  <th style="width: 120px; text-align: right;">占用体积</th>
-                  <th style="width: 90px; text-align: right;">文件数</th>
-                  <th style="width: 220px;">判定原因</th>
-                  <th style="width: 120px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="appLeftoversTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- 11. Universal System Maintenance Pane -->
-        <section class="workspace-pane" id="pane-system">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>Windows 系统底座通用维护箱</h1>
-              <p>一键清空全盘回收站、刷新本地 DNS 解析缓存、清理 Windows 预读与系统错误报告</p>
-            </div>
-            <div class="workspace-controls">
-              <button class="btn btn-secondary" onclick="loadSystemMaintenance()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
-                <span>刷新系统状态</span>
-              </button>
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
-            <!-- Maint Card 1: Recycle Bin -->
-            <div class="feature-card" style="cursor: default; padding: 20px;">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-cyan" style="width:44px; height:44px;">
-                  <svg style="width:24px; height:24px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
-                </div>
-                <div class="feature-card-metric" id="maintRecycleBinMetric"><span class="metric-num">380.8</span><span class="metric-unit">MB</span></div>
-              </div>
-              <div class="feature-card-body" style="margin-top:14px;">
-                <div class="card-title" style="font-size:15px;">全盘回收站深度清空</div>
-                <div class="card-desc" style="font-size:12px; margin-top:4px;">跨所有本地 NTFS 盘符彻底清空回收站中积压的历史删除文件，释放物理存储空间</div>
-              </div>
-              <div style="margin-top: 18px;">
-                <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="emptyRecycleBinNow()">
-                  <span>立即清空全盘回收站</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Maint Card 2: DNS Flush -->
-            <div class="feature-card" style="cursor: default; padding: 20px;">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-green" style="width:44px; height:44px;">
-                  <svg style="width:24px; height:24px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                </div>
-                <div class="feature-card-metric"><span class="metric-num" style="color:#6ccb5f; font-size:22px;">就绪</span></div>
-              </div>
-              <div class="feature-card-body" style="margin-top:14px;">
-                <div class="card-title" style="font-size:15px;">本地 DNS 网络解析缓存刷新</div>
-                <div class="card-desc" style="font-size:12px; margin-top:4px;">清除本地网络解析堆积脏数据，快速解决特定网页打不开、域名指向陈旧与请求假死</div>
-              </div>
-              <div style="margin-top: 18px;">
-                <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="flushDnsNow()">
-                  <span>一键刷新 DNS 缓存</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Maint Card 3: Prefetch & WER -->
-            <div class="feature-card" style="cursor: default; padding: 20px;">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-purple" style="width:44px; height:44px;">
-                  <svg style="width:24px; height:24px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-                </div>
-                <div class="feature-card-metric" id="maintSystemLogsMetric"><span class="metric-num">WER</span><span class="metric-unit">日志</span></div>
-              </div>
-              <div class="feature-card-body" style="margin-top:14px;">
-                <div class="card-title" style="font-size:15px;">Windows 预读与错误报告清理</div>
-                <div class="card-desc" style="font-size:12px; margin-top:4px;">清理 C:\Windows\Prefetch 预取历史和 WER 系统错误队列，保持核心引导盘轻量</div>
-              </div>
-              <div style="margin-top: 18px;">
-                <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="cleanCategoryItems('system')">
-                  <span>清理系统冗余组件</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Maint Card 4: Empty Folders -->
-            <div class="feature-card" style="cursor: default; padding: 20px;">
-              <div class="feature-card-top">
-                <div class="card-icon-box icon-box-blue" style="width:44px; height:44px;">
-                  <svg style="width:24px; height:24px; fill:currentColor;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
-                </div>
-                <div class="feature-card-metric"><span class="metric-num" id="emptyDirsCountLabel">0</span><span class="metric-unit">目录</span></div>
-              </div>
-              <div class="feature-card-body" style="margin-top:14px;">
-                <div class="card-title" style="font-size:15px;">孤立幽灵空目录清理</div>
-                <div class="card-desc" style="font-size:12px; margin-top:4px;">扫描 Temp 及缓存目录下不含任何文件和子目录的冗余空壳文件夹并安全移除</div>
-              </div>
-              <div style="margin-top: 18px; display: flex; gap: 8px;">
-                <button class="btn btn-secondary" style="flex: 1; justify-content: center;" onclick="scanEmptyDirs()">
-                  <span>排查空目录</span>
-                </button>
-                <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="cleanEmptyDirs()">
-                  <span>一键清除</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- 12. Duplicate Files Finder Pane -->
-        <section class="workspace-pane" id="pane-duplicates">
-          <div class="workspace-header">
-            <div class="workspace-title-box">
-              <h1>全盘重复文件查找与智选去重</h1>
-              <p>基于双阶段 MD5 精确比对，毫秒级发现磁盘或下载目录中完全相同的文件副本，智能推荐保留</p>
-            </div>
-            <div class="workspace-controls">
-              <button class="btn btn-primary" onclick="cleanSelectedDuplicates()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
+              <button class="btn btn-danger" style="height: 32px; padding: 0 16px;" onclick="cleanSelectedDuplicates()">
                 <span id="btnCleanDupsText">一键去重清理</span>
               </button>
             </div>
-          </div>
 
-          <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 14px 16px; display: flex; gap: 12px; align-items: flex-end;">
-            <div style="flex: 2;">
-              <label style="font-size: 11.5px; color: var(--text-secondary); display: block; margin-bottom: 5px;">排查目标路径</label>
-              <input type="text" id="dupScanPathInput" style="width: 100%; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 6px 10px; color: #fff; font-size: 12px; outline: none; font-family: var(--font-mono);">
+            <div class="data-grid-container" style="flex: 1;">
+              <table class="data-grid">
+                <thead>
+                  <tr>
+                    <th class="col-checkbox"><input type="checkbox" checked onchange="toggleSelectAllDups(this)"></th>
+                    <th style="width: 260px;">文件哈希 / 特征组</th>
+                    <th>物理存储路径</th>
+                    <th style="width: 120px; text-align: right;">单个体积</th>
+                    <th style="width: 140px; text-align: center;">去重建议</th>
+                    <th style="width: 90px; text-align: center;">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="duplicatesTableBody"></tbody>
+              </table>
             </div>
-            <div style="flex: 1;">
-              <label style="font-size: 11.5px; color: var(--text-secondary); display: block; margin-bottom: 5px;">最小文件阈值</label>
-              <select id="dupMinSizeSelect" style="width: 100%; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 6px 10px; color: #fff; font-size: 12px; outline: none;">
-                <option value="1">大于 1 MB</option>
-                <option value="10">大于 10 MB</option>
-                <option value="50">大于 50 MB</option>
-                <option value="100">大于 100 MB</option>
-              </select>
-            </div>
-            <button class="btn btn-primary" style="height: 32px; padding: 0 16px;" onclick="runDuplicatesScan()">
-              <span>开始排查重复</span>
-            </button>
-          </div>
-
-          <div class="data-grid-container" style="flex: 1;">
-            <table class="data-grid">
-              <thead>
-                <tr>
-                  <th class="col-checkbox"><input type="checkbox" checked onchange="toggleSelectAllDups(this)"></th>
-                  <th style="width: 260px;">文件哈希 / 特征组</th>
-                  <th>物理存储路径</th>
-                  <th style="width: 120px; text-align: right;">单个体积</th>
-                  <th style="width: 140px; text-align: center;">去重建议</th>
-                  <th style="width: 90px; text-align: center;">操作</th>
-                </tr>
-              </thead>
-              <tbody id="duplicatesTableBody"></tbody>
-            </table>
           </div>
         </section>
-</section>
+
+
+        <!-- ======================================================== -->
+        <!-- WORKSPACE 3: 残留与死链瘦身 (Purge) -->
+        <!-- ======================================================== -->
+        <section class="workspace-pane" id="pane-purge">
+          <div class="workspace-header">
+            <div class="workspace-title-box">
+              <h1>残留与死链瘦身治理</h1>
+              <p>专攻软件卸载后遗留在 AppData 的孤立无主残留，清除注册表幽灵死链与失效自启项</p>
+            </div>
+            <div class="workspace-controls">
+              <div class="filter-tabs" id="purgeFilterTabs" style="margin: 0;">
+                <div class="filter-tab active" onclick="setPurgeSubView('leftovers', this)">软件卸载孤立残留 (<span id="purgeLeftoversCountLabel">排查</span>)</div>
+                <div class="filter-tab" onclick="setPurgeSubView('registry', this)">注册表死链与失效自启 (<span id="purgeRegistryCountLabel">198 处</span>)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subview 1: AppData Leftovers -->
+          <div id="subviewLeftovers" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="font-size: 12px; color: var(--text-secondary);">
+                排查主程序已删除、但历史配置与缓存仍积聚在 AppData 的孤立遗留文件夹：
+              </div>
+              <button class="btn btn-primary" onclick="loadAppLeftovers()">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
+                <span>深度排查残留</span>
+              </button>
+            </div>
+
+            <div class="data-grid-container" style="flex: 1;">
+              <table class="data-grid">
+                <thead>
+                  <tr>
+                    <th style="width: 220px;">残留文件夹</th>
+                    <th>关联物理路径</th>
+                    <th style="width: 120px; text-align: right;">占用体积</th>
+                    <th style="width: 90px; text-align: right;">文件数</th>
+                    <th style="width: 220px;">判定原因</th>
+                    <th style="width: 120px; text-align: center;">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="appLeftoversTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Subview 2: Registry Dead Links & Ghost Autoruns -->
+          <div id="subviewRegistry" style="display: none; flex-direction: column; gap: 14px; flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="font-size: 12px; color: var(--text-secondary);">
+                清除已卸载程序残留的 MUICache 冗余、失效 OpenWith 右键打开方式及文件丢失的失效自启项：
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" onclick="loadRegistryIssues()">
+                  <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
+                  <span>排查死链</span>
+                </button>
+                <button class="btn btn-primary" onclick="cleanSelectedRegistryIssues()">
+                  <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
+                  <span>一键修复清理</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="data-grid-container" style="flex: 1;">
+              <table class="data-grid">
+                <thead>
+                  <tr>
+                    <th class="col-checkbox"><input type="checkbox" checked onchange="toggleSelectAllRegistry(this)"></th>
+                    <th style="width: 140px;">残留类型</th>
+                    <th style="width: 240px;">键名 / 文件名</th>
+                    <th>失效注册表路径 / 引用位置</th>
+                    <th style="width: 100px; text-align: center;">状态</th>
+                  </tr>
+                </thead>
+                <tbody id="registryTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ======================================================== -->
+        <!-- WORKSPACE 4: 深度极客工具箱 (Tools) -->
+        <!-- ======================================================== -->
+        <section class="workspace-pane" id="pane-tools">
+          <div class="workspace-header">
+            <div class="workspace-title-box">
+              <h1>深度极客工具箱</h1>
+              <p>底层虚拟化与物理收缩工具：Docker 镜像管理、NTFS Junction 目录搬家与 SQLite 数据库整理</p>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+            <!-- Tool Card 1: Docker Virtualization -->
+            <div class="feature-card" style="cursor: default; padding: 20px;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-blue" style="width:40px; height:40px;">
+                  <svg style="width:22px; height:22px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                </div>
+                <div class="feature-card-metric" id="dockerMetric"><span class="metric-num">0</span><span class="metric-unit">B</span></div>
+              </div>
+              <div class="feature-card-body" style="margin-top:12px;">
+                <div class="card-title" style="font-size:14.5px;">Docker 虚拟镜像与 Buildx 治理</div>
+                <div class="card-desc" style="font-size:11.5px; margin-top:4px;">清理容器层构建缓存、孤立网络卷及未使用的旧版镜像，释放虚拟磁盘空间</div>
+              </div>
+              <div style="margin-top: 16px; display:flex; flex-direction:column; gap:8px;">
+                <button class="btn btn-secondary" style="width: 100%; justify-content: center; font-size:11.5px;" onclick="pruneDockerBuildCache()">
+                  <span>清理构建缓存 (Buildx)</span>
+                </button>
+                <button class="btn btn-primary" style="width: 100%; justify-content: center; font-size:11.5px;" onclick="pruneDockerSystem()">
+                  <span>全量系统瘦身 (docker prune)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Tool Card 2: Junction Migration -->
+            <div class="feature-card" style="cursor: default; padding: 20px;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-purple" style="width:40px; height:40px;">
+                  <svg style="width:22px; height:22px; fill:currentColor;" viewBox="0 0 24 24"><path d="M16 13h-3V3h-2v10H8l4 4 4-4zM4 19v2h16v-2H4z"/></svg>
+                </div>
+                <div class="feature-card-metric"><span class="metric-num" style="color:#c084fc;">Junction</span></div>
+              </div>
+              <div class="feature-card-body" style="margin-top:12px;">
+                <div class="card-title" style="font-size:14.5px;">目录无损跨盘搬家 (Junction)</div>
+                <div class="card-desc" style="font-size:11.5px; margin-top:4px;">基于 NTFS 符号链接透明转移 Android 模拟器、微信记录至 D/E 盘，系统无感</div>
+              </div>
+              <div style="margin-top: 16px;">
+                <button class="btn btn-secondary" style="width: 100%; justify-content: center; font-size:11.5px;" onclick="openMigrationWizardModal()">
+                  <span>启动目录搬家向导</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Tool Card 3: SQLite Vacuum -->
+            <div class="feature-card" style="cursor: default; padding: 20px;">
+              <div class="feature-card-top">
+                <div class="card-icon-box icon-box-green" style="width:40px; height:40px;">
+                  <svg style="width:22px; height:22px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 3C7.58 3 4 4.79 4 7v10c0 2.21 3.58 4 8 4s8-1.79 8-4V7c0-2.21-3.58-4-8-4zm0 2c3.87 0 6 1.5 6 2s-2.13 2-6 2-6-1.5-6-2 2.13-2 6-2zm0 14c-3.87 0-6-1.5-6-2v-1.85c1.47.78 3.61 1.25 6 1.25s4.53-.47 6-1.25V17c0 .5-2.13 2-6 2zm0-4c-3.87 0-6-1.5-6-2v-1.85c1.47.78 3.61 1.25 6 1.25s4.53-.47 6-1.25V13c0 .5-2.13 2-6 2z"/></svg>
+                </div>
+                <div class="feature-card-metric"><span class="metric-num" style="color:#6ccb5f;">VACUUM</span></div>
+              </div>
+              <div class="feature-card-body" style="margin-top:12px;">
+                <div class="card-title" style="font-size:14.5px;">数据库碎片物理压缩 (SQLite)</div>
+                <div class="card-desc" style="font-size:11.5px; margin-top:4px;">针对 Cursor / IDE 膨胀的 state.vscdb 进行原生数据页重排，物理缩小文件体积</div>
+              </div>
+              <div style="margin-top: 16px;">
+                <button class="btn btn-secondary" style="width: 100%; justify-content: center; font-size:11.5px;" onclick="runVacuumCursor()">
+                  <span>执行 state.vscdb 压缩</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Junctions List in Tools Workspace -->
+          <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 16px; margin-top: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+              <span style="font-size: 13px; font-weight: 600; color: #fff;">当前已建立的 NTFS Junction 无感软链接</span>
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="loadActiveJunctions()">刷新链接</button>
+            </div>
+            <div id="toolsJunctionList" style="font-size: 11.5px; color: var(--text-secondary);">
+              正在检测系统活跃符号链接...
+            </div>
+          </div>
+        </section>
 
       </div>
-
       <!-- Right Master-Detail Inspector Drawer -->
       <aside class="desktop-inspector collapsed" id="desktopInspector">
         <div class="inspector-header">
@@ -2777,6 +2136,12 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         if (document.getElementById('leftoversCountLabel')) {
           document.getElementById('leftoversCountLabel').innerText = `${state.appLeftovers.length} 处`;
         }
+        if (document.getElementById('purgeLeftoversCountLabel')) {
+          document.getElementById('purgeLeftoversCountLabel').innerText = `${state.appLeftovers.length} 处`;
+        }
+        if (document.getElementById('badgePurge')) {
+          document.getElementById('badgePurge').innerText = `${state.appLeftovers.length + state.registryIssues.length} 处`;
+        }
         setAppsView('leftovers');
         renderLeftoversTable();
         showToast(`排查完成，发现 ${state.appLeftovers.length} 处疑似孤立数据残留`);
@@ -2795,13 +2160,15 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         if (tabs[idx]) tabs[idx].classList.add('active');
       }
 
+      const tInst = document.getElementById('installedAppsTable');
+      const tLeft = document.getElementById('appLeftoversTable');
       if (mode === 'installed') {
-        document.getElementById('installedAppsTable').style.display = 'table';
-        document.getElementById('appLeftoversTable').style.display = 'none';
+        if (tInst) tInst.style.display = 'table';
+        if (tLeft) tLeft.style.display = 'none';
         renderAppsTable();
       } else {
-        document.getElementById('installedAppsTable').style.display = 'none';
-        document.getElementById('appLeftoversTable').style.display = 'table';
+        if (tInst) tInst.style.display = 'none';
+        if (tLeft) tLeft.style.display = 'table';
         renderLeftoversTable();
       }
     }
@@ -3207,40 +2574,52 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     function switchTab(tabId) {
       state.currentTab = tabId;
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.workspace-pane').forEach(el => el.classList.remove('active'));
-
-      const pane = document.getElementById(`pane-${tabId}`);
-      if (pane) pane.classList.add('active');
-
-      const navMap = {
-        'overview': 0, 'devcache': 1, 'office': 2, 'docker': 3, 'browser': 4, 'registry': 5,
-        'giant': 6, 'migration': 7, 'vacuum': 8, 'rules': 9
-      };
-      const items = document.querySelectorAll('.nav-item');
-      if (items[navMap[tabId]]) items[navMap[tabId]].classList.add('active');
-
-      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
       const activeNav = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
       if (activeNav) activeNav.classList.add('active');
 
-      if (tabId === 'startup') { if (state.startupItems.length > 0) renderStartupTable(); loadStartupItems(); }
-      if (tabId === 'apps') { if (state.installedApps.length > 0) renderAppsTable(); loadInstalledApps(); }
-      if (tabId === 'system') loadSystemMaintenance();
-      if (tabId === 'duplicates') {
-        const defPath = document.getElementById('dupScanPathInput');
-        if (defPath && !defPath.value) {
-          defPath.value = 'C:\\Users\\EDY\\Downloads';
-        }
+      document.querySelectorAll('.workspace-pane').forEach(el => el.classList.remove('active'));
+      const targetPane = document.getElementById(`pane-${tabId}`);
+      if (targetPane) targetPane.classList.add('active');
+
+      toggleInspector(false);
+
+      if (tabId === 'analyze') {
+        if (state.giantFiles.length === 0) loadGiantFiles();
       }
-      if (tabId === 'giant' && state.giantFiles.length === 0) loadGiantFiles();
-      if (tabId === 'registry' && state.registryIssues.length === 0) loadRegistryIssues();
-      if (tabId === 'migration') loadActiveJunctions();
-      if (tabId === 'rules') renderCustomRulesTable();
-      if (tabId === 'office') renderOfficeTable();
-      if (tabId === 'docker') { renderDockerTable(); loadDockerStatus(); }
-      if (tabId === 'devcache') renderDevCacheTable();
-      if (tabId === 'browser') renderBrowserTable();
-      if (tabId === 'vacuum') renderVacuumTable();
+      if (tabId === 'purge') {
+        if (state.appLeftovers.length === 0) loadAppLeftovers();
+      }
+      if (tabId === 'tools') {
+        loadDockerStatus();
+        loadActiveJunctions();
+      }
+    }
+
+    function setAnalyzeSubView(mode, el) {
+      document.querySelectorAll('#analyzeFilterTabs .filter-tab').forEach(t => t.classList.remove('active'));
+      if (el) el.classList.add('active');
+      if (mode === 'giant') {
+        document.getElementById('subviewGiantFiles').style.display = 'flex';
+        document.getElementById('subviewDuplicates').style.display = 'none';
+        if (state.giantFiles.length === 0) loadGiantFiles();
+      } else {
+        document.getElementById('subviewGiantFiles').style.display = 'none';
+        document.getElementById('subviewDuplicates').style.display = 'flex';
+      }
+    }
+
+    function setPurgeSubView(mode, el) {
+      document.querySelectorAll('#purgeFilterTabs .filter-tab').forEach(t => t.classList.remove('active'));
+      if (el) el.classList.add('active');
+      if (mode === 'leftovers') {
+        document.getElementById('subviewLeftovers').style.display = 'flex';
+        document.getElementById('subviewRegistry').style.display = 'none';
+        if (state.appLeftovers.length === 0) loadAppLeftovers();
+      } else {
+        document.getElementById('subviewLeftovers').style.display = 'none';
+        document.getElementById('subviewRegistry').style.display = 'flex';
+        if (state.registryIssues.length === 0) loadRegistryIssues();
+      }
     }
 
     // Inspector Control
@@ -3440,23 +2819,25 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         });
 
         const totalGbStr = (totalReclaimable / (1024**3)).toFixed(1);
-        document.getElementById('heroReclaimNum').innerText = totalGbStr;
-        document.getElementById('badgeOverview').innerText = `${totalGbStr} GB`;
-        document.getElementById('heroBtnCleanText').innerText = `一键快速清理 (${totalGbStr} GB)`;
+        if (document.getElementById('heroReclaimNum')) document.getElementById('heroReclaimNum').innerText = totalGbStr;
+        if (document.getElementById('badgeClean')) document.getElementById('badgeClean').innerText = `${totalGbStr} GB`;
+        if (document.getElementById('heroBtnCleanText')) document.getElementById('heroBtnCleanText').innerText = `一键快速清理 (${totalGbStr} GB)`;
 
         // Update Gauge Circle stroke-dashoffset
         const circle = document.getElementById('heroGaugeCircle');
-        const offset = Math.max(80, 440 - Math.min(360, (totalReclaimable / (40 * 1024**3)) * 360));
-        circle.style.strokeDashoffset = offset;
+        if (circle) {
+          const offset = Math.max(80, 440 - Math.min(360, (totalReclaimable / (40 * 1024**3)) * 360));
+          circle.style.strokeDashoffset = offset;
+        }
 
         // Update Card Metrics
         const sysCat = state.scanReport.categories.find(c => c.id === 'system');
-        if (sysCat) document.getElementById('cardSystemMetric').innerHTML = formatMetricHtml(sysCat.total_size_bytes);
+        if (sysCat && document.getElementById('cardSystemMetric')) document.getElementById('cardSystemMetric').innerHTML = formatMetricHtml(sysCat.total_size_bytes);
 
         const devCat = state.scanReport.categories.find(c => c.id === 'dev_cache');
         if (devCat) {
-          document.getElementById('cardDevMetric').innerHTML = formatMetricHtml(devCat.total_size_bytes);
-          document.getElementById('badgeDevCache').innerText = formatBytes(devCat.total_size_bytes);
+          if (document.getElementById('cardDevMetric')) document.getElementById('cardDevMetric').innerHTML = formatMetricHtml(devCat.total_size_bytes);
+          if (document.getElementById('badgeDevCache')) document.getElementById('badgeDevCache').innerText = formatBytes(devCat.total_size_bytes);
         }
 
         const offCat = state.scanReport.categories.find(c => c.id === 'office_chat');
@@ -3473,12 +2854,21 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
         const bCat = state.scanReport.categories.find(c => c.id === 'browser_cache');
         if (bCat) {
-          document.getElementById('cardBrowserMetric').innerHTML = formatMetricHtml(bCat.total_size_bytes);
-          document.getElementById('badgeBrowser').innerText = formatBytes(bCat.total_size_bytes);
+          if (document.getElementById('cardBrowserMetric')) document.getElementById('cardBrowserMetric').innerHTML = formatMetricHtml(bCat.total_size_bytes);
+          if (document.getElementById('badgeBrowser')) document.getElementById('badgeBrowser').innerText = formatBytes(bCat.total_size_bytes);
         }
 
         const vacCat = state.scanReport.categories.find(c => c.id === 'sqlite_optimize' || c.id === 'db_vacuum');
-        if (vacCat) document.getElementById('cardVacuumMetric').innerHTML = formatMetricHtml(vacCat.total_size_bytes);
+        if (vacCat && document.getElementById('cardVacuumMetric')) document.getElementById('cardVacuumMetric').innerHTML = formatMetricHtml(vacCat.total_size_bytes);
+
+        state.selectedPaths.clear();
+        state.scanReport.categories.forEach(cat => {
+          cat.rules.forEach(rule => {
+            rule.matched_paths.forEach(mp => {
+              if (mp.size_bytes > 0) state.selectedPaths.add(mp.path);
+            });
+          });
+        });
 
         renderOverviewTable();
         renderDevCacheTable();
@@ -3488,7 +2878,8 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         renderVacuumTable();
         renderCustomRulesTable();
 
-        document.getElementById('sbProgress').innerText = '体检完成';
+        const sbProg = document.getElementById('sbProgress');
+        if (sbProg) sbProg.innerText = '体检完成';
         updateSelectionStatus();
         showToast('空间体检完成，已识别可释放空间');
       } catch (e) {
@@ -3499,6 +2890,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
     function renderOverviewTable() {
       const tbody = document.getElementById('overviewTableBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
       if (!state.scanReport) return;
 
@@ -3544,7 +2936,8 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         });
       });
 
-      document.getElementById('overviewCounter').innerText = `已检出 ${renderedCount} 处清理项`;
+      const oc = document.getElementById('overviewCounter');
+      if (oc) oc.innerText = `已检出 ${renderedCount} 处清理项`;
     }
 
     function toggleItemSelect(path, checked) {
@@ -3591,8 +2984,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           });
         });
       }
-      document.getElementById('sbSelection').innerText = `已选 ${state.selectedPaths.size} 项 (${formatBytes(selBytes)})`;
-      document.getElementById('heroBtnCleanText').innerText = `一键快速清理 (${formatBytes(selBytes)})`;
+      const sbSel = document.getElementById('sbSelection');
+      if (sbSel) sbSel.innerText = `已选 ${state.selectedPaths.size} 项 (${formatBytes(selBytes)})`;
+      const btnClean = document.getElementById('heroBtnCleanText');
+      if (btnClean) btnClean.innerText = `一键快速清理 (${formatBytes(selBytes)})`;
     }
 
     // Render Office & WeChat Table
@@ -3822,6 +3217,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     // Browser Cache Table
     function renderBrowserTable() {
       const tbody = document.getElementById('browserTableBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
       if (!state.scanReport) return;
       const cat = state.scanReport.categories.find(c => c.id === 'browser_cache');
@@ -3860,6 +3256,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     // Vacuum Table
     function renderVacuumTable() {
       const tbody = document.getElementById('vacuumTableBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
       if (!state.scanReport) return;
       const cat = state.scanReport.categories.find(c => c.id === 'sqlite_optimize' || c.id === 'db_vacuum');
@@ -3896,12 +3293,14 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     // Registry Scanner
     async function loadRegistryIssues() {
       showToast('正在深度排查无效卸载信息与死链注册表项...');
-      document.getElementById('registryCounter').innerText = '扫描中...';
+      const regCounter = document.getElementById('registryCounter');
+      if (regCounter) regCounter.innerText = '扫描中...';
       try {
         const res = await fetch('/api/registry/scan');
         state.registryIssues = await res.json();
         state.selectedRegistryIds = new Set(state.registryIssues.map(i => i.id));
-        document.getElementById('badgeRegistry').innerText = state.registryIssues.length;
+        if (document.getElementById('badgeRegistry')) document.getElementById('badgeRegistry').innerText = state.registryIssues.length;
+        if (document.getElementById('badgePurge')) document.getElementById('badgePurge').innerText = `${state.registryIssues.length + state.appLeftovers.length} 处`;
         renderRegistryTable();
         showToast(`排查出 ${state.registryIssues.length} 处失效注册表条目`);
       } catch (e) {
@@ -3911,6 +3310,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
     function renderRegistryTable() {
       const tbody = document.getElementById('registryTableBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
       const q = (document.getElementById('registrySearchInput')?.value || '').toLowerCase();
       const filtered = state.registryIssues.filter(item => {
@@ -3921,8 +3321,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         return true;
       });
 
-      document.getElementById('registryCounter').innerText = `发现 ${filtered.length} 处冗余项目`;
-      document.getElementById('btnCleanRegistryLabel').innerText = `一键安全修复 (${state.selectedRegistryIds.size} 项)`;
+      const rc = document.getElementById('registryCounter');
+      if (rc) rc.innerText = `发现 ${filtered.length} 处冗余项目`;
+      const btnClean = document.getElementById('btnCleanRegistryLabel');
+      if (btnClean) btnClean.innerText = `一键安全修复 (${state.selectedRegistryIds.size} 项)`;
 
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 30px; color: var(--text-tertiary);">当前注册表环境干净，未发现死链残留</td></tr>`;
@@ -4002,12 +3404,14 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     // Giant Files Scanner
     async function loadGiantFiles() {
       showToast('正在多线程全盘检索 100MB+ 沉淀文件...');
-      document.getElementById('giantCounter').innerText = '排查中...';
+      const gc = document.getElementById('giantCounter');
+      if (gc) gc.innerText = '排查中...';
       try {
         const res = await fetch('/api/giant-files');
         state.giantFiles = await res.json();
-        document.getElementById('badgeGiantFiles').innerText = state.giantFiles.length;
-        document.getElementById('cardGiantMetric').innerText = `${(state.giantFiles.reduce((acc, f) => acc + f.size_bytes, 0) / (1024**3)).toFixed(1)} GB`;
+        if (document.getElementById('badgeGiantFiles')) document.getElementById('badgeGiantFiles').innerText = state.giantFiles.length;
+        if (document.getElementById('badgeAnalyze')) document.getElementById('badgeAnalyze').innerText = `${state.giantFiles.length} 项`;
+        if (document.getElementById('cardGiantMetric')) document.getElementById('cardGiantMetric').innerText = `${(state.giantFiles.reduce((acc, f) => acc + f.size_bytes, 0) / (1024**3)).toFixed(1)} GB`;
         renderGiantDistribution();
         renderGiantTable();
       } catch (e) {
@@ -4042,11 +3446,14 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         }
       });
 
-      document.getElementById('giantTotalSubtitle').innerText = `总计 ${formatBytes(totalBytes)} (${state.giantFiles.length} 个文件)`;
+      const giantSub = document.getElementById('giantTotalSubtitle');
+      if (giantSub) giantSub.innerText = `总计 ${formatBytes(totalBytes)} (${state.giantFiles.length} 个文件)`;
 
       const bar = document.getElementById('giantDistributionBar');
+      if (!bar) return;
       bar.innerHTML = '';
       const legend = document.getElementById('giantLegendList');
+      if (!legend) return;
       legend.innerHTML = '';
 
       const allPill = document.createElement('div');
@@ -4103,7 +3510,8 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     }
 
     function renderGiantTable() {
-      const tbody = document.getElementById('giantTableBody');
+      const tbody = document.getElementById('giantFilesTableBody') || document.getElementById('giantTableBody');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
       const q = (document.getElementById('giantSearchInput')?.value || '').toLowerCase();
@@ -4116,7 +3524,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         return true;
       });
 
-      document.getElementById('giantCounter').innerText = `已排查出 ${filtered.length} 个大型资产`;
+      const gc = document.getElementById('giantCounter');
+      if (gc) gc.innerText = `已排查出 ${filtered.length} 个大型资产`;
+      const agc = document.getElementById('analyzeGiantCount');
+      if (agc) agc.innerText = `${filtered.length}`;
 
       filtered.forEach(f => {
         const tr = document.createElement('tr');
@@ -4131,14 +3542,14 @@ HTML_CONTENT = r'''<!DOCTYPE html>
             inspectItem({ name: f.name, path: f.path, size_bytes: f.size_bytes, category: f.category || '大文件' });
           }
         };
-        const catZh = f.category === 'Database' ? '数据库' : f.category === 'VirtualDisk' ? '虚拟机' : f.category === 'Installer' ? '安装包' : f.category === 'Archive' ? '压缩包' : '大资产';
-        const badgeStyle = f.category === 'Database' ? 'badge-safe' : f.category === 'VirtualDisk' ? 'badge-junction' : f.category === 'Installer' ? 'badge-warn' : 'badge-openwith';
+
+        const mtimeStr = f.modified_timestamp ? new Date(f.modified_timestamp * 1000).toLocaleDateString() : '-';
 
         tr.innerHTML = `
           <td style="font-weight:600;"><span class="path-text" title="${escapeHtml(f.name)}" style="color:#ffffff;">${escapeHtml(f.name)}</span></td>
           <td><span class="path-text" title="${escapeHtml(f.path)}">${escapeHtml(f.path)}</span></td>
-          <td><span class="badge-pill ${badgeStyle}">${escapeHtml(catZh)}</span></td>
-          <td style="text-align: right; font-family: var(--font-mono); font-weight: 600;">${formatBytes(f.size_bytes)}</td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 600; color: #60cdff;">${formatBytes(f.size_bytes)}</td>
+          <td style="text-align: center; color: var(--text-tertiary); font-size: 11px;">${mtimeStr}</td>
           <td style="text-align: center;">
             <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapeHtml(f.path)}')">定位</button>
           </td>
@@ -4152,25 +3563,50 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       try {
         const res = await fetch('/api/junctions');
         const list = await res.json();
-        const tbody = document.getElementById('activeJunctionsTableBody');
-        tbody.innerHTML = '';
-        if (list.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 24px; color: var(--text-tertiary);">当前尚未创建任何活动软联接</td></tr>`;
-          return;
+        const container = document.getElementById('toolsJunctionList');
+        if (container) {
+          if (list.length === 0) {
+            container.innerHTML = '<div style="padding: 12px 0; color: var(--text-tertiary); text-align: center;">当前系统未创建任何活动 NTFS 符号链接 (Junction)</div>';
+          } else {
+            let html = '<table class="data-grid"><thead><tr><th>原始路径 (C盘)</th><th>物理重定向路径</th><th>建立时间</th><th style="width:140px; text-align:center;">操作</th></tr></thead><tbody>';
+            list.forEach(j => {
+              html += `
+                <tr>
+                  <td><span class="path-text" title="${escapeHtml(j.source_path)}">${escapeHtml(j.source_path)}</span></td>
+                  <td><span class="path-text" title="${escapeHtml(j.target_path)}" style="color: #60cdff;">${escapeHtml(j.target_path)}</span></td>
+                  <td style="color: var(--text-tertiary);">${escapeHtml(j.created_at || '最近')}</td>
+                  <td style="text-align: center;">
+                    <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapeHtml(j.target_path)}')">定位</button>
+                    <button class="btn btn-danger" style="padding: 2px 8px; font-size: 11px; margin-left: 4px;" onclick="rollbackJunction('${escapeHtml(j.source_path)}')">还原</button>
+                  </td>
+                </tr>
+              `;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+          }
         }
-        list.forEach(j => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td style="font-family: var(--font-mono);"><span class="path-text" title="${escapeHtml(j.source_path)}">${escapeHtml(j.source_path)}</span></td>
-            <td style="font-family: var(--font-mono); color: #60cdff;"><span class="path-text" title="${escapeHtml(j.target_path)}">${escapeHtml(j.target_path)}</span></td>
-            <td style="color: var(--text-tertiary);">${escapeHtml(j.created_at || '最近')}</td>
-            <td style="text-align: center; display: flex; gap: 6px; justify-content: center;">
-              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapeHtml(j.target_path)}')">打开目标</button>
-              <button class="btn btn-danger" style="padding: 2px 8px; font-size: 11px;" onclick="rollbackJunction('${escapeHtml(j.source_path)}')">安全还原</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
+        const tbody = document.getElementById('activeJunctionsTableBody');
+        if (tbody) {
+          tbody.innerHTML = '';
+          if (list.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 24px; color: var(--text-tertiary);">当前尚未创建任何活动软联接</td></tr>`;
+          } else {
+            list.forEach(j => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td style="font-family: var(--font-mono);"><span class="path-text" title="${escapeHtml(j.source_path)}">${escapeHtml(j.source_path)}</span></td>
+                <td style="font-family: var(--font-mono); color: #60cdff;"><span class="path-text" title="${escapeHtml(j.target_path)}">${escapeHtml(j.target_path)}</span></td>
+                <td style="color: var(--text-tertiary);">${escapeHtml(j.created_at || '最近')}</td>
+                <td style="text-align: center; display: flex; gap: 6px; justify-content: center;">
+                  <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapeHtml(j.target_path)}')">打开目标</button>
+                  <button class="btn btn-danger" style="padding: 2px 8px; font-size: 11px;" onclick="rollbackJunction('${escapeHtml(j.source_path)}')">安全还原</button>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            });
+          }
+        }
       } catch (e) {
         console.error('Failed to load junctions', e);
       }
