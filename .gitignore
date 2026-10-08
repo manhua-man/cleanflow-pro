@@ -9,3 +9,4 @@ out.txt
 test_sqlite.ps1
 .idea/
 .vscode/
+dist/*.zip

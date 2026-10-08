@@ -1190,17 +1190,57 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     }
 
     .toast-message {
+      position: relative;
+      overflow: hidden;
       background-color: var(--bg-card);
       border: 1px solid var(--stroke-card-hover);
       border-radius: var(--radius-sm);
-      padding: 8px 14px;
+      padding: 9px 16px;
       font-size: 12px;
       color: #ffffff;
-      box-shadow: var(--shadow-card);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
       display: flex;
       align-items: center;
-      gap: 8px;
-      animation: toastIn 180ms var(--motion-spring);
+      gap: 10px;
+      animation: toastIn 200ms var(--motion-spring);
+    }
+
+    .toast-message::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: var(--accent-gradient);
+      width: 100%;
+      animation: toastProgress 3.2s linear forwards;
+    }
+
+    @keyframes toastProgress {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+
+    /* Silky micro-interactions */
+    .data-grid tbody tr {
+      transition: background-color 0.15s ease;
+    }
+    .data-grid tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.045);
+    }
+    .feature-card {
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+      border-color: var(--stroke-card-hover);
+    }
+    .btn {
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn:active {
+      transform: scale(0.97);
     }
 
     @keyframes toastIn {
@@ -1460,10 +1500,16 @@ HTML_CONTENT = r'''<!DOCTYPE html>
                 <span class="icon" style="width:18px; height:18px;"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
                 <span id="heroBtnCleanText">一键快速清理 (21.5 GB)</span>
               </button>
-              <button class="btn btn-secondary" style="padding: 6px 14px;" onclick="runScan()">
-                <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
-                <span>重新深度体检</span>
-              </button>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="padding: 6px 14px;" onclick="runScan()">
+                  <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
+                  <span>重新深度体检</span>
+                </button>
+                <button class="btn btn-secondary" style="padding: 6px 14px;" onclick="exportHealthReport()">
+                  <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></span>
+                  <span>导出诊断报告</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2135,6 +2181,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
                 <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
                 <span>刷新自启项</span>
               </button>
+              <button class="btn btn-secondary" onclick="exportStartupToCsv()">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></span>
+                <span>导出自启清单</span>
+              </button>
               <button class="btn btn-primary" onclick="cleanDeadStartupItems()">
                 <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></span>
                 <span>一键清理失效死链</span>
@@ -2209,6 +2259,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               <button class="btn btn-secondary" onclick="loadInstalledApps()">
                 <span class="icon"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></span>
                 <span>刷新应用列表</span>
+              </button>
+              <button class="btn btn-secondary" onclick="exportAppsToCsv()">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></span>
+                <span>导出软件资产</span>
               </button>
               <button class="btn btn-primary" onclick="loadAppLeftovers()">
                 <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span>
@@ -3063,7 +3117,93 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         }
       });
     }
-// Tab Switching
+
+    // ==========================================
+    // Data Export Utilities (CSV & JSON)
+    // ==========================================
+    function downloadBlob(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 200);
+      showToast(`已导出: ${filename}`);
+    }
+
+    function exportStartupToCsv() {
+      if (!state.startupItems || state.startupItems.length === 0) {
+        showToast('暂无自启动数据可导出');
+        return;
+      }
+      const headers = ['名称', '启动命令', '注册源', '注册位置', '开机影响', '文件是否存在', '状态'];
+      const rows = state.startupItems.map(item => [
+        `"${(item.name || '').replace(/"/g, '""')}"`,
+        `"${(item.command || '').replace(/"/g, '""')}"`,
+        `"${(item.source || '').replace(/"/g, '""')}"`,
+        `"${(item.location || '').replace(/"/g, '""')}"`,
+        `"${(item.impact || '').replace(/"/g, '""')}"`,
+        item.exists ? '正常' : '文件丢失',
+        item.enabled ? '启用' : '禁用'
+      ]);
+      const csv = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+      downloadBlob(csv, `CleanFlow_自启动清单_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv;charset=utf-8;');
+    }
+
+    function exportAppsToCsv() {
+      if (!state.installedApps || state.installedApps.length === 0) {
+        showToast('暂无已装软件数据可导出');
+        return;
+      }
+      const headers = ['软件名称', '版本', '发布厂商', '占用字节', '估算大小', '安装路径', '卸载命令'];
+      const rows = state.installedApps.map(app => [
+        `"${(app.name || '').replace(/"/g, '""')}"`,
+        `"${(app.version || '').replace(/"/g, '""')}"`,
+        `"${(app.publisher || '').replace(/"/g, '""')}"`,
+        app.size_bytes || 0,
+        `"${formatBytes(app.size_bytes || 0)}"`,
+        `"${(app.install_location || '').replace(/"/g, '""')}"`,
+        `"${(app.uninstall_string || '').replace(/"/g, '""')}"`
+      ]);
+      const csv = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+      downloadBlob(csv, `CleanFlow_已装软件资产清单_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv;charset=utf-8;');
+    }
+
+    function exportHealthReport() {
+      const report = {
+        generated_at: new Date().toISOString(),
+        device: 'Windows PC (x86_64)',
+        engine_version: 'CleanFlow Pro v0.1.0',
+        summary: {
+          total_reclaimable_bytes: state.scanResult ? state.scanResult.total_size_bytes : 0,
+          total_reclaimable_formatted: formatBytes(state.scanResult ? state.scanResult.total_size_bytes : 0),
+          startup_items_count: state.startupItems ? state.startupItems.length : 0,
+          installed_apps_count: state.installedApps ? state.installedApps.length : 0,
+        },
+        categories: (state.scanResult && state.scanResult.categories ? state.scanResult.categories : []).map(cat => ({
+          name: cat.name,
+          risk_level: cat.risk_level,
+          size_bytes: cat.total_size_bytes,
+          size_formatted: formatBytes(cat.total_size_bytes),
+          files_count: cat.total_files,
+          rules: (cat.rules || []).map(r => ({
+            name: r.name,
+            size_bytes: r.total_size_bytes,
+            size_formatted: formatBytes(r.total_size_bytes),
+            paths: r.matched_paths
+          }))
+        }))
+      };
+      const json = JSON.stringify(report, null, 2);
+      downloadBlob(json, `CleanFlow_健康体检报告_${new Date().toISOString().slice(0, 10)}.json`, 'application/json');
+    }
+
+    // Tab Switching
     function switchTab(tabId) {
       state.currentTab = tabId;
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -3083,8 +3223,8 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       const activeNav = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
       if (activeNav) activeNav.classList.add('active');
 
-      if (tabId === 'startup') loadStartupItems();
-      if (tabId === 'apps') { loadInstalledApps(); }
+      if (tabId === 'startup') { if (state.startupItems.length > 0) renderStartupTable(); loadStartupItems(); }
+      if (tabId === 'apps') { if (state.installedApps.length > 0) renderAppsTable(); loadInstalledApps(); }
       if (tabId === 'system') loadSystemMaintenance();
       if (tabId === 'duplicates') {
         const defPath = document.getElementById('dupScanPathInput');

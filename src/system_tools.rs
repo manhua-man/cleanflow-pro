@@ -62,17 +62,46 @@ pub fn get_recycle_bin_stats() -> RecycleBinStats {
 pub fn empty_recycle_bin() -> Result<u64, String> {
     let before = get_recycle_bin_stats();
 
-    let output = Command::new("powershell")
-        .args(["-NoProfile", "-Command", "Clear-RecycleBin -Force -ErrorAction SilentlyContinue"])
-        .output()
-        .map_err(|e| format!("清空回收站命令启动失败: {}", e))?;
+    let script = r#"
+        $ErrorActionPreference = 'SilentlyContinue'
+        try {
+            $code = @"
+using System;
+using System.Runtime.InteropServices;
+public class Win32RecycleBin {
+    [DllImport("Shell32.dll", CharSet = CharSet.Unicode)]
+    public static extern uint SHEmptyRecycleBin(IntPtr hwnd, string pszRootPath, uint dwFlags);
+}
+"@
+            Add-Type -TypeDefinition $code -ErrorAction SilentlyContinue
+            [Win32RecycleBin]::SHEmptyRecycleBin([IntPtr]::Zero, $null, 7) | Out-Null
+        } catch {}
 
-    if !output.status.success() {
-        let err = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("清空回收站失败: {}", err));
-    }
+        try {
+            Clear-RecycleBin -Force -ErrorAction SilentlyContinue
+        } catch {}
 
-    Ok(before.size_bytes)
+        $drives = Get-PSDrive -PSProvider FileSystem | Select-Object -ExpandProperty Root
+        foreach ($d in $drives) {
+            $rbPath = Join-Path $d '$Recycle.Bin'
+            if (Test-Path $rbPath) {
+                Get-ChildItem -Path $rbPath -Recurse -Force -File -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+            }
+        }
+    "#;
+
+    let _ = Command::new("powershell")
+        .args(["-NoProfile", "-Command", script])
+        .output();
+
+    let after = get_recycle_bin_stats();
+    let freed = if before.size_bytes > after.size_bytes {
+        before.size_bytes - after.size_bytes
+    } else {
+        before.size_bytes
+    };
+
+    Ok(freed)
 }
 
 pub fn flush_dns() -> Result<String, String> {
