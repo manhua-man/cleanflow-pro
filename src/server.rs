@@ -996,6 +996,74 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                     "volumes_count": fresh.len()
                 }).to_string();
                 send_json_response(request, res_json);
+            } else if url.starts_with("/api/actions/list") && method == Method::Get {
+                let target_path = if let Some(pos) = url.find("?path=") {
+                    let raw = &url[pos + 6..];
+                    let encoded = raw.split('&').next().unwrap_or(raw);
+                    percent_decode_str(encoded).unwrap_or_else(|| encoded.to_string())
+                } else {
+                    String::new()
+                };
+
+                let actions = crate::action_runner::get_available_actions(&target_path);
+                let json = serde_json::to_string(&actions).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/actions/execute" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct ActionReq {
+                    action_id: String,
+                    target_path: String,
+                }
+
+                match serde_json::from_str::<ActionReq>(&content) {
+                    Ok(req) => {
+                        let res = crate::action_runner::execute_action(&req.action_id, &req.target_path);
+                        let json = serde_json::to_string(&res).unwrap_or_else(|_| "{}".to_string());
+                        send_json_response(request, json);
+                    }
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
+            } else if url.starts_with("/api/quick-switch") {
+                let target_path = if method == Method::Post {
+                    let mut content = String::new();
+                    let _ = request.as_reader().read_to_string(&mut content);
+                    #[derive(serde::Deserialize)]
+                    struct QsReq { path: String }
+                    serde_json::from_str::<QsReq>(&content).map(|r| r.path).ok()
+                } else if let Some(pos) = url.find("?path=") {
+                    let raw = &url[pos + 6..];
+                    let encoded = raw.split('&').next().unwrap_or(raw);
+                    percent_decode_str(encoded).or_else(|| Some(encoded.to_string()))
+                } else {
+                    None
+                };
+
+                let res = match target_path {
+                    Some(p) => crate::quick_switch::execute_quick_switch(&p),
+                    None => Err("缺少目标路径参数".to_string()),
+                };
+
+                let res_json = match res {
+                    Ok(_) => serde_json::json!({ "success": true, "message": "已成功跳转前台文件对话框" }).to_string(),
+                    Err(e) => serde_json::json!({ "success": false, "error": e }).to_string(),
+                };
+                send_json_response(request, res_json);
+            } else if url == "/api/daemon/status" && method == Method::Get {
+                static DAEMON: std::sync::OnceLock<crate::daemon_service::DaemonService> = std::sync::OnceLock::new();
+                let svc = DAEMON.get_or_init(|| {
+                    let d = crate::daemon_service::DaemonService::new();
+                    d.start();
+                    d
+                });
+                let status = svc.get_status();
+                let json = serde_json::to_string(&status).unwrap_or_else(|_| "{}".to_string());
+                send_json_response(request, json);
             } else if url == "/api/shutdown" && method == Method::Post {
                 running_clone.store(false, Ordering::SeqCst);
                 let res_json = r#"{"success": true, "message": "已关闭"}"#;

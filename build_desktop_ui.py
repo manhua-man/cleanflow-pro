@@ -1521,6 +1521,182 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       height: 100%;
       fill: currentColor;
     }
+
+    /* Spotlight Floating Bar (Listary Feature A: Alt+Space) */
+    .spotlight-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(8px);
+      z-index: 12000;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 12vh;
+    }
+    .spotlight-bar {
+      width: 680px;
+      max-width: 92vw;
+      background: rgba(28, 28, 34, 0.94);
+      backdrop-filter: blur(36px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 14px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: spotlightFadeIn 150ms cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+    @keyframes spotlightFadeIn {
+      from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .spotlight-input-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 12px;
+    }
+    .spotlight-search-icon {
+      width: 20px;
+      height: 20px;
+      fill: #60cdff;
+      flex-shrink: 0;
+    }
+    .spotlight-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-size: 15px;
+      font-family: inherit;
+      font-weight: 500;
+    }
+    .spotlight-input::placeholder {
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 13.5px;
+    }
+    .spotlight-badges {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .spotlight-kbd {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #c9d1d9;
+      font-family: var(--font-mono);
+    }
+    .spotlight-results {
+      max-height: 380px;
+      overflow-y: auto;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .spotlight-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 120ms ease;
+      user-select: none;
+    }
+    .spotlight-item:hover, .spotlight-item.selected {
+      background: rgba(0, 120, 212, 0.28);
+      border: 1px solid rgba(0, 153, 255, 0.4);
+    }
+    .spotlight-item-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+      flex: 1;
+    }
+    .spotlight-item-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .spotlight-item-path {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 300px;
+    }
+    .spotlight-item-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .spotlight-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(0, 0, 0, 0.2);
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* Action Runner Item Styles */
+    .action-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 140ms ease;
+    }
+    .action-card:hover {
+      background: rgba(0, 120, 212, 0.18);
+      border-color: rgba(0, 153, 255, 0.45);
+      transform: translateX(2px);
+    }
+    .action-card-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .action-card-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .action-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .action-card-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
   </style>
 </head>
 <body>
@@ -1542,8 +1718,16 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       <!-- Injected via JS -->
     </div>
 
-    <!-- Window Caption Controls -->
+    <!-- Window Caption Controls & Listary Extensions -->
     <div class="titlebar-actions">
+      <button class="btn btn-secondary" style="padding: 2px 10px; font-size: 11px; margin-right: 8px; display: inline-flex; align-items: center; gap: 6px; border-radius: 12px; height: 26px;" onclick="openSpotlight()" title="呼出毫秒级极简微型悬浮搜索框 (快捷键 Alt+Space)">
+        <svg style="width:12px; height:12px; fill:#60cdff;" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span>Spotlight (Alt+Space)</span>
+      </button>
+      <div id="daemonStatusPill" style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; padding: 2px 10px; background: rgba(0, 120, 212, 0.12); border: 1px solid rgba(0, 120, 212, 0.3); border-radius: 12px; color: #60cdff; margin-right: 12px; height: 26px; cursor: pointer;" onclick="loadDaemonStatus()" title="点击刷新 C: 盘容量与后台守护健康度">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: #107c41; display: inline-block;" id="daemonStatusDot"></span>
+        <span id="daemonStatusText">守护: 监听中</span>
+      </div>
       <button class="win-caption-btn" onclick="minimizeWindow()" title="最小化">
         <svg style="width:10px; height:10px; fill:currentColor;" viewBox="0 0 10 10"><path d="M0 5h10v1H0z"/></svg>
       </button>
@@ -2422,6 +2606,63 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     </div>
   </div>
 
+  <!-- Spotlight Floating Search Overlay (Listary Feature A: Alt+Space) -->
+  <div id="spotlightOverlay" class="spotlight-overlay" style="display:none;" onclick="handleSpotlightOverlayClick(event)">
+    <div class="spotlight-bar" onclick="event.stopPropagation()">
+      <div class="spotlight-input-row">
+        <svg class="spotlight-search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" id="spotlightInput" class="spotlight-input" placeholder="极简秒搜: 输入名称、grep:代码、sym:符号，按 Tab 动作，Esc 退出..." autocomplete="off" oninput="onSpotlightInput(this.value)" onkeydown="handleSpotlightKeydown(event)" />
+        <div class="spotlight-badges">
+          <span class="spotlight-kbd">Alt+Space 呼出</span>
+          <span class="spotlight-kbd">Tab 动作</span>
+          <span class="spotlight-kbd">Ctrl+G 跳转</span>
+          <span class="spotlight-kbd" style="cursor:pointer;" onclick="closeSpotlight()">Esc</span>
+        </div>
+      </div>
+      <div id="spotlightResultsContainer" class="spotlight-results">
+        <div style="padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 13px;">输入关键词即刻全盘毫秒检索 · 上下键选择 · 回车打开 · Tab 动作流水线</div>
+      </div>
+      <div class="spotlight-footer">
+        <span id="spotlightStatusText">CleanFlow Pro Spotlight (对齐 Listary 悬浮搜索与即搜即走架构)</span>
+        <div style="display:flex; gap:14px;">
+          <span>[Enter] 打开/定位</span>
+          <span>[Tab] 动作抽屉</span>
+          <span>[Ctrl+G] Quick Switch</span>
+          <span>[Esc] 退出</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Runner Pipeline Modal (Listary Feature C) -->
+  <div class="fluent-modal-overlay" id="actionRunnerModal">
+    <div class="fluent-modal" style="width: 640px; max-width: 90vw;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:16px; font-weight:600; color:#fff;">搜索动作流水线 (Action Pipeline)</span>
+          <span class="badge-pill badge-safe">Listary 对齐</span>
+        </div>
+        <button class="inspector-close-btn" onclick="closeActionRunnerModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+
+      <div style="font-size:12px; color:var(--text-secondary); margin-bottom:14px;">
+        当前目标路径: <span id="actionRunnerTargetPath" style="font-family:var(--font-mono); color:#60cdff; word-break:break-all;"></span>
+      </div>
+
+      <!-- Action items list -->
+      <div id="actionRunnerItemsContainer" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; margin-bottom:16px;">
+        <!-- Dynamically injected -->
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--stroke-divider); padding-top:12px;">
+        <span style="font-size:11.5px; color:var(--text-tertiary);">按快捷键或点击卡片即刻执行治理与联动动作</span>
+        <button class="btn btn-secondary" onclick="closeActionRunnerModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // State Store
     const state = {
@@ -3278,7 +3519,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
             const fileLoc = `${h.file_name}:${h.line_number}`;
             const fileIcon = '<svg style="width:14px;height:14px;fill:#60cdff;margin-right:6px;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
             const lineSnippet = escapeHtml(h.line_content || '');
-            const actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.file_path)}')">定位</button>`;
+            const actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.file_path)}')">定位</button> <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="openActionRunnerModal('${escapePath(h.file_path)}', '${escapeHtml(h.file_name)}')">动作...</button>`;
 
             return `<tr>
               <td style="font-weight: 600; color: #fff; display: flex; align-items: center; white-space: nowrap;">
@@ -3306,11 +3547,13 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               : '<svg style="width:14px;height:14px;fill:var(--text-secondary);margin-right:6px;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
 
             let actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.path)}')">定位</button>`;
+            actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="triggerQuickSwitch('${escapePath(h.path)}')" title="跳转至当前前台文件选择对话框 (Listary 看家本领)">跳转</button>`;
+            actionsHtml += ` <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="openActionRunnerModal('${escapePath(h.path)}', '${escapeHtml(h.name)}')" title="展开 Listary 动作流水线">动作...</button>`;
             if (h.can_check_lock) {
               actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="checkFileLockQuick('${escapePath(h.path)}')">查锁</button>`;
             }
             if (h.can_junction_migrate) {
-              actionsHtml += ` <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="startJunctionMigrateQuick('${escapePath(h.path)}')">搬迁</button>`;
+              actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="startJunctionMigrateQuick('${escapePath(h.path)}')">搬迁</button>`;
             }
 
             return `<tr>
@@ -5156,6 +5399,349 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       });
     }
 
+    // ==========================================
+    // Listary Feature A: Spotlight Floating Bar
+    // ==========================================
+    let spotlightHits = [];
+    let spotlightSelectedIndex = 0;
+    let spotlightTimer = null;
+
+    function openSpotlight() {
+      const overlay = document.getElementById('spotlightOverlay');
+      const input = document.getElementById('spotlightInput');
+      if (!overlay || !input) return;
+      overlay.style.display = 'flex';
+      input.value = '';
+      input.focus();
+      spotlightHits = [];
+      spotlightSelectedIndex = 0;
+      renderSpotlightHits();
+    }
+
+    function closeSpotlight() {
+      const overlay = document.getElementById('spotlightOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+
+    function handleSpotlightOverlayClick(e) {
+      if (e.target && e.target.id === 'spotlightOverlay') {
+        closeSpotlight();
+      }
+    }
+
+    function onSpotlightInput(val) {
+      if (spotlightTimer) clearTimeout(spotlightTimer);
+      const query = val.trim();
+      if (!query) {
+        spotlightHits = [];
+        spotlightSelectedIndex = 0;
+        renderSpotlightHits();
+        return;
+      }
+      spotlightTimer = setTimeout(() => {
+        executeSpotlightSearch(query);
+      }, 90);
+    }
+
+    async function executeSpotlightSearch(query) {
+      const container = document.getElementById('spotlightResultsContainer');
+      const statusText = document.getElementById('spotlightStatusText');
+      if (!container) return;
+      try {
+        const isGrep = query.startsWith('grep:') || query.startsWith('sym:');
+        const endpoint = isGrep
+          ? ('/api/search/grep?q=' + encodeURIComponent(query))
+          : ('/api/search/query?q=' + encodeURIComponent(query));
+        const res = await fetch(endpoint);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        
+        if (isGrep) {
+          spotlightHits = (data.hits || []).slice(0, 15).map(h => ({
+            name: `${h.file_name}:${h.line_number}`,
+            path: h.file_path,
+            is_dir: false,
+            size_bytes: 0,
+            detail: h.line_content || ''
+          }));
+        } else {
+          spotlightHits = (data.hits || []).slice(0, 15);
+        }
+        spotlightSelectedIndex = 0;
+        if (statusText) {
+          statusText.innerText = `命中 ${data.total_hits || spotlightHits.length} 项 (上下键选择, 回车打开, Tab 动作, Ctrl+G 跳转)`;
+        }
+        renderSpotlightHits();
+      } catch (e) {
+        container.innerHTML = `<div style="padding:16px; color:var(--status-danger); text-align:center;">检索出错: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    function renderSpotlightHits() {
+      const container = document.getElementById('spotlightResultsContainer');
+      if (!container) return;
+      if (spotlightHits.length === 0) {
+        container.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 13px;">输入关键词即刻全盘毫秒检索 · 上下键选择 · 回车打开 · Tab 动作流水线</div>`;
+        return;
+      }
+      container.innerHTML = spotlightHits.map((h, idx) => {
+        const isSelected = idx === spotlightSelectedIndex;
+        const iconSvg = h.is_dir
+          ? '<svg style="width:16px;height:16px;fill:#ffb900;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
+          : '<svg style="width:16px;height:16px;fill:#60cdff;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
+        const sizeBadge = h.is_dir ? '<span class="badge-pill badge-neutral">目录</span>' : `<span style="font-size:11px; color:var(--text-tertiary);">${formatBytes(h.size_bytes || 0)}</span>`;
+
+        return `
+          <div class="spotlight-item ${isSelected ? 'selected' : ''}" onclick="selectAndExecuteSpotlightHit(${idx})">
+            <div class="spotlight-item-left">
+              ${iconSvg}
+              <div style="display:flex; flex-direction:column; overflow:hidden;">
+                <div class="spotlight-item-name">${escapeHtml(h.name)}</div>
+                <div class="spotlight-item-path" title="${escapeHtml(h.path)}">${escapeHtml(h.path)}</div>
+              </div>
+            </div>
+            <div class="spotlight-item-meta">
+              ${sizeBadge}
+              <button class="btn btn-secondary" style="padding:2px 6px; font-size:10px;" onclick="event.stopPropagation(); triggerQuickSwitch('${escapePath(h.path)}')">跳转</button>
+              <button class="btn btn-primary" style="padding:2px 6px; font-size:10px;" onclick="event.stopPropagation(); openActionRunnerModal('${escapePath(h.path)}', '${escapeHtml(h.name)}')">动作</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const selEl = container.querySelector('.spotlight-item.selected');
+      if (selEl) selEl.scrollIntoView({ block: 'nearest' });
+    }
+
+    function handleSpotlightKeydown(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeSpotlight();
+        return;
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (spotlightHits.length > 0) {
+          spotlightSelectedIndex = (spotlightSelectedIndex + 1) % spotlightHits.length;
+          renderSpotlightHits();
+        }
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (spotlightHits.length > 0) {
+          spotlightSelectedIndex = (spotlightSelectedIndex - 1 + spotlightHits.length) % spotlightHits.length;
+          renderSpotlightHits();
+        }
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (spotlightHits[spotlightSelectedIndex]) {
+          selectAndExecuteSpotlightHit(spotlightSelectedIndex);
+        }
+        return;
+      }
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        if (spotlightHits[spotlightSelectedIndex]) {
+          const item = spotlightHits[spotlightSelectedIndex];
+          openActionRunnerModal(item.path, item.name);
+        }
+        return;
+      }
+      if (e.ctrlKey && (e.key === 'g' || e.key === 'G')) {
+        e.preventDefault();
+        if (spotlightHits[spotlightSelectedIndex]) {
+          triggerQuickSwitch(spotlightHits[spotlightSelectedIndex].path);
+        }
+        return;
+      }
+    }
+
+    function selectAndExecuteSpotlightHit(idx) {
+      const item = spotlightHits[idx];
+      if (!item) return;
+      revealInExplorer(item.path);
+      closeSpotlight();
+    }
+
+    // ==========================================
+    // Listary Feature B: Quick Switch
+    // ==========================================
+    async function triggerQuickSwitch(targetPath) {
+      if (!targetPath) {
+        showToast('请选择待跳转的目标路径');
+        return;
+      }
+      showToast('正在穿透前台对话框并注入路径...');
+      try {
+        const res = await fetch('/api/quick-switch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: targetPath })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Quick Switch: ${data.message || '已成功跳转前台文件对话框'}`);
+        } else {
+          showToast(`Quick Switch 提示: ${data.error || '未检测到处于前台的 #32770 文件选择对话框'}`);
+        }
+      } catch (e) {
+        showToast('Quick Switch 请求异常: ' + e.message);
+      }
+    }
+
+    // ==========================================
+    // Listary Feature C: Action Runner Pipeline
+    // ==========================================
+    let currentActionTargetPath = '';
+    async function openActionRunnerModal(targetPath, targetName) {
+      currentActionTargetPath = targetPath;
+      const modal = document.getElementById('actionRunnerModal');
+      const pathLabel = document.getElementById('actionRunnerTargetPath');
+      const container = document.getElementById('actionRunnerItemsContainer');
+      if (!modal || !container) return;
+
+      if (pathLabel) pathLabel.innerText = targetPath;
+      container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-tertiary);">正在分析该项目支持的动作流水线...</div>';
+      modal.classList.add('active');
+
+      try {
+        const res = await fetch('/api/actions/list?path=' + encodeURIComponent(targetPath));
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const actions = await res.json();
+
+        if (!actions || actions.length === 0) {
+          container.innerHTML = '<div style="padding:16px; color:var(--text-secondary); text-align:center;">暂无匹配动作</div>';
+          return;
+        }
+
+        container.innerHTML = actions.map(act => {
+          let iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>';
+          if (act.icon === 'swap') {
+            iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>';
+          } else if (act.icon === 'terminal') {
+            iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10zm-2-1h-6v-2h6v2zM7.5 17l-1.41-1.41L8.67 13l-2.58-2.59L7.5 9l4 4-4 4z"/></svg>';
+          } else if (act.icon === 'copy') {
+            iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+          } else if (act.icon === 'link') {
+            iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>';
+          } else if (act.icon === 'lock') {
+            iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
+          } else if (act.icon === 'fingerprint') {
+            iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M17.81 4.47c-.08 0-.16-.02-.23-.06C15.66 3.42 14 3 12.01 3c-1.98 0-3.86.47-5.57 1.41-.24.13-.54.04-.68-.2-.13-.24-.04-.55.2-.68C7.82 2.52 9.86 2 12.01 2c2.13 0 3.99.47 6.03 1.52.25.13.34.43.21.67-.1.18-.28.28-.44.28zM3.5 9.72c-.1 0-.2-.03-.29-.09-.23-.16-.28-.47-.12-.7.99-1.4 2.25-2.5 3.75-3.27.25-.13.55-.03.67.22.12.24.03.54-.21.67-1.34.69-2.46 1.67-3.35 2.92-.1.16-.27.25-.45.25zM12 11c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2s2-.9 2-2v-8c0-1.1-.9-2-2-2z"/></svg>';
+          }
+
+          return `
+            <div class="action-card" onclick="executeSelectedAction('${escapeHtml(act.id)}', '${escapePath(targetPath)}')">
+              <div class="action-card-left">
+                <div class="action-card-icon" style="color:#60cdff;">
+                  ${iconSvg}
+                </div>
+                <div>
+                  <div class="action-card-title">${escapeHtml(act.title)}</div>
+                  <div class="action-card-desc">${escapeHtml(act.description)}</div>
+                </div>
+              </div>
+              <div>
+                <span class="spotlight-kbd">${escapeHtml(act.shortcut || '点击')}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = `<div style="padding:16px; color:var(--status-danger); text-align:center;">获取动作失败: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    function closeActionRunnerModal() {
+      const modal = document.getElementById('actionRunnerModal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    async function executeSelectedAction(actionId, targetPath) {
+      if (actionId === 'junction_migrate') {
+        closeActionRunnerModal();
+        startJunctionMigrateQuick(targetPath);
+        return;
+      }
+      if (actionId === 'quick_switch') {
+        closeActionRunnerModal();
+        triggerQuickSwitch(targetPath);
+        return;
+      }
+
+      showToast(`正在执行动作: ${actionId}...`);
+      try {
+        const res = await fetch('/api/actions/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action_id: actionId, target_path: targetPath })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`动作执行成功: ${data.message}`);
+          if (data.payload) {
+            prompt('动作输出结果 (Ctrl+C 复制):', data.payload);
+          }
+        } else {
+          showToast(`动作执行失败: ${data.error || '未知错误'}`);
+        }
+      } catch (e) {
+        showToast('执行异常: ' + e.message);
+      }
+    }
+
+    // ==========================================
+    // Listary Feature D: Auto-Cleaner Daemon
+    // ==========================================
+    async function loadDaemonStatus() {
+      const textEl = document.getElementById('daemonStatusText');
+      const dotEl = document.getElementById('daemonStatusDot');
+      if (!textEl || !dotEl) return;
+      try {
+        const res = await fetch('/api/daemon/status');
+        if (!res.ok) return;
+        const st = await res.json();
+        if (st.running) {
+          if (st.is_warning) {
+            dotEl.style.background = '#d83b01';
+            textEl.innerHTML = `<strong style="color:#ff8c00;">C:盘警告 (${st.free_gb.toFixed(1)}GB &lt; ${st.redline_gb}GB)</strong>`;
+          } else {
+            dotEl.style.background = '#107c41';
+            textEl.innerText = `守护中 (C: 剩余 ${st.free_gb.toFixed(1)} GB)`;
+          }
+        } else {
+          dotEl.style.background = '#8a8886';
+          textEl.innerText = '守护进程未就绪';
+        }
+      } catch (e) {
+        // Silently tolerate
+      }
+    }
+
+    // Global Key Listener for Spotlight (Alt+Space) & Search Focus (Ctrl+F)
+    window.addEventListener('keydown', (e) => {
+      if (e.altKey && (e.code === 'Space' || e.key === ' ')) {
+        e.preventDefault();
+        const overlay = document.getElementById('spotlightOverlay');
+        if (overlay && overlay.style.display !== 'none') {
+          closeSpotlight();
+        } else {
+          openSpotlight();
+        }
+      }
+      if (e.ctrlKey && (e.code === 'KeyF' || e.key === 'f' || e.key === 'F')) {
+        const inp = document.getElementById('searchInputField');
+        if (inp && state.currentTab === 'search') {
+          e.preventDefault();
+          inp.focus();
+          inp.select();
+        }
+      }
+    });
+
     // Init
     window.addEventListener('DOMContentLoaded', () => {
       refreshDisks();
@@ -5165,6 +5751,8 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       loadSystemMaintenance();
       loadInstalledApps();
       loadGiantFiles();
+      loadDaemonStatus();
+      setInterval(loadDaemonStatus, 15000);
     });
   </script>
 </body>

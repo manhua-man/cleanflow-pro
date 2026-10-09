@@ -82,7 +82,11 @@ impl TrigramIndex {
 
         // Collect all eligible text files
         let mut file_paths = Vec::new();
-        for entry in jwalk::WalkDir::new(root_dir).skip_hidden(true).max_depth(8) {
+        for entry in jwalk::WalkDir::new(root_dir)
+            .parallelism(jwalk::Parallelism::Serial)
+            .skip_hidden(true)
+            .max_depth(8)
+        {
             if let Ok(entry) = entry {
                 if entry.file_type.is_file() {
                     let path = entry.path();
@@ -260,7 +264,15 @@ mod tests {
 
     #[test]
     fn test_trigram_in_memory_grep() {
-        let temp_dir = std::env::temp_dir().join("cleanflow_trigram_test");
+        let unique_name = format!(
+            "cleanflow_trigram_test_{}_{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        );
+        let temp_dir = std::env::temp_dir().join(unique_name);
         let _ = std::fs::remove_dir_all(&temp_dir);
         let _ = std::fs::create_dir_all(&temp_dir);
 

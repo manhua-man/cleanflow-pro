@@ -131,6 +131,37 @@ fn main() -> anyhow::Result<()> {
     // Start background server
     let (port, running) = start_server(target_port);
 
+    // Start Auto-Cleaner Daemon and Global Hotkey services
+    let daemon = cleanflow::daemon_service::DaemonService::new();
+    daemon.start();
+
+    let hotkey = cleanflow::hotkey_manager::HotkeyService::new();
+    hotkey.start(
+        || {
+            // Alt + Space: Spotlight bring-to-front
+            #[cfg(windows)]
+            unsafe {
+                extern "system" {
+                    fn FindWindowW(lpClassName: *const u16, lpWindowName: *const u16) -> isize;
+                    fn SetForegroundWindow(hWnd: isize) -> i32;
+                    fn ShowWindow(hWnd: isize, nCmdShow: i32) -> i32;
+                }
+                let title: Vec<u16> = "CleanFlow Pro".encode_utf16().chain(std::iter::once(0)).collect();
+                let hwnd = FindWindowW(std::ptr::null(), title.as_ptr());
+                if hwnd != 0 {
+                    ShowWindow(hwnd, 9); // SW_RESTORE
+                    SetForegroundWindow(hwnd);
+                }
+            }
+        },
+        || {
+            // Ctrl + G: Quick Switch
+            if let Ok(user_profile) = std::env::var("USERPROFILE") {
+                let _ = cleanflow::quick_switch::execute_quick_switch(&user_profile);
+            }
+        },
+    );
+
     // Launch GUI App Window if not headless
     if !is_headless {
         launch_app_window(port);

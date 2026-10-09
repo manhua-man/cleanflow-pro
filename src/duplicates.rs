@@ -25,7 +25,7 @@ pub struct DuplicateGroup {
     pub files: Vec<DuplicateFile>,
 }
 
-fn compute_file_hash<P: AsRef<Path>>(path: P) -> Option<String> {
+pub fn compute_file_hash<P: AsRef<Path>>(path: P) -> Option<String> {
     let mut file = File::open(path).ok()?;
     let mut hasher = blake3::Hasher::new();
     let mut buffer = [0u8; FULL_HASH_BUFFER_SIZE];

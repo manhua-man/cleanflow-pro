@@ -23,6 +23,10 @@ pub mod fuzzy_matcher;
 pub mod search_index;
 pub mod search_engine;
 pub mod trigram_indexer;
+pub mod quick_switch;
+pub mod action_runner;
+pub mod hotkey_manager;
+pub mod daemon_service;
 
 pub use cleaner::*;
 pub use disks::*;
