@@ -1,4 +1,3 @@
-use md5::{Digest, Md5};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -6,7 +5,8 @@ use std::fs::{self, File};
 use std::io::Read;
 use std::path::Path;
 
-const HASH_BUFFER_SIZE: usize = 64 * 1024; // 64 KB streaming buffer
+const PARTIAL_HASH_SIZE: usize = 16 * 1024; // 16 KB head buffer for microsecond filtering
+const FULL_HASH_BUFFER_SIZE: usize = 128 * 1024; // 128 KB streaming chunk for maximum NVMe throughput
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DuplicateFile {
@@ -27,8 +27,8 @@ pub struct DuplicateGroup {
 
 fn compute_file_hash<P: AsRef<Path>>(path: P) -> Option<String> {
     let mut file = File::open(path).ok()?;
-    let mut hasher = Md5::new();
-    let mut buffer = [0u8; HASH_BUFFER_SIZE];
+    let mut hasher = blake3::Hasher::new();
+    let mut buffer = [0u8; FULL_HASH_BUFFER_SIZE];
 
     loop {
         let n = file.read(&mut buffer).ok()?;
@@ -38,18 +38,18 @@ fn compute_file_hash<P: AsRef<Path>>(path: P) -> Option<String> {
         hasher.update(&buffer[..n]);
     }
 
-    Some(hex::encode(hasher.finalize()))
+    Some(hasher.finalize().to_hex().to_string())
 }
 
 fn compute_head_hash<P: AsRef<Path>>(path: P) -> Option<String> {
     let mut file = File::open(path).ok()?;
-    let mut hasher = Md5::new();
-    let mut buffer = [0u8; HASH_BUFFER_SIZE];
+    let mut hasher = blake3::Hasher::new();
+    let mut buffer = [0u8; PARTIAL_HASH_SIZE];
 
     let n = file.read(&mut buffer).ok()?;
     hasher.update(&buffer[..n]);
 
-    Some(hex::encode(hasher.finalize()))
+    Some(hasher.finalize().to_hex().to_string())
 }
 
 pub fn scan_duplicate_files(target_dir: &str, min_size_bytes: u64) -> Vec<DuplicateGroup> {
@@ -107,8 +107,8 @@ pub fn scan_duplicate_files(target_dir: &str, min_size_bytes: u64) -> Vec<Duplic
                 // Prefer shortest path first for deterministic preservation recommendation
                 cand_paths.sort_by(|a, b| a.len().cmp(&b.len()).then_with(|| a.cmp(b)));
 
-                // If file size is within head buffer, head hash IS the exact full MD5 hash
-                if sz <= HASH_BUFFER_SIZE as u64 {
+                // If file size is within head buffer, head hash IS the exact full BLAKE3 hash
+                if sz <= PARTIAL_HASH_SIZE as u64 {
                     let wasted = sz * (cand_paths.len() as u64 - 1);
                     let count = cand_paths.len();
                     let files = cand_paths
@@ -140,7 +140,7 @@ pub fn scan_duplicate_files(target_dir: &str, min_size_bytes: u64) -> Vec<Duplic
                         files,
                     });
                 } else {
-                    // For files larger than 64 KB, compute full 64KB-buffered MD5 hash in parallel
+                    // For files larger than 16 KB, compute full BLAKE3 hash in parallel with Rayon
                     let full_results: Vec<(String, String)> = cand_paths
                         .into_par_iter()
                         .filter_map(|p| {
@@ -238,7 +238,40 @@ mod tests {
         let _ = fs::write(&temp_file, b"CleanFlow duplicate test content");
         let h = compute_file_hash(&temp_file);
         assert!(h.is_some());
+        let hash_str = h.unwrap();
+        // BLAKE3 produces a 256-bit (64 hex characters) hash
+        assert_eq!(hash_str.len(), 64);
         let _ = fs::remove_file(&temp_file);
+    }
+
+    #[test]
+    fn test_blake3_partial_hash_large_file_differentiation() {
+        let test_dir = std::env::temp_dir().join("cleanflow_blake3_partial_test");
+        let _ = fs::remove_dir_all(&test_dir);
+        fs::create_dir_all(&test_dir).unwrap();
+
+        // 32 KB files (> 16 KB partial hash buffer)
+        let f_a1 = test_dir.join("file_a1.bin");
+        let f_a2 = test_dir.join("file_a2.bin");
+        let f_b = test_dir.join("file_b_diff_head.bin");
+
+        let mut data_a = vec![0u8; 32 * 1024];
+        data_a[0..8].copy_from_slice(b"HEADER_A");
+
+        let mut data_b = vec![0u8; 32 * 1024];
+        data_b[0..8].copy_from_slice(b"HEADER_B");
+
+        fs::write(&f_a1, &data_a).unwrap();
+        fs::write(&f_a2, &data_a).unwrap();
+        fs::write(&f_b, &data_b).unwrap();
+
+        let groups = scan_duplicate_files(test_dir.to_str().unwrap(), 0);
+        // Only f_a1 and f_a2 should match into a duplicate group
+        assert_eq!(groups.len(), 1);
+        assert_eq!(groups[0].file_count, 2);
+        assert_eq!(groups[0].hash.len(), 64);
+
+        let _ = fs::remove_dir_all(&test_dir);
     }
 
     #[test]
