@@ -87,36 +87,53 @@ impl VolumeIndex {
 
         // 2. Fallback: Fast multi-threaded parallel directory crawl
         let mut entries = Vec::new();
+        let mut seen_paths = std::collections::HashSet::new();
         let root_path = PathBuf::from(&vol.root_path);
         let max_depth = fallback_crawl_depth.unwrap_or(6);
 
-        if root_path.exists() {
-            let mut id_counter = 1u64;
-            for entry in jwalk::WalkDir::new(&root_path)
-                .skip_hidden(false)
-                .max_depth(max_depth)
-            {
-                if let Ok(entry) = entry {
-                    let path = entry.path();
-                    let is_dir = entry.file_type.is_dir();
-                    let name = entry.file_name().to_string_lossy().to_string();
-                    let meta = entry.metadata().ok();
-                    let size_bytes = meta.as_ref().map(|m| m.len()).unwrap_or(0);
-                    let modified_ts = meta
-                        .and_then(|m| m.modified().ok())
-                        .and_then(|t| t.duration_since(SystemTime::UNIX_EPOCH).ok())
-                        .map(|d| d.as_secs())
-                        .unwrap_or(0);
+        let mut crawl_roots = vec![(root_path, max_depth)];
+        if vol.drive_letter == 'C' {
+            if let Ok(user_profile) = std::env::var("USERPROFILE") {
+                let up_path = PathBuf::from(user_profile);
+                if up_path.exists() {
+                    crawl_roots.push((up_path, 9));
+                }
+            }
+        }
 
-                    entries.push(CompactFileEntry {
-                        id: id_counter,
-                        name,
-                        path: path.to_string_lossy().to_string(),
-                        size_bytes,
-                        is_dir,
-                        modified_timestamp: modified_ts,
-                    });
-                    id_counter += 1;
+        let mut id_counter = 1u64;
+        for (dir_root, depth) in crawl_roots {
+            if dir_root.exists() {
+                for entry in jwalk::WalkDir::new(&dir_root)
+                    .skip_hidden(false)
+                    .max_depth(depth)
+                {
+                    if let Ok(entry) = entry {
+                        let path_str = entry.path().to_string_lossy().to_string();
+                        if !seen_paths.insert(path_str.clone()) {
+                            continue;
+                        }
+
+                        let is_dir = entry.file_type.is_dir();
+                        let name = entry.file_name().to_string_lossy().to_string();
+                        let meta = entry.metadata().ok();
+                        let size_bytes = meta.as_ref().map(|m| m.len()).unwrap_or(0);
+                        let modified_ts = meta
+                            .and_then(|m| m.modified().ok())
+                            .and_then(|t| t.duration_since(SystemTime::UNIX_EPOCH).ok())
+                            .map(|d| d.as_secs())
+                            .unwrap_or(0);
+
+                        entries.push(CompactFileEntry {
+                            id: id_counter,
+                            name,
+                            path: path_str,
+                            size_bytes,
+                            is_dir,
+                            modified_timestamp: modified_ts,
+                        });
+                        id_counter += 1;
+                    }
                 }
             }
         }

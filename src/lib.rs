@@ -22,6 +22,7 @@ pub mod mft_scanner;
 pub mod fuzzy_matcher;
 pub mod search_index;
 pub mod search_engine;
+pub mod trigram_indexer;
 
 pub use cleaner::*;
 pub use disks::*;
@@ -47,3 +48,4 @@ pub use mft_scanner::{list_available_volumes, read_volume_mft_stream, reconstruc
 pub use fuzzy_matcher::*;
 pub use search_index::*;
 pub use search_engine::*;
+pub use trigram_indexer::*;

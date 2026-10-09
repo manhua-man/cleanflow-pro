@@ -149,6 +149,7 @@ pub fn scan_giant_files_hybrid(
 
     if scan_dir.exists() {
         for entry in jwalk::WalkDir::new(&scan_dir)
+            .parallelism(jwalk::Parallelism::Serial)
             .skip_hidden(false)
             .max_depth(8)
         {
@@ -223,7 +224,7 @@ mod tests {
 
     #[test]
     fn test_scan_giant_files_hybrid() {
-        let temp_dir = std::env::temp_dir().join("cleanflow_usn_test");
+        let temp_dir = std::env::temp_dir().join(format!("cleanflow_usn_test_{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&temp_dir);
         std::fs::create_dir_all(&temp_dir).unwrap();
 

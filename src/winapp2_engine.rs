@@ -155,9 +155,9 @@ pub fn scan_winapp2_rules(rules: &[WinApp2Rule]) -> WinApp2ScanReport {
                         }
                     } else if root.is_dir() {
                         let walk = if fk.recurse {
-                            jwalk::WalkDir::new(&root).max_depth(8)
+                            jwalk::WalkDir::new(&root).parallelism(jwalk::Parallelism::Serial).max_depth(8)
                         } else {
-                            jwalk::WalkDir::new(&root).max_depth(1)
+                            jwalk::WalkDir::new(&root).parallelism(jwalk::Parallelism::Serial).max_depth(1)
                         };
 
                         for entry in walk.skip_hidden(false) {
@@ -250,9 +250,9 @@ pub fn clean_winapp2_categories(
                         let _ = fs::remove_dir_all(&root);
                     } else {
                         let walk = if fk.recurse {
-                            jwalk::WalkDir::new(&root).max_depth(8)
+                            jwalk::WalkDir::new(&root).parallelism(jwalk::Parallelism::Serial).max_depth(8)
                         } else {
-                            jwalk::WalkDir::new(&root).max_depth(1)
+                            jwalk::WalkDir::new(&root).parallelism(jwalk::Parallelism::Serial).max_depth(1)
                         };
 
                         for entry in walk.skip_hidden(false) {
@@ -297,7 +297,7 @@ mod tests {
 
     #[test]
     fn test_rule_detection_and_scan() {
-        let temp_dir = std::env::temp_dir().join("cleanflow_winapp2_engine_test");
+        let temp_dir = std::env::temp_dir().join(format!("cleanflow_winapp2_engine_test_{}", std::process::id()));
         let cache_dir = temp_dir.join("Cache");
         let _ = fs::remove_dir_all(&temp_dir);
         fs::create_dir_all(&cache_dir).unwrap();

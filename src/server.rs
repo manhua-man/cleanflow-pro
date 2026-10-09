@@ -177,19 +177,26 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                 let scan_res = crate::usn_scanner::scan_giant_files_hybrid(None, min_size, 100);
                 let json = serde_json::to_string(&scan_res.files).unwrap_or_else(|_| "[]".to_string());
                 send_json_response(request, json);
-            } else if url == "/api/reveal" && method == Method::Post {
-                let mut content = String::new();
-                let _ = request.as_reader().read_to_string(&mut content);
+            } else if url.starts_with("/api/reveal") {
+                let target_path = if method == Method::Post {
+                    let mut content = String::new();
+                    let _ = request.as_reader().read_to_string(&mut content);
+                    serde_json::from_str::<RevealRequest>(&content).map(|r| r.path).ok()
+                } else if let Some(pos) = url.find("?path=") {
+                    let raw = &url[pos + 6..];
+                    let encoded = raw.split('&').next().unwrap_or(raw);
+                    percent_decode_str(encoded).or_else(|| Some(encoded.to_string()))
+                } else {
+                    None
+                };
 
-                let req_parsed: Result<RevealRequest, _> = serde_json::from_str(&content);
-                match req_parsed {
-                    Ok(req) => {
-                        let _ = reveal_in_explorer(&req.path);
+                match target_path {
+                    Some(p) => {
+                        let _ = reveal_in_explorer(&p);
                         send_json_response(request, r#"{"success": true}"#.to_string());
                     }
-                    Err(e) => {
-                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
-                        send_json_response(request, err_json);
+                    None => {
+                        send_json_response(request, r#"{"success": false, "error": "Missing path parameter"}"#.to_string());
                     }
                 }
             } else if url == "/api/check-path" && method == Method::Post {
@@ -910,6 +917,72 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
 
                 let res_json = serde_json::json!({
                     "query": query_str,
+                    "total_hits": hits.len(),
+                    "hits": hits
+                }).to_string();
+                send_json_response(request, res_json);
+            } else if url.starts_with("/api/search/grep") && method == Method::Get {
+                let mut query_str = if let Some(pos) = url.find("?q=") {
+                    let raw = &url[pos + 3..];
+                    let encoded = raw.split('&').next().unwrap_or(raw);
+                    percent_decode_str(encoded).unwrap_or_else(|| encoded.to_string())
+                } else {
+                    String::new()
+                };
+
+                let mut target_dir = if let Some(pos) = url.find("&dir=") {
+                    let raw = &url[pos + 5..];
+                    let encoded = raw.split('&').next().unwrap_or(raw);
+                    percent_decode_str(encoded).unwrap_or_else(|| encoded.to_string())
+                } else if let Ok(cwd) = std::env::current_dir() {
+                    cwd.to_string_lossy().to_string()
+                } else if let Ok(user_profile) = std::env::var("USERPROFILE") {
+                    user_profile
+                } else {
+                    "C:\\".to_string()
+                };
+
+                if query_str.starts_with("grep:") {
+                    query_str = query_str.trim_start_matches("grep:").trim().to_string();
+                } else if query_str.starts_with("sym:") {
+                    query_str = query_str.trim_start_matches("sym:").trim().to_string();
+                }
+
+                if let Some(in_pos) = query_str.find("in:") {
+                    let after = &query_str[in_pos + 3..];
+                    let path_part = after.split_whitespace().next().unwrap_or("");
+                    if !path_part.is_empty() {
+                        target_dir = path_part.to_string();
+                        query_str = format!("{} {}", &query_str[..in_pos], &after[path_part.len()..]).trim().to_string();
+                    }
+                }
+
+                static TRIGRAM_CACHE: std::sync::Mutex<Option<(String, crate::trigram_indexer::TrigramIndex)>> = std::sync::Mutex::new(None);
+                let (hits, duration_ms) = {
+                    let mut lock = match TRIGRAM_CACHE.lock() {
+                        Ok(guard) => guard,
+                        Err(poisoned) => poisoned.into_inner(),
+                    };
+                    let needs_rebuild = match &*lock {
+                        Some((cached_dir, _)) => cached_dir != &target_dir,
+                        None => true,
+                    };
+                    if needs_rebuild {
+                        let p = std::path::Path::new(&target_dir);
+                        let idx = crate::trigram_indexer::TrigramIndex::build_from_directory(p, 1000);
+                        *lock = Some((target_dir.clone(), idx));
+                    }
+                    if let Some((_, ref idx)) = *lock {
+                        idx.search_grep(&query_str, 50)
+                    } else {
+                        (Vec::new(), 0)
+                    }
+                };
+
+                let res_json = serde_json::json!({
+                    "query": query_str,
+                    "target_directory": target_dir,
+                    "duration_ms": duration_ms,
                     "total_hits": hits.len(),
                     "hits": hits
                 }).to_string();

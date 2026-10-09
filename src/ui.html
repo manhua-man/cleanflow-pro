@@ -2001,6 +2001,12 @@
             </div>
           </div>
 
+          <!-- Search Sub-modes (MFT File Search vs Trigram Code Grep) -->
+          <div class="filter-tabs" id="searchModeTabs" style="margin-bottom: 12px;">
+            <div class="filter-tab active" id="tabModeFiles" onclick="setSearchSubMode('files', this)">全盘毫秒检索 (MFT &amp; 1-Edit 容错)</div>
+            <div class="filter-tab" id="tabModeGrep" onclick="setSearchSubMode('grep', this)">Trigram 源码全文 Grep (sym: / grep:)</div>
+          </div>
+
           <!-- Interactive Search Input Box -->
           <div style="position: relative; margin-bottom: 16px;">
             <div style="display: flex; align-items: center; background: rgba(0,0,0,0.3); border: 1.5px solid var(--accent); border-radius: var(--radius-md); padding: 10px 16px; gap: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.25);">
@@ -2011,14 +2017,23 @@
               <span class="badge-pill badge-neutral" style="font-size: 10px; cursor: pointer;" onclick="clearSearchInput()">清空</span>
             </div>
 
-            <!-- Quick Filter Presets -->
-            <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
-              <span style="font-size: 11px; color: var(--text-tertiary); display: flex; align-items: center;">快速预设:</span>
+            <!-- Quick Filter Presets: File Search -->
+            <div id="searchPresetsFiles" style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+              <span style="font-size: 11px; color: var(--text-tertiary); display: flex; align-items: center;">文件预设:</span>
               <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('size:>50mb')">巨型文件 (&gt;50MB)</button>
               <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('ext:exe')">可执行文件 (ext:exe)</button>
               <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('ext:safetensors')">AI 权重 (safetensors)</button>
               <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('kind:dir in:C:\\Users')">用户目录 (kind:dir)</button>
               <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('cagro.toml')">容错演示 (cagro.toml)</button>
+            </div>
+
+            <!-- Quick Filter Presets: Trigram Grep -->
+            <div id="searchPresetsGrep" style="display: none; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+              <span style="font-size: 11px; color: var(--text-tertiary); display: flex; align-items: center;">代码检索预设:</span>
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('grep:fn main')">入口函数 (fn main)</button>
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('grep:TrigramIndex')">3-Gram 索引类</button>
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('grep:FSCTL_ENUM_USN_DATA')">USN/MFT 流式常数</button>
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('sym:WinApp2Rule')">WinApp2 规则类型</button>
             </div>
           </div>
 
@@ -2030,13 +2045,13 @@
             </div>
             <div style="max-height: 440px; overflow-y: auto;">
               <table class="fluent-table" style="width: 100%;">
-                <thead>
+                <thead id="searchResultsThead">
                   <tr>
-                    <th style="width: 28%;">文件 / 目录名</th>
-                    <th style="width: 14%;">匹配质量</th>
-                    <th style="width: 12%;">大小</th>
-                    <th style="width: 32%;">完整路径</th>
-                    <th style="width: 14%; text-align: right;">治理动作</th>
+                    <th style="width: 28%;" id="thSearchCol1">文件 / 目录名</th>
+                    <th style="width: 14%;" id="thSearchCol2">匹配质量</th>
+                    <th style="width: 12%;" id="thSearchCol3">大小</th>
+                    <th style="width: 32%;" id="thSearchCol4">完整路径</th>
+                    <th style="width: 14%; text-align: right;" id="thSearchCol5">治理动作</th>
                   </tr>
                 </thead>
                 <tbody id="searchResultsTableBody">
@@ -3110,6 +3125,35 @@
       }
     }
 
+    let currentSearchSubMode = 'files';
+
+    function setSearchSubMode(mode, tabEl) {
+      currentSearchSubMode = mode;
+      document.querySelectorAll('#searchModeTabs .filter-tab').forEach(t => t.classList.remove('active'));
+      if (tabEl) tabEl.classList.add('active');
+
+      const pFiles = document.getElementById('searchPresetsFiles');
+      const pGrep = document.getElementById('searchPresetsGrep');
+      const inp = document.getElementById('searchInputField');
+      const hint = document.getElementById('searchMatchHint');
+
+      if (mode === 'grep') {
+        if (pFiles) pFiles.style.display = 'none';
+        if (pGrep) pGrep.style.display = 'flex';
+        if (inp) inp.placeholder = '输入源码符号或关键字，如: fn main、TrigramIndex、sym:scan (支持 in:目录 过滤)';
+        if (hint) hint.innerText = 'Trigram 3-Gram 倒排索引秒级全文匹配';
+      } else {
+        if (pFiles) pFiles.style.display = 'flex';
+        if (pGrep) pGrep.style.display = 'none';
+        if (inp) inp.placeholder = '输入文件名、目录，或输入过滤器如: cagro.toml、ext:exe、size:>50mb、in:C:\\Users (按 Ctrl+F 随时聚焦)';
+        if (hint) hint.innerText = '支持 1-edit 拼写容错纠错';
+      }
+
+      if (inp && inp.value.trim()) {
+        executeDiskSearch(inp.value.trim());
+      }
+    }
+
     let searchDebounceTimer = null;
     function onSearchInput(val) {
       if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
@@ -3132,6 +3176,10 @@
       if (inp) {
         inp.value = preset;
         inp.focus();
+        if (preset.startsWith('grep:') || preset.startsWith('sym:')) {
+          const tabGrep = document.getElementById('tabModeGrep');
+          if (tabGrep && currentSearchSubMode !== 'grep') setSearchSubMode('grep', tabGrep);
+        }
         executeDiskSearch(preset);
       }
     }
@@ -3177,6 +3225,10 @@
       const tbody = document.getElementById('searchResultsTableBody');
       const title = document.getElementById('searchResultsCountTitle');
       const latencyStats = document.getElementById('searchLatencyStats');
+      const col1 = document.getElementById('thSearchCol1');
+      const col2 = document.getElementById('thSearchCol2');
+      const col3 = document.getElementById('thSearchCol3');
+      const col4 = document.getElementById('thSearchCol4');
       if (!tbody) return;
 
       if (!query) {
@@ -3185,49 +3237,90 @@
         return;
       }
 
+      const isGrepMode = query.startsWith('grep:') || query.startsWith('sym:') || currentSearchSubMode === 'grep';
+
+      if (isGrepMode) {
+        if (col1) col1.innerText = '代码文件 : 行号';
+        if (col2) col2.innerText = '匹配代码内容';
+        if (col3) col3.innerText = '得分';
+        if (col4) col4.innerText = '完整文件路径';
+      } else {
+        if (col1) col1.innerText = '文件 / 目录名';
+        if (col2) col2.innerText = '匹配质量';
+        if (col3) col3.innerText = '大小';
+        if (col4) col4.innerText = '完整路径';
+      }
+
       const t0 = performance.now();
       try {
-        const res = await fetch('/api/search/query?q=' + encodeURIComponent(query));
+        const endpoint = isGrepMode 
+          ? ('/api/search/grep?q=' + encodeURIComponent(query))
+          : ('/api/search/query?q=' + encodeURIComponent(query));
+
+        const res = await fetch(endpoint);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         const elapsedMs = (performance.now() - t0).toFixed(2);
         
-        if (latencyStats) latencyStats.innerHTML = `<span>本次检索耗时: <strong>${elapsedMs} ms</strong> (命中了 ${data.total_hits} 项)</span>`;
+        if (latencyStats) {
+          latencyStats.innerHTML = `<span>本次检索耗时: <strong>${elapsedMs} ms</strong> (命中了 ${data.total_hits} 项)</span>`;
+        }
         if (title) title.innerText = `检索结果 (${data.total_hits} 项)`;
 
         if (!data.hits || data.hits.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 36px; color: var(--text-tertiary);">未找到与 "' + escapeHtml(query) + '" 匹配的文件或目录</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 36px; color: var(--text-tertiary);">未找到与 "' + escapeHtml(query) + '" 匹配的' + (isGrepMode ? '代码行或符号' : '文件或目录') + '</td></tr>';
           return;
         }
 
-        tbody.innerHTML = data.hits.map(h => {
-          let qualityBadge = '<span class="badge-pill badge-neutral">模糊子序列</span>';
-          if (h.match_quality === 'Exact') qualityBadge = '<span class="badge-pill badge-safe">精确匹配</span>';
-          else if (h.match_quality === 'Prefix') qualityBadge = '<span class="badge-pill badge-safe">前缀匹配</span>';
-          else if (h.match_quality === 'Suffix') qualityBadge = '<span class="badge-pill badge-neutral">后缀匹配</span>';
-          else if (h.match_quality === 'TypoTolerant') qualityBadge = '<span class="badge-pill badge-warn" style="color:#ffb900; background:rgba(255,185,0,0.15);">1-edit 容错纠正</span>';
+        if (isGrepMode) {
+          tbody.innerHTML = data.hits.map(h => {
+            const fileLoc = `${h.file_name}:${h.line_number}`;
+            const fileIcon = '<svg style="width:14px;height:14px;fill:#60cdff;margin-right:6px;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
+            const lineSnippet = escapeHtml(h.line_content || '');
+            const actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.file_path)}')">定位</button>`;
 
-          const sizeStr = h.is_dir ? '<span style="color:var(--text-tertiary);">[目录]</span>' : formatBytes(h.size_bytes);
-          const iconSvg = h.is_dir 
-            ? '<svg style="width:14px;height:14px;fill:#ffb900;margin-right:6px;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
-            : '<svg style="width:14px;height:14px;fill:var(--text-secondary);margin-right:6px;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
+            return `<tr>
+              <td style="font-weight: 600; color: #fff; display: flex; align-items: center; white-space: nowrap;">
+                ${fileIcon}<span title="${escapeHtml(fileLoc)}">${escapeHtml(fileLoc)}</span>
+              </td>
+              <td>
+                <div style="font-family: Consolas, monospace; font-size: 11.5px; background: rgba(0,0,0,0.4); padding: 3px 8px; border-radius: 4px; color: #a8d1ff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 380px;">${lineSnippet}</div>
+              </td>
+              <td style="color: var(--text-secondary);">${h.score || 100}</td>
+              <td style="color: var(--text-tertiary); font-family: monospace; font-size: 11px;" title="${escapeHtml(h.file_path)}">${escapeHtml(h.file_path)}</td>
+              <td style="text-align: right; white-space: nowrap;">${actionsHtml}</td>
+            </tr>`;
+          }).join('');
+        } else {
+          tbody.innerHTML = data.hits.map(h => {
+            let qualityBadge = '<span class="badge-pill badge-neutral">模糊子序列</span>';
+            if (h.match_quality === 'Exact') qualityBadge = '<span class="badge-pill badge-safe">精确匹配</span>';
+            else if (h.match_quality === 'Prefix') qualityBadge = '<span class="badge-pill badge-safe">前缀匹配</span>';
+            else if (h.match_quality === 'Suffix') qualityBadge = '<span class="badge-pill badge-neutral">后缀匹配</span>';
+            else if (h.match_quality === 'TypoTolerant') qualityBadge = '<span class="badge-pill badge-warn" style="color:#ffb900; background:rgba(255,185,0,0.15);">1-edit 容错纠正</span>';
 
-          let actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.path)}')">定位</button>`;
-          if (h.can_check_lock) {
-            actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="checkFileLockQuick('${escapePath(h.path)}')">查锁</button>`;
-          }
-          if (h.can_junction_migrate) {
-            actionsHtml += ` <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="startJunctionMigrateQuick('${escapePath(h.path)}')">搬迁</button>`;
-          }
+            const sizeStr = h.is_dir ? '<span style="color:var(--text-tertiary);">[目录]</span>' : formatBytes(h.size_bytes);
+            const iconSvg = h.is_dir 
+              ? '<svg style="width:14px;height:14px;fill:#ffb900;margin-right:6px;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
+              : '<svg style="width:14px;height:14px;fill:var(--text-secondary);margin-right:6px;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
 
-          return `<tr>
-            <td style="font-weight: 600; color: #fff; display: flex; align-items: center;">${iconSvg}<span title="${escapeHtml(h.name)}">${escapeHtml(h.name)}</span></td>
-            <td>${qualityBadge}</td>
-            <td style="color: var(--text-secondary);">${sizeStr}</td>
-            <td style="color: var(--text-tertiary); font-family: monospace; font-size: 11px;" title="${escapeHtml(h.path)}">${escapeHtml(h.path)}</td>
-            <td style="text-align: right; white-space: nowrap;">${actionsHtml}</td>
-          </tr>`;
-        }).join('');
+            let actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.path)}')">定位</button>`;
+            if (h.can_check_lock) {
+              actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="checkFileLockQuick('${escapePath(h.path)}')">查锁</button>`;
+            }
+            if (h.can_junction_migrate) {
+              actionsHtml += ` <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="startJunctionMigrateQuick('${escapePath(h.path)}')">搬迁</button>`;
+            }
+
+            return `<tr>
+              <td style="font-weight: 600; color: #fff; display: flex; align-items: center;">${iconSvg}<span title="${escapeHtml(h.name)}">${escapeHtml(h.name)}</span></td>
+              <td>${qualityBadge}</td>
+              <td style="color: var(--text-secondary);">${sizeStr}</td>
+              <td style="color: var(--text-tertiary); font-family: monospace; font-size: 11px;" title="${escapeHtml(h.path)}">${escapeHtml(h.path)}</td>
+              <td style="text-align: right; white-space: nowrap;">${actionsHtml}</td>
+            </tr>`;
+          }).join('');
+        }
 
       } catch(e) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--status-danger);">检索失败: ' + escapeHtml(e.message) + '</td></tr>';

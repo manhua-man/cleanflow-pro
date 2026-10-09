@@ -61,7 +61,7 @@ pub fn scan_duplicate_files(target_dir: &str, min_size_bytes: u64) -> Vec<Duplic
     // Phase 1: Group files by exact size
     let mut size_map: HashMap<u64, Vec<String>> = HashMap::new();
 
-    for entry in jwalk::WalkDir::new(root).skip_hidden(true) {
+    for entry in jwalk::WalkDir::new(root).parallelism(jwalk::Parallelism::Serial).skip_hidden(true) {
         if let Ok(entry) = entry {
             if entry.file_type.is_file() {
                 if let Ok(meta) = entry.metadata() {
@@ -246,7 +246,7 @@ mod tests {
 
     #[test]
     fn test_blake3_partial_hash_large_file_differentiation() {
-        let test_dir = std::env::temp_dir().join("cleanflow_blake3_partial_test");
+        let test_dir = std::env::temp_dir().join(format!("cleanflow_blake3_partial_test_{}", std::process::id()));
         let _ = fs::remove_dir_all(&test_dir);
         fs::create_dir_all(&test_dir).unwrap();
 
@@ -276,7 +276,7 @@ mod tests {
 
     #[test]
     fn test_scan_and_delete_duplicates() {
-        let test_dir = std::env::temp_dir().join("cleanflow_dup_test_dir");
+        let test_dir = std::env::temp_dir().join(format!("cleanflow_dup_test_dir_{}", std::process::id()));
         let sub_dir = test_dir.join("sub");
         let _ = fs::remove_dir_all(&test_dir);
         fs::create_dir_all(&sub_dir).unwrap();
