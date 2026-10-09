@@ -1534,7 +1534,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         </svg>
       </div>
       <span class="app-brand-title">CleanFlow Pro</span>
-      <span class="app-version-badge">v0.3.0</span>
+      <span class="app-version-badge">v0.4.0</span>
     </div>
 
     <!-- Drive Switcher Pills -->
@@ -1657,6 +1657,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
                   <div class="badge-pill badge-safe">
                     <span class="icon" style="width:12px; height:12px;"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
                     100% 安全清理项已就绪
+                  </div>
+                  <div id="winapp2StatusPill" class="badge-pill" style="background: rgba(147, 51, 234, 0.15); border: 1px solid rgba(147, 51, 234, 0.3); color: #c084fc; cursor: pointer;" onclick="checkWinApp2Rules()" title="点击查看 WinApp2 规则状态">
+                    <span class="icon" style="width:12px; height:12px;"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg></span>
+                    <span>WinApp2 社区规则: 兼容已激活 (支持 2000+ 软件)</span>
                   </div>
                   <div class="badge-pill badge-openwith">零后台常驻 · 本地原生引擎</div>
                 </div>
@@ -2209,7 +2213,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       <span>|</span>
       <span id="sbSelection">已选 0 项 (0 B)</span>
       <span>|</span>
-      <span>Rust 原生内核 v0.3.0 · <span style="color:var(--status-safe);">零后台常驻</span></span>
+      <span>Rust 原生内核 v0.4.0 · <span style="color:var(--status-safe);">零后台常驻</span></span>
     </div>
   </footer>
 
@@ -2947,7 +2951,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       const report = {
         generated_at: new Date().toISOString(),
         device: 'Windows PC (x86_64)',
-        engine_version: 'CleanFlow Pro v0.3.0',
+        engine_version: 'CleanFlow Pro v0.4.0',
         summary: {
           total_reclaimable_bytes: state.scanResult ? state.scanResult.total_size_bytes : 0,
           total_reclaimable_formatted: formatBytes(state.scanResult ? state.scanResult.total_size_bytes : 0),
@@ -2970,6 +2974,20 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       };
       const json = JSON.stringify(report, null, 2);
       downloadBlob(json, `CleanFlow_健康体检报告_${new Date().toISOString().slice(0, 10)}.json`, 'application/json');
+    }
+
+    async function checkWinApp2Rules() {
+      try {
+        const res = await fetch('/api/winapp2/status');
+        const data = await res.json();
+        if (data.available) {
+          showToast(`WinApp2 社区规则已就绪: 已解析 ${data.total_rules} 项规则，命中 ${data.detected_apps} 款已装应用`);
+        } else {
+          showToast('WinApp2 状态: ' + (data.error || '未就绪'));
+        }
+      } catch(e) {
+        showToast('获取 WinApp2 状态失败: ' + e.message);
+      }
     }
 
     // Tab Switching

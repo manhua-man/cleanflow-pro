@@ -784,6 +784,101 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                         send_json_response(request, err_json);
                     }
                 }
+            } else if url == "/api/winapp2/status" && method == Method::Get {
+                let default_path = Path::new("winapp2.ini");
+                let fallback_path = Path::new("winapp2_default.ini");
+                let active_path = if default_path.exists() {
+                    Some(default_path)
+                } else if fallback_path.exists() {
+                    Some(fallback_path)
+                } else {
+                    None
+                };
+
+                if let Some(p) = active_path {
+                    if let Ok(rules) = crate::winapp2_parser::load_winapp2_file(p) {
+                        let active_count = rules.iter().filter(|r| crate::winapp2_engine::is_rule_detected(r)).count();
+                        let res_json = serde_json::json!({
+                            "available": true,
+                            "source_file": p.to_string_lossy().to_string(),
+                            "total_rules": rules.len(),
+                            "detected_apps": active_count,
+                        }).to_string();
+                        send_json_response(request, res_json);
+                    } else {
+                        let res_json = r#"{"available": false, "error": "规则文件解析失败"}"#;
+                        send_json_response(request, res_json.to_string());
+                    }
+                } else {
+                    let res_json = r#"{"available": false, "error": "未找到 winapp2.ini 规则文件"}"#;
+                    send_json_response(request, res_json.to_string());
+                }
+            } else if url == "/api/winapp2/scan" && method == Method::Get {
+                let default_path = Path::new("winapp2.ini");
+                let fallback_path = Path::new("winapp2_default.ini");
+                let active_path = if default_path.exists() {
+                    Some(default_path)
+                } else if fallback_path.exists() {
+                    Some(fallback_path)
+                } else {
+                    None
+                };
+
+                if let Some(p) = active_path {
+                    if let Ok(rules) = crate::winapp2_parser::load_winapp2_file(p) {
+                        let report = crate::winapp2_engine::scan_winapp2_rules(&rules);
+                        let res_json = serde_json::to_string(&report).unwrap_or_default();
+                        send_json_response(request, res_json);
+                    } else {
+                        let res_json = r#"{"total_rules_loaded":0,"active_apps_detected":0,"total_reclaimable_bytes":0,"categories":[]}"#;
+                        send_json_response(request, res_json.to_string());
+                    }
+                } else {
+                    let res_json = r#"{"total_rules_loaded":0,"active_apps_detected":0,"total_reclaimable_bytes":0,"categories":[]}"#;
+                    send_json_response(request, res_json.to_string());
+                }
+            } else if url == "/api/winapp2/clean" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct WinApp2CleanReq {
+                    sections: Vec<String>,
+                }
+
+                let default_path = Path::new("winapp2.ini");
+                let fallback_path = Path::new("winapp2_default.ini");
+                let active_path = if default_path.exists() {
+                    Some(default_path)
+                } else if fallback_path.exists() {
+                    Some(fallback_path)
+                } else {
+                    None
+                };
+
+                if let Some(p) = active_path {
+                    if let Ok(rules) = crate::winapp2_parser::load_winapp2_file(p) {
+                        if let Ok(req) = serde_json::from_str::<WinApp2CleanReq>(&content) {
+                            let (freed, count, errs) = crate::winapp2_engine::clean_winapp2_categories(&rules, &req.sections);
+                            let res_json = serde_json::json!({
+                                "success": true,
+                                "bytes_freed": freed,
+                                "files_deleted": count,
+                                "errors": errs
+                            }).to_string();
+                            send_json_response(request, res_json);
+                        } else {
+                            let err_json = r#"{"success": false, "error": "请求参数无效"}"#;
+                            send_json_response(request, err_json.to_string());
+                        }
+                    } else {
+                        let err_json = r#"{"success": false, "error": "规则文件读取失败"}"#;
+                        send_json_response(request, err_json.to_string());
+                    }
+                } else {
+                    let err_json = r#"{"success": false, "error": "未找到规则文件"}"#;
+                    send_json_response(request, err_json.to_string());
+                }
             } else if url == "/api/shutdown" && method == Method::Post {
                 running_clone.store(false, Ordering::SeqCst);
                 let res_json = r#"{"success": true, "message": "已关闭"}"#;
