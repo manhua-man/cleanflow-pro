@@ -5,7 +5,6 @@ use tiny_http::{Header, Method, Response, Server, StatusCode};
 
 use crate::cleaner::{clear_directory_contents, delete_single_file};
 use crate::disks::get_disk_drives;
-use crate::giant_files::scan_giant_files;
 use crate::migrator::{
     get_migration_status, is_junction, list_active_junctions, migrate_to_drive,
     reveal_in_explorer, rollback_junction, start_migration_task,
@@ -163,11 +162,20 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                         send_json_response(request, err_json);
                     }
                 }
+            } else if url == "/api/usn/status" && method == Method::Get {
+                let (elevated, active, journal) = crate::usn_scanner::check_usn_journal_status("C:");
+                let res_json = serde_json::json!({
+                    "volume": "C:",
+                    "is_elevated": elevated,
+                    "usn_journal_active": active,
+                    "has_journal_data": journal.is_some()
+                }).to_string();
+                send_json_response(request, res_json);
             } else if url == "/api/giant-files" && method == Method::Get {
-                // Minimum size: 100 MB
+                // Minimum size: 100 MB, hybrid scanner with automatic USN acceleration
                 let min_size = 100 * 1024 * 1024;
-                let files = scan_giant_files(min_size, 100);
-                let json = serde_json::to_string(&files).unwrap_or_else(|_| "[]".to_string());
+                let scan_res = crate::usn_scanner::scan_giant_files_hybrid(None, min_size, 100);
+                let json = serde_json::to_string(&scan_res.files).unwrap_or_else(|_| "[]".to_string());
                 send_json_response(request, json);
             } else if url == "/api/reveal" && method == Method::Post {
                 let mut content = String::new();

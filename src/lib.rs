@@ -15,6 +15,7 @@ pub mod apps;
 pub mod system_tools;
 pub mod duplicates;
 pub mod block_clone;
+pub mod usn_scanner;
 
 pub use cleaner::*;
 pub use disks::*;
@@ -33,3 +34,4 @@ pub use apps::*;
 pub use system_tools::*;
 pub use duplicates::*;
 pub use block_clone::*;
+pub use usn_scanner::*;

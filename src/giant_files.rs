@@ -79,7 +79,7 @@ pub fn scan_giant_files(min_size_bytes: u64, max_results: usize) -> Vec<GiantFil
     giant_files
 }
 
-fn categorize_extension(ext: &str) -> String {
+pub fn categorize_extension(ext: &str) -> String {
     match ext {
         "vmdk" | "vhdx" | "vdi" | "qcow2" | "img" | "iso" => "VirtualDisk".to_string(),
         "db" | "vscdb" | "sqlite" | "sqlite3" | "mdf" | "ldf" => "Database".to_string(),
