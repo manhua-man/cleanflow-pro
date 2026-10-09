@@ -84,6 +84,16 @@ fn run_cli_scan(config: &RuleConfig, json_output: bool) -> anyhow::Result<()> {
 fn main() -> anyhow::Result<()> {
     let args: Vec<String> = env::args().collect();
 
+    // CLI mode: version check
+    if args.iter().any(|a| a == "--version" || a == "-v" || a == "-V") {
+        #[cfg(windows)]
+        unsafe {
+            AttachConsole(0xFFFFFFFF);
+        }
+        println!("CleanFlow Pro v{}", env!("CARGO_PKG_VERSION"));
+        return Ok(());
+    }
+
     // CLI mode checks
     if args.iter().any(|a| a == "--json" || a == "--cli" || a == "--scan") {
         #[cfg(windows)]

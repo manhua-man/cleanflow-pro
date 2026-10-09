@@ -1533,7 +1533,7 @@
         </svg>
       </div>
       <span class="app-brand-title">CleanFlow Pro</span>
-      <span class="app-version-badge">v0.2.0</span>
+      <span class="app-version-badge">v0.3.0</span>
     </div>
 
     <!-- Drive Switcher Pills -->
@@ -1916,25 +1916,31 @@
 
           <!-- Subview 2: Duplicate Files Finder -->
           <div id="subviewDuplicates" style="display: none; flex-direction: column; gap: 14px; flex: 1;">
-            <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 14px 16px; display: flex; gap: 12px; align-items: flex-end;">
-              <div style="flex: 2;">
-                <label style="font-size: 11.5px; color: var(--text-secondary); display: block; margin-bottom: 5px;">排查目标路径</label>
-                <input type="text" id="dupScanPathInput" value="C:\\Users\\EDY\\Downloads" style="width: 100%; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 6px 10px; color: #fff; font-size: 12px; outline: none; font-family: var(--font-mono);">
+            <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.3); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-family: var(--font-mono); font-weight: 500;">BLAKE3 + 16KB Partial Hash 流式引擎</span>
+                <span id="refsBlockCloneBadge" style="background: rgba(148, 163, 184, 0.12); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.25); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-family: var(--font-mono);">卷特性: 待探测</span>
               </div>
-              <div style="flex: 1;">
-                <label style="font-size: 11.5px; color: var(--text-secondary); display: block; margin-bottom: 5px;">最小文件阈值</label>
-                <select id="dupMinSizeSelect" style="width: 100%; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 6px 10px; color: #fff; font-size: 12px; outline: none;">
-                  <option value="1">大于 1 MB</option>
-                  <option value="10">大于 10 MB</option>
-                  <option value="50">大于 50 MB</option>
-                </select>
+              <div style="display: flex; gap: 12px; align-items: flex-end;">
+                <div style="flex: 2;">
+                  <label style="font-size: 11.5px; color: var(--text-secondary); display: block; margin-bottom: 5px;">排查目标路径</label>
+                  <input type="text" id="dupScanPathInput" value="C:\\Users\\EDY\\Downloads" style="width: 100%; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 6px 10px; color: #fff; font-size: 12px; outline: none; font-family: var(--font-mono);">
+                </div>
+                <div style="flex: 1;">
+                  <label style="font-size: 11.5px; color: var(--text-secondary); display: block; margin-bottom: 5px;">最小文件阈值</label>
+                  <select id="dupMinSizeSelect" style="width: 100%; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 6px 10px; color: #fff; font-size: 12px; outline: none;">
+                    <option value="1">大于 1 MB</option>
+                    <option value="10">大于 10 MB</option>
+                    <option value="50">大于 50 MB</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" style="height: 32px; padding: 0 16px;" onclick="runDuplicatesScan()">
+                  <span>开始排查重复</span>
+                </button>
+                <button class="btn btn-danger" style="height: 32px; padding: 0 16px;" onclick="cleanSelectedDuplicates()">
+                  <span id="btnCleanDupsText">一键去重清理</span>
+                </button>
               </div>
-              <button class="btn btn-primary" style="height: 32px; padding: 0 16px;" onclick="runDuplicatesScan()">
-                <span>开始排查重复</span>
-              </button>
-              <button class="btn btn-danger" style="height: 32px; padding: 0 16px;" onclick="cleanSelectedDuplicates()">
-                <span id="btnCleanDupsText">一键去重清理</span>
-              </button>
             </div>
 
             <div class="data-grid-container" style="flex: 1;">
@@ -2202,7 +2208,7 @@
       <span>|</span>
       <span id="sbSelection">已选 0 项 (0 B)</span>
       <span>|</span>
-      <span>Rust 原生内核 v0.2.0 · <span style="color:var(--status-safe);">零后台常驻</span></span>
+      <span>Rust 原生内核 v0.3.0 · <span style="color:var(--status-safe);">零后台常驻</span></span>
     </div>
   </footer>
 
@@ -2752,7 +2758,32 @@
       const minMb = parseInt(document.getElementById('dupMinSizeSelect')?.value || '1', 10);
       let targetDir = pathInput ? pathInput.value.trim() : '';
 
-      showToast('正在进行全盘双阶段特征哈希比对排查...');
+      showToast('正在进行 BLAKE3 流式特征哈希排查...');
+      
+      // Probe volume block clone capability
+      try {
+        const volRes = await fetch('/api/duplicates/volume-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: targetDir })
+        });
+        const volStatus = await volRes.json();
+        const badge = document.getElementById('refsBlockCloneBadge');
+        if (badge) {
+          if (volStatus.supports_block_cloning) {
+            badge.innerText = `${volStatus.file_system} Dev Drive (支持 ReFS 块克隆写时复制)`;
+            badge.style.color = '#34d399';
+            badge.style.background = 'rgba(16, 185, 129, 0.15)';
+            badge.style.borderColor = 'rgba(16, 185, 129, 0.35)';
+          } else {
+            badge.innerText = `${volStatus.file_system} 卷 (标准母本保护 + 副本删除模式)`;
+            badge.style.color = '#60cdff';
+            badge.style.background = 'rgba(14, 165, 233, 0.12)';
+            badge.style.borderColor = 'rgba(14, 165, 233, 0.25)';
+          }
+        }
+      } catch(e) {}
+
       try {
         const res = await fetch('/api/duplicates/scan', {
           method: 'POST',
@@ -2915,7 +2946,7 @@
       const report = {
         generated_at: new Date().toISOString(),
         device: 'Windows PC (x86_64)',
-        engine_version: 'CleanFlow Pro v0.2.0',
+        engine_version: 'CleanFlow Pro v0.3.0',
         summary: {
           total_reclaimable_bytes: state.scanResult ? state.scanResult.total_size_bytes : 0,
           total_reclaimable_formatted: formatBytes(state.scanResult ? state.scanResult.total_size_bytes : 0),
