@@ -2195,9 +2195,9 @@
           <div style="position: relative; margin-bottom: 16px;">
             <div style="display: flex; align-items: center; background: rgba(0,0,0,0.3); border: 1.5px solid var(--accent); border-radius: var(--radius-md); padding: 10px 16px; gap: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.25);">
               <svg style="width: 18px; height: 18px; fill: var(--accent);" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-              <input type="text" id="searchInputField" placeholder="输入文件名、目录，或输入过滤器如: cagro.toml、ext:exe、size:>50mb、in:C:\Users (按 Ctrl+F 随时聚焦)" 
+              <input type="text" id="searchInputField" placeholder="输入文件名、目录，或输入过滤器如: cagro.toml、gh tokio、cmd:dir、ext:exe、size:>50mb (按 Ctrl+F 随时聚焦)" 
                 style="flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 14px; font-family: inherit;"
-                oninput="onSearchInput(this.value)">
+                oninput="onSearchInput(this.value)" onkeydown="handleSearchInputKeydown(event)">
               <span class="badge-pill badge-neutral" style="font-size: 10px; cursor: pointer;" onclick="clearSearchInput()">清空</span>
             </div>
 
@@ -2211,6 +2211,17 @@
               <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('cagro.toml')">容错演示 (cagro.toml)</button>
             </div>
 
+            <!-- Quick Filter Presets: Pro & Dev Superpowers -->
+            <div id="searchPresetsPro" style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
+              <span style="font-size: 11px; color: #60cdff; font-weight: 600; display: flex; align-items: center;">PRO 穿透与降噪:</span>
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('gh tokio')">GitHub 穿透 (gh tokio)</button>
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('cargo serde')">Cargo 穿透 (cargo serde)</button>
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('regex:^clean.*\\.rs$')">RegEx 检索 (regex:)</button>
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('cmd: dir /b')">终端指令 (cmd:)</button>
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="applySearchPreset('calc')">系统别名 (calc)</button>
+              <button class="btn btn-secondary" id="btnToggleNoiseShield" style="padding: 2px 8px; font-size: 11px; color: #60cdff; border-color: rgba(96,205,255,0.4);" onclick="toggleDevNoiseShield()" title="屏蔽 node_modules, .git, target, .venv 等海量碎文件噪声">降噪盾牌: 已开启</button>
+            </div>
+
             <!-- Quick Filter Presets: Trigram Grep -->
             <div id="searchPresetsGrep" style="display: none; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
               <span style="font-size: 11px; color: var(--text-tertiary); display: flex; align-items: center;">代码检索预设:</span>
@@ -2221,20 +2232,23 @@
             </div>
           </div>
 
+          <!-- Pro Launcher Instant Hit Card -->
+          <div id="launcherHitContainer" style="display: none; margin-bottom: 12px;"></div>
+
           <!-- Search Results Table -->
           <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); overflow: hidden;">
             <div style="padding: 12px 16px; border-bottom: 1px solid var(--stroke-card); display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 13px; font-weight: 600; color: #fff;" id="searchResultsCountTitle">检索结果 (0 项)</span>
-              <span style="font-size: 11px; color: var(--text-tertiary);" id="searchMatchHint">支持 1-edit 拼写容错纠错</span>
+              <span style="font-size: 11px; color: var(--text-tertiary);" id="searchMatchHint">支持 1-edit 拼写容错纠错 · 点击表头即时排序</span>
             </div>
             <div style="max-height: 440px; overflow-y: auto;">
               <table class="fluent-table" style="width: 100%;">
                 <thead id="searchResultsThead">
                   <tr>
-                    <th style="width: 28%;" id="thSearchCol1">文件 / 目录名</th>
-                    <th style="width: 14%;" id="thSearchCol2">匹配质量</th>
-                    <th style="width: 12%;" id="thSearchCol3">大小</th>
-                    <th style="width: 32%;" id="thSearchCol4">完整路径</th>
+                    <th style="width: 28%; cursor: pointer; user-select: none;" id="thSearchCol1" onclick="toggleSearchSort('name')" title="点击正逆序重排">文件 / 目录名</th>
+                    <th style="width: 14%; cursor: pointer; user-select: none;" id="thSearchCol2" onclick="toggleSearchSort('quality')" title="点击正逆序重排">匹配质量</th>
+                    <th style="width: 12%; cursor: pointer; user-select: none;" id="thSearchCol3" onclick="toggleSearchSort('size')" title="点击正逆序重排">大小</th>
+                    <th style="width: 32%; cursor: pointer; user-select: none;" id="thSearchCol4" onclick="toggleSearchSort('path')" title="点击正逆序重排">完整路径</th>
                     <th style="width: 14%; text-align: right;" id="thSearchCol5">治理动作</th>
                   </tr>
                 </thead>
@@ -2624,7 +2638,7 @@
       <div class="spotlight-footer">
         <span id="spotlightStatusText">CleanFlow Pro Spotlight (对齐 Listary 悬浮搜索与即搜即走架构)</span>
         <div style="display:flex; gap:14px;">
-          <span>[Enter] 打开/定位</span>
+          <span>[Enter] 打开/PRO直达</span>
           <span>[Tab] 动作抽屉</span>
           <span>[Ctrl+G] Quick Switch</span>
           <span>[Esc] 退出</span>
@@ -3462,41 +3476,223 @@
       }
     }
 
+    let currentSearchHits = [];
+    let currentSearchGrepMode = false;
+    let currentSearchSort = { col: null, asc: true };
+    let devNoiseShieldEnabled = true;
+    let currentLauncherHit = null;
+
+    function toggleDevNoiseShield() {
+      devNoiseShieldEnabled = !devNoiseShieldEnabled;
+      const btn = document.getElementById('btnToggleNoiseShield');
+      if (btn) {
+        if (devNoiseShieldEnabled) {
+          btn.innerText = '降噪盾牌: 已开启';
+          btn.style.color = '#60cdff';
+          btn.style.borderColor = 'rgba(96,205,255,0.4)';
+        } else {
+          btn.innerText = '降噪盾牌: 已关闭 (含 node_modules)';
+          btn.style.color = 'var(--text-tertiary)';
+          btn.style.borderColor = 'var(--stroke-card)';
+        }
+      }
+      const inp = document.getElementById('searchInputField');
+      if (inp && inp.value.trim()) {
+        executeDiskSearch(inp.value.trim());
+      }
+    }
+
+    async function executeLauncherAction(actionType, target) {
+      if (!actionType || !target) return;
+      try {
+        const res = await fetch('/api/launcher/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action_type: actionType, target: target })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || '已成功唤起动作');
+          const ov = document.getElementById('spotlightOverlay');
+          if (ov && ov.style.display !== 'none') {
+            closeSpotlight();
+          }
+        } else {
+          showToast('唤起失败: ' + (data.error || '未知错误'));
+        }
+      } catch (e) {
+        showToast('执行异常: ' + e.message);
+      }
+    }
+
+    function handleSearchInputKeydown(e) {
+      if (e.key === 'Enter') {
+        if (currentLauncherHit) {
+          e.preventDefault();
+          executeLauncherAction(currentLauncherHit.action_type, currentLauncherHit.target);
+        }
+      }
+    }
+
+    function toggleSearchSort(col) {
+      if (currentSearchSort.col === col) {
+        currentSearchSort.asc = !currentSearchSort.asc;
+      } else {
+        currentSearchSort.col = col;
+        currentSearchSort.asc = true;
+      }
+      updateSearchSortHeaders();
+      sortAndRenderSearchResults();
+    }
+
+    function updateSearchSortHeaders() {
+      const colMap = {
+        name: { id: 'thSearchCol1', text: currentSearchGrepMode ? '代码文件 : 行号' : '文件 / 目录名' },
+        quality: { id: 'thSearchCol2', text: currentSearchGrepMode ? '匹配代码内容' : '匹配质量' },
+        size: { id: 'thSearchCol3', text: currentSearchGrepMode ? '得分' : '大小' },
+        path: { id: 'thSearchCol4', text: currentSearchGrepMode ? '完整文件路径' : '完整路径' },
+      };
+      for (const [k, v] of Object.entries(colMap)) {
+        const el = document.getElementById(v.id);
+        if (!el) continue;
+        if (currentSearchSort.col === k) {
+          el.innerText = `${v.text} ${currentSearchSort.asc ? '▲' : '▼'}`;
+        } else {
+          el.innerText = v.text;
+        }
+      }
+    }
+
+    function sortAndRenderSearchResults() {
+      if (!currentSearchHits || currentSearchHits.length === 0) return;
+      const { col, asc } = currentSearchSort;
+      if (col) {
+        currentSearchHits.sort((a, b) => {
+          let cmp = 0;
+          if (currentSearchGrepMode) {
+            if (col === 'name') {
+              const kA = `${a.file_name}:${a.line_number}`;
+              const kB = `${b.file_name}:${b.line_number}`;
+              cmp = kA.localeCompare(kB);
+            } else if (col === 'quality') {
+              cmp = (a.line_content || '').localeCompare(b.line_content || '');
+            } else if (col === 'size') {
+              cmp = (a.score || 0) - (b.score || 0);
+            } else if (col === 'path') {
+              cmp = (a.file_path || '').localeCompare(b.file_path || '');
+            }
+          } else {
+            if (col === 'name') {
+              cmp = (a.name || '').localeCompare(b.name || '');
+            } else if (col === 'quality') {
+              cmp = (a.score || 0) - (b.score || 0);
+            } else if (col === 'size') {
+              cmp = (a.size_bytes || 0) - (b.size_bytes || 0);
+            } else if (col === 'path') {
+              cmp = (a.path || '').localeCompare(b.path || '');
+            }
+          }
+          return asc ? cmp : -cmp;
+        });
+      }
+      renderSearchResultsTableRows();
+    }
+
+    function renderSearchResultsTableRows() {
+      const tbody = document.getElementById('searchResultsTableBody');
+      if (!tbody) return;
+      if (!currentSearchHits || currentSearchHits.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 36px; color: var(--text-tertiary);">未找到匹配结果</td></tr>';
+        return;
+      }
+
+      if (currentSearchGrepMode) {
+        tbody.innerHTML = currentSearchHits.map(h => {
+          const fileLoc = `${h.file_name}:${h.line_number}`;
+          const fileIcon = '<svg style="width:14px;height:14px;fill:#60cdff;margin-right:6px;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
+          const lineSnippet = escapeHtml(h.line_content || '');
+          const actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.file_path)}')">定位</button> <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="openActionRunnerModal('${escapePath(h.file_path)}', '${escapeHtml(h.file_name)}')">动作...</button>`;
+
+          return `<tr>
+            <td style="font-weight: 600; color: #fff; display: flex; align-items: center; white-space: nowrap;">
+              ${fileIcon}<span title="${escapeHtml(fileLoc)}">${escapeHtml(fileLoc)}</span>
+            </td>
+            <td>
+              <div style="font-family: Consolas, monospace; font-size: 11.5px; background: rgba(0,0,0,0.4); padding: 3px 8px; border-radius: 4px; color: #a8d1ff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 380px;">${lineSnippet}</div>
+            </td>
+            <td style="color: var(--text-secondary);">${h.score || 100}</td>
+            <td style="color: var(--text-tertiary); font-family: monospace; font-size: 11px;" title="${escapeHtml(h.file_path)}">${escapeHtml(h.file_path)}</td>
+            <td style="text-align: right; white-space: nowrap;">${actionsHtml}</td>
+          </tr>`;
+        }).join('');
+      } else {
+        tbody.innerHTML = currentSearchHits.map(h => {
+          let qualityBadge = '<span class="badge-pill badge-neutral">模糊子序列</span>';
+          if (h.match_quality === 'Exact') qualityBadge = '<span class="badge-pill badge-safe">精确匹配</span>';
+          else if (h.match_quality === 'Prefix') qualityBadge = '<span class="badge-pill badge-safe">前缀匹配</span>';
+          else if (h.match_quality === 'Suffix') qualityBadge = '<span class="badge-pill badge-neutral">后缀匹配</span>';
+          else if (h.match_quality === 'TypoTolerant') qualityBadge = '<span class="badge-pill badge-warn" style="color:#ffb900; background:rgba(255,185,0,0.15);">1-edit 容错纠正</span>';
+
+          const sizeStr = h.is_dir ? '<span style="color:var(--text-tertiary);">[目录]</span>' : formatBytes(h.size_bytes);
+          const iconSvg = h.is_dir 
+            ? '<svg style="width:14px;height:14px;fill:#ffb900;margin-right:6px;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
+            : '<svg style="width:14px;height:14px;fill:var(--text-secondary);margin-right:6px;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
+
+          let actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.path)}')">定位</button>`;
+          actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="triggerQuickSwitch('${escapePath(h.path)}')" title="跳转至当前前台文件选择对话框 (Listary 看家本领)">跳转</button>`;
+          actionsHtml += ` <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="openActionRunnerModal('${escapePath(h.path)}', '${escapeHtml(h.name)}')" title="展开 Listary 动作流水线">动作...</button>`;
+          if (h.can_check_lock) {
+            actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="checkFileLockQuick('${escapePath(h.path)}')">查锁</button>`;
+          }
+          if (h.can_junction_migrate) {
+            actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="startJunctionMigrateQuick('${escapePath(h.path)}')">搬迁</button>`;
+          }
+
+          return `<tr>
+            <td style="font-weight: 600; color: #fff; display: flex; align-items: center;">${iconSvg}<span title="${escapeHtml(h.name)}">${escapeHtml(h.name)}</span></td>
+            <td>${qualityBadge}</td>
+            <td style="color: var(--text-secondary);">${sizeStr}</td>
+            <td style="color: var(--text-tertiary); font-family: monospace; font-size: 11px;" title="${escapeHtml(h.path)}">${escapeHtml(h.path)}</td>
+            <td style="text-align: right; white-space: nowrap;">${actionsHtml}</td>
+          </tr>`;
+        }).join('');
+      }
+    }
+
     async function executeDiskSearch(query) {
       const tbody = document.getElementById('searchResultsTableBody');
       const title = document.getElementById('searchResultsCountTitle');
       const latencyStats = document.getElementById('searchLatencyStats');
-      const col1 = document.getElementById('thSearchCol1');
-      const col2 = document.getElementById('thSearchCol2');
-      const col3 = document.getElementById('thSearchCol3');
-      const col4 = document.getElementById('thSearchCol4');
+      const launcherContainer = document.getElementById('launcherHitContainer');
       if (!tbody) return;
 
+      currentLauncherHit = null;
+      if (launcherContainer) {
+        launcherContainer.style.display = 'none';
+        launcherContainer.innerHTML = '';
+      }
+
       if (!query) {
+        currentSearchHits = [];
         tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 36px; color: var(--text-tertiary);">请输入检索词或点击上方预设，体验 ~1ms 极速检索与治理动作</td></tr>';
         if (title) title.innerText = '检索结果 (0 项)';
         return;
       }
 
       const isGrepMode = query.startsWith('grep:') || query.startsWith('sym:') || currentSearchSubMode === 'grep';
+      currentSearchGrepMode = isGrepMode;
+      updateSearchSortHeaders();
 
-      if (isGrepMode) {
-        if (col1) col1.innerText = '代码文件 : 行号';
-        if (col2) col2.innerText = '匹配代码内容';
-        if (col3) col3.innerText = '得分';
-        if (col4) col4.innerText = '完整文件路径';
-      } else {
-        if (col1) col1.innerText = '文件 / 目录名';
-        if (col2) col2.innerText = '匹配质量';
-        if (col3) col3.innerText = '大小';
-        if (col4) col4.innerText = '完整路径';
+      let effectiveQuery = query;
+      if (!isGrepMode && !devNoiseShieldEnabled && !query.includes('shield:')) {
+        effectiveQuery = query + ' shield:0';
       }
 
       const t0 = performance.now();
       try {
         const endpoint = isGrepMode 
-          ? ('/api/search/grep?q=' + encodeURIComponent(query))
-          : ('/api/search/query?q=' + encodeURIComponent(query));
+          ? ('/api/search/grep?q=' + encodeURIComponent(effectiveQuery))
+          : ('/api/search/query?q=' + encodeURIComponent(effectiveQuery));
 
         const res = await fetch(endpoint);
         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -3508,61 +3704,36 @@
         }
         if (title) title.innerText = `检索结果 (${data.total_hits} 项)`;
 
-        if (!data.hits || data.hits.length === 0) {
+        // 渲染 Pro Launcher 直达动作条目
+        if (data.launcher_hit && launcherContainer) {
+          currentLauncherHit = data.launcher_hit;
+          launcherContainer.style.display = 'block';
+          launcherContainer.innerHTML = `
+            <div style="background: linear-gradient(135deg, rgba(96, 205, 255, 0.12), rgba(0, 120, 212, 0.08)); border: 1.5px solid rgba(96, 205, 255, 0.4); border-radius: var(--radius-md); padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
+              <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
+                <div style="background: #60cdff; color: #080b10; font-weight: 700; font-size: 11px; padding: 4px 8px; border-radius: 4px; white-space: nowrap;">PRO 直达</div>
+                <div style="overflow: hidden;">
+                  <div style="font-weight: 700; font-size: 13.5px; color: #fff;">${escapeHtml(data.launcher_hit.title)}</div>
+                  <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(data.launcher_hit.description)}</div>
+                </div>
+              </div>
+              <button class="btn btn-primary" style="white-space: nowrap; font-weight: 600;" onclick="executeLauncherAction('${escapeHtml(data.launcher_hit.action_type)}', '${escapePath(data.launcher_hit.target)}')">
+                执行 (${escapeHtml(data.launcher_hit.shortcut_label || 'Enter')})
+              </button>
+            </div>
+          `;
+        }
+
+        currentSearchHits = data.hits || [];
+        if (currentSearchHits.length === 0 && !data.launcher_hit) {
           tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 36px; color: var(--text-tertiary);">未找到与 "' + escapeHtml(query) + '" 匹配的' + (isGrepMode ? '代码行或符号' : '文件或目录') + '</td></tr>';
           return;
         }
 
-        if (isGrepMode) {
-          tbody.innerHTML = data.hits.map(h => {
-            const fileLoc = `${h.file_name}:${h.line_number}`;
-            const fileIcon = '<svg style="width:14px;height:14px;fill:#60cdff;margin-right:6px;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
-            const lineSnippet = escapeHtml(h.line_content || '');
-            const actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.file_path)}')">定位</button> <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="openActionRunnerModal('${escapePath(h.file_path)}', '${escapeHtml(h.file_name)}')">动作...</button>`;
-
-            return `<tr>
-              <td style="font-weight: 600; color: #fff; display: flex; align-items: center; white-space: nowrap;">
-                ${fileIcon}<span title="${escapeHtml(fileLoc)}">${escapeHtml(fileLoc)}</span>
-              </td>
-              <td>
-                <div style="font-family: Consolas, monospace; font-size: 11.5px; background: rgba(0,0,0,0.4); padding: 3px 8px; border-radius: 4px; color: #a8d1ff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 380px;">${lineSnippet}</div>
-              </td>
-              <td style="color: var(--text-secondary);">${h.score || 100}</td>
-              <td style="color: var(--text-tertiary); font-family: monospace; font-size: 11px;" title="${escapeHtml(h.file_path)}">${escapeHtml(h.file_path)}</td>
-              <td style="text-align: right; white-space: nowrap;">${actionsHtml}</td>
-            </tr>`;
-          }).join('');
+        if (currentSearchSort.col) {
+          sortAndRenderSearchResults();
         } else {
-          tbody.innerHTML = data.hits.map(h => {
-            let qualityBadge = '<span class="badge-pill badge-neutral">模糊子序列</span>';
-            if (h.match_quality === 'Exact') qualityBadge = '<span class="badge-pill badge-safe">精确匹配</span>';
-            else if (h.match_quality === 'Prefix') qualityBadge = '<span class="badge-pill badge-safe">前缀匹配</span>';
-            else if (h.match_quality === 'Suffix') qualityBadge = '<span class="badge-pill badge-neutral">后缀匹配</span>';
-            else if (h.match_quality === 'TypoTolerant') qualityBadge = '<span class="badge-pill badge-warn" style="color:#ffb900; background:rgba(255,185,0,0.15);">1-edit 容错纠正</span>';
-
-            const sizeStr = h.is_dir ? '<span style="color:var(--text-tertiary);">[目录]</span>' : formatBytes(h.size_bytes);
-            const iconSvg = h.is_dir 
-              ? '<svg style="width:14px;height:14px;fill:#ffb900;margin-right:6px;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
-              : '<svg style="width:14px;height:14px;fill:var(--text-secondary);margin-right:6px;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
-
-            let actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.path)}')">定位</button>`;
-            actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="triggerQuickSwitch('${escapePath(h.path)}')" title="跳转至当前前台文件选择对话框 (Listary 看家本领)">跳转</button>`;
-            actionsHtml += ` <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="openActionRunnerModal('${escapePath(h.path)}', '${escapeHtml(h.name)}')" title="展开 Listary 动作流水线">动作...</button>`;
-            if (h.can_check_lock) {
-              actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="checkFileLockQuick('${escapePath(h.path)}')">查锁</button>`;
-            }
-            if (h.can_junction_migrate) {
-              actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="startJunctionMigrateQuick('${escapePath(h.path)}')">搬迁</button>`;
-            }
-
-            return `<tr>
-              <td style="font-weight: 600; color: #fff; display: flex; align-items: center;">${iconSvg}<span title="${escapeHtml(h.name)}">${escapeHtml(h.name)}</span></td>
-              <td>${qualityBadge}</td>
-              <td style="color: var(--text-secondary);">${sizeStr}</td>
-              <td style="color: var(--text-tertiary); font-family: monospace; font-size: 11px;" title="${escapeHtml(h.path)}">${escapeHtml(h.path)}</td>
-              <td style="text-align: right; white-space: nowrap;">${actionsHtml}</td>
-            </tr>`;
-          }).join('');
+          renderSearchResultsTableRows();
         }
 
       } catch(e) {
@@ -5448,9 +5619,13 @@
       if (!container) return;
       try {
         const isGrep = query.startsWith('grep:') || query.startsWith('sym:');
+        let effectiveQuery = query;
+        if (!isGrep && !devNoiseShieldEnabled && !query.includes('shield:')) {
+          effectiveQuery = query + ' shield:0';
+        }
         const endpoint = isGrep
-          ? ('/api/search/grep?q=' + encodeURIComponent(query))
-          : ('/api/search/query?q=' + encodeURIComponent(query));
+          ? ('/api/search/grep?q=' + encodeURIComponent(effectiveQuery))
+          : ('/api/search/query?q=' + encodeURIComponent(effectiveQuery));
         const res = await fetch(endpoint);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
@@ -5466,9 +5641,22 @@
         } else {
           spotlightHits = (data.hits || []).slice(0, 15);
         }
+
+        if (data.launcher_hit) {
+          spotlightHits.unshift({
+            is_launcher: true,
+            name: data.launcher_hit.title,
+            path: data.launcher_hit.target,
+            detail: data.launcher_hit.description,
+            action_type: data.launcher_hit.action_type,
+            shortcut_label: data.launcher_hit.shortcut_label,
+            is_dir: false
+          });
+        }
+
         spotlightSelectedIndex = 0;
         if (statusText) {
-          statusText.innerText = `命中 ${data.total_hits || spotlightHits.length} 项 (上下键选择, 回车打开, Tab 动作, Ctrl+G 跳转)`;
+          statusText.innerText = `命中 ${data.total_hits || spotlightHits.length} 项 (上下键选择, 回车打开/直达, Tab 动作, Ctrl+G 跳转)`;
         }
         renderSpotlightHits();
       } catch (e) {
@@ -5485,6 +5673,24 @@
       }
       container.innerHTML = spotlightHits.map((h, idx) => {
         const isSelected = idx === spotlightSelectedIndex;
+        if (h.is_launcher) {
+          return `
+            <div class="spotlight-item ${isSelected ? 'selected' : ''}" style="background: rgba(96, 205, 255, 0.12); border: 1px solid rgba(96, 205, 255, 0.35);" onclick="selectAndExecuteSpotlightHit(${idx})">
+              <div class="spotlight-item-left">
+                <svg style="width:16px;height:16px;fill:#60cdff;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+                <div style="display:flex; flex-direction:column; overflow:hidden;">
+                  <div class="spotlight-item-name" style="color:#60cdff; font-weight:700;">${escapeHtml(h.name)} · [${escapeHtml(h.shortcut_label || '回车直达')}]</div>
+                  <div class="spotlight-item-path" style="color:var(--text-secondary);" title="${escapeHtml(h.detail)}">${escapeHtml(h.detail)}</div>
+                </div>
+              </div>
+              <div class="spotlight-item-meta">
+                <span class="badge-pill badge-safe" style="font-size:10px;">PRO 直达</span>
+                <button class="btn btn-primary" style="padding:2px 8px; font-size:10px;" onclick="event.stopPropagation(); executeLauncherAction('${escapeHtml(h.action_type)}', '${escapePath(h.path)}')">执行</button>
+              </div>
+            </div>
+          `;
+        }
+
         const iconSvg = h.is_dir
           ? '<svg style="width:16px;height:16px;fill:#ffb900;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
           : '<svg style="width:16px;height:16px;fill:#60cdff;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
@@ -5545,7 +5751,9 @@
         e.preventDefault();
         if (spotlightHits[spotlightSelectedIndex]) {
           const item = spotlightHits[spotlightSelectedIndex];
-          openActionRunnerModal(item.path, item.name);
+          if (!item.is_launcher) {
+            openActionRunnerModal(item.path, item.name);
+          }
         }
         return;
       }
@@ -5561,6 +5769,11 @@
     function selectAndExecuteSpotlightHit(idx) {
       const item = spotlightHits[idx];
       if (!item) return;
+      if (item.is_launcher) {
+        executeLauncherAction(item.action_type, item.path);
+        closeSpotlight();
+        return;
+      }
       revealInExplorer(item.path);
       closeSpotlight();
     }

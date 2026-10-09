@@ -27,6 +27,9 @@ pub mod quick_switch;
 pub mod action_runner;
 pub mod hotkey_manager;
 pub mod daemon_service;
+pub mod launcher;
+
+pub use launcher::*;
 
 pub use cleaner::*;
 pub use disks::*;

@@ -909,6 +909,7 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                 });
 
                 let parsed_q = crate::search_engine::ParsedSearchQuery::parse(&query_str);
+                let launcher_hit = crate::launcher::detect_launcher_action(&query_str);
                 let hits = if let Ok(guard) = lock.read() {
                     crate::search_engine::execute_search(&guard, &parsed_q)
                 } else {
@@ -918,7 +919,8 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                 let res_json = serde_json::json!({
                     "query": query_str,
                     "total_hits": hits.len(),
-                    "hits": hits
+                    "hits": hits,
+                    "launcher_hit": launcher_hit,
                 }).to_string();
                 send_json_response(request, res_json);
             } else if url.starts_with("/api/search/grep") && method == Method::Get {
@@ -1027,6 +1029,32 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                     Err(e) => {
                         let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
                         send_json_response(request, err_json);
+                    }
+                }
+            } else if url == "/api/launcher/execute" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct LauncherReq {
+                    kind: String,
+                    payload: String,
+                }
+
+                match serde_json::from_str::<LauncherReq>(&content) {
+                    Ok(req) => match crate::launcher::execute_launcher_action(&req.kind, &req.payload) {
+                        Ok(msg) => {
+                            let json = serde_json::json!({ "success": true, "message": msg }).to_string();
+                            send_json_response(request, json);
+                        }
+                        Err(e) => {
+                            let json = serde_json::json!({ "success": false, "error": e }).to_string();
+                            send_json_response(request, json);
+                        }
+                    },
+                    Err(e) => {
+                        let json = serde_json::json!({ "success": false, "error": format!("解析请求失败: {}", e) }).to_string();
+                        send_json_response(request, json);
                     }
                 }
             } else if url.starts_with("/api/quick-switch") {

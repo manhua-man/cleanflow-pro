@@ -14,6 +14,9 @@ pub struct ParsedSearchQuery {
     pub only_dirs: bool,
     pub only_files: bool,
     pub limit: usize,
+    // Pro Features: RegEx and Noise Shielding
+    pub regex_pattern: Option<String>,
+    pub shield_noise: bool,
 }
 
 impl ParsedSearchQuery {
@@ -26,6 +29,8 @@ impl ParsedSearchQuery {
         let mut max_size = None;
         let mut only_dirs = false;
         let mut only_files = false;
+        let mut regex_pattern = None;
+        let mut shield_noise = true; // Enabled by default
         let limit = 50;
 
         for part in trimmed.split_whitespace() {
@@ -36,6 +41,10 @@ impl ParsedSearchQuery {
             } else if lower.starts_with("ext:") {
                 let extension = part[4..].trim_start_matches('.').to_lowercase();
                 ext = Some(extension);
+            } else if lower.starts_with("regex:") {
+                regex_pattern = Some(part[6..].to_string());
+            } else if lower == "noise:all" || lower == "shield:off" || lower == "noise:show" {
+                shield_noise = false;
             } else if lower.starts_with("size:>") {
                 min_size = parse_size_str(&part[6..]);
             } else if lower.starts_with("size:<") {
@@ -59,8 +68,33 @@ impl ParsedSearchQuery {
             only_dirs,
             only_files,
             limit,
+            regex_pattern,
+            shield_noise,
         }
     }
+}
+
+pub fn is_dev_noise_path(path: &str) -> bool {
+    let lower = path.to_lowercase();
+    lower.contains("\\node_modules\\")
+        || lower.contains("\\.git\\")
+        || lower.contains("\\target\\debug\\")
+        || lower.contains("\\target\\release\\")
+        || lower.contains("\\.venv\\")
+        || lower.contains("\\venv\\")
+        || lower.contains("\\__pycache__\\")
+        || lower.contains("\\vendor\\bundle\\")
+        || lower.contains("\\appdata\\local\\temp\\")
+}
+
+pub fn is_high_priority_path(path: &str) -> bool {
+    let lower = path.to_lowercase();
+    lower.contains("\\projects\\")
+        || lower.contains("\\src\\")
+        || lower.contains("\\documents\\")
+        || lower.contains("\\desktop\\")
+        || lower.contains("\\repos\\")
+        || lower.contains("\\workspace\\")
 }
 
 fn parse_size_str(s: &str) -> Option<u64> {
@@ -98,6 +132,11 @@ pub fn execute_search(
     indexes: &[VolumeIndex],
     query: &ParsedSearchQuery,
 ) -> Vec<SearchResultHit> {
+    let compiled_regex = query
+        .regex_pattern
+        .as_ref()
+        .and_then(|p| regex::RegexBuilder::new(p).case_insensitive(true).build().ok());
+
     let mut all_hits: Vec<SearchResultHit> = indexes
         .par_iter()
         .flat_map(|vol_idx| {
@@ -107,14 +146,27 @@ pub fn execute_search(
                 .entries
                 .par_iter()
                 .filter_map(|entry| {
-                    // 1. Directory constraint
+                    // 1. Noise shield filter (Listary Pro & fsearch alignment)
+                    if query.shield_noise && is_dev_noise_path(&entry.path) {
+                        let explicitly_searched = query.terms.iter().any(|t| {
+                            t.contains("node_modules")
+                                || t.contains(".git")
+                                || t.contains("target")
+                                || t.contains("venv")
+                        });
+                        if !explicitly_searched {
+                            return None;
+                        }
+                    }
+
+                    // 2. Directory constraint
                     if let Some(ref req_dir) = query.in_directory {
                         if !entry.path.to_lowercase().starts_with(&req_dir.to_lowercase()) {
                             return None;
                         }
                     }
 
-                    // 2. Type constraints
+                    // 3. Type constraints
                     if query.only_dirs && !entry.is_dir {
                         return None;
                     }
@@ -122,7 +174,7 @@ pub fn execute_search(
                         return None;
                     }
 
-                    // 3. Size constraints
+                    // 4. Size constraints
                     if let Some(min_s) = query.min_size {
                         if entry.size_bytes < min_s {
                             return None;
@@ -134,16 +186,27 @@ pub fn execute_search(
                         }
                     }
 
-                    // 4. Extension constraint
+                    // 5. Extension constraint
                     if let Some(ref req_ext) = query.extension {
                         if !entry.name.to_lowercase().ends_with(&format!(".{}", req_ext)) {
                             return None;
                         }
                     }
 
-                    // 5. Query term matching
-                    let (best_quality, total_score) = if query.terms.is_empty() {
-                        (MatchQuality::Exact, 100)
+                    // 6. RegEx filter (fsearch Pro parity)
+                    if let Some(ref re) = compiled_regex {
+                        if !re.is_match(&entry.name) && !re.is_match(&entry.path) {
+                            return None;
+                        }
+                    }
+
+                    // 7. Query term matching & Priority Boost
+                    let (best_quality, mut total_score) = if query.terms.is_empty() {
+                        if compiled_regex.is_some() {
+                            (MatchQuality::Exact, 120)
+                        } else {
+                            (MatchQuality::Exact, 100)
+                        }
                     } else {
                         let mut quality = MatchQuality::None;
                         let mut sum_score = 0;
@@ -169,6 +232,11 @@ pub fn execute_search(
 
                     if total_score <= 0 {
                         return None;
+                    }
+
+                    // Priority Boost: grant +25 score bonus to user projects and work documents
+                    if is_high_priority_path(&entry.path) {
+                        total_score += 25;
                     }
 
                     // Action Bridge Enrichment
@@ -210,11 +278,13 @@ mod tests {
 
     #[test]
     fn test_parse_search_query() {
-        let q = ParsedSearchQuery::parse("cagro.toml in:C:\\Users\\ ext:toml size:>1mb");
+        let q = ParsedSearchQuery::parse("cagro.toml in:C:\\Users\\ ext:toml size:>1mb regex:^c.*");
         assert_eq!(q.terms, vec!["cagro.toml".to_string()]);
         assert_eq!(q.in_directory, Some("C:\\Users\\".to_string()));
         assert_eq!(q.extension, Some("toml".to_string()));
         assert_eq!(q.min_size, Some(1024 * 1024));
+        assert_eq!(q.regex_pattern, Some("^c.*".to_string()));
+        assert!(q.shield_noise);
     }
 
     #[test]
@@ -253,5 +323,46 @@ mod tests {
         assert_eq!(hits[0].name, "cargo.toml");
         assert_eq!(hits[0].match_quality, MatchQuality::TypoTolerant);
         assert!(hits[0].can_check_lock);
+    }
+
+    #[test]
+    fn test_regex_search_and_noise_shield() {
+        let vol_idx = VolumeIndex {
+            drive_letter: 'C',
+            label: "System".to_string(),
+            fs_type: "NTFS".to_string(),
+            is_mft_accelerated: true,
+            last_indexed_epoch: 1000,
+            duration_ms: 10,
+            entries: vec![
+                CompactFileEntry {
+                    id: 1,
+                    name: "package.json".to_string(),
+                    path: "C:\\Projects\\app\\node_modules\\lodash\\package.json".to_string(),
+                    size_bytes: 1024,
+                    is_dir: false,
+                    modified_timestamp: 100,
+                },
+                CompactFileEntry {
+                    id: 2,
+                    name: "package.json".to_string(),
+                    path: "C:\\Projects\\app\\package.json".to_string(),
+                    size_bytes: 2048,
+                    is_dir: false,
+                    modified_timestamp: 100,
+                },
+            ],
+        };
+
+        // Query with noise shield: node_modules file should be excluded
+        let q_shield = ParsedSearchQuery::parse("package.json");
+        let hits_shield = execute_search(&[vol_idx.clone()], &q_shield);
+        assert_eq!(hits_shield.len(), 1);
+        assert_eq!(hits_shield[0].path, "C:\\Projects\\app\\package.json");
+
+        // RegEx search
+        let q_regex = ParsedSearchQuery::parse("regex:^package\\..*");
+        let hits_regex = execute_search(&[vol_idx], &q_regex);
+        assert_eq!(hits_regex.len(), 1);
     }
 }
