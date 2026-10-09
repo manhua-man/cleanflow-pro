@@ -701,6 +701,23 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                         send_json_response(request, err_json);
                     }
                 }
+            } else if url == "/api/duplicates/volume-status" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct VolReq {
+                    path: Option<String>,
+                }
+
+                let p = serde_json::from_str::<VolReq>(&content)
+                    .ok()
+                    .and_then(|r| r.path)
+                    .unwrap_or_else(|| "C:\\".to_string());
+
+                let status = crate::block_clone::check_volume_block_clone_support(&p);
+                let res_json = serde_json::to_string(&status).unwrap_or_default();
+                send_json_response(request, res_json);
             } else if url == "/api/duplicates/clean" && method == Method::Post {
                 let mut content = String::new();
                 let _ = request.as_reader().read_to_string(&mut content);
@@ -708,13 +725,51 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                 #[derive(serde::Deserialize)]
                 struct DupCleanReq {
                     paths: Vec<String>,
+                    mode: Option<String>,
+                    master_path: Option<String>,
                 }
 
                 match serde_json::from_str::<DupCleanReq>(&content) {
                     Ok(req) => {
-                        let (freed, count, errs) = crate::duplicates::delete_duplicate_files(&req.paths);
-                        let res_json = serde_json::json!({ "success": true, "bytes_freed": freed, "files_deleted": count, "errors": errs }).to_string();
-                        send_json_response(request, res_json);
+                        if req.mode.as_deref() == Some("refs_clone") {
+                            if let Some(master) = req.master_path {
+                                let mut cloned_bytes = 0u64;
+                                let mut count = 0usize;
+                                let mut errs = Vec::new();
+                                for target in &req.paths {
+                                    match crate::block_clone::clone_file_extents(&master, target) {
+                                        Ok(b) => {
+                                            cloned_bytes += b;
+                                            count += 1;
+                                        }
+                                        Err(e) => {
+                                            errs.push(format!("{}: {}", target, e));
+                                        }
+                                    }
+                                }
+                                let res_json = serde_json::json!({
+                                    "success": true,
+                                    "mode": "refs_clone",
+                                    "bytes_freed": cloned_bytes,
+                                    "files_cloned": count,
+                                    "errors": errs
+                                }).to_string();
+                                send_json_response(request, res_json);
+                            } else {
+                                let err_json = r#"{"success": false, "error": "ReFS 块克隆模式需要指定 master_path 母本路径"}"#;
+                                send_json_response(request, err_json.to_string());
+                            }
+                        } else {
+                            let (freed, count, errs) = crate::duplicates::delete_duplicate_files(&req.paths);
+                            let res_json = serde_json::json!({
+                                "success": true,
+                                "mode": "delete",
+                                "bytes_freed": freed,
+                                "files_deleted": count,
+                                "errors": errs
+                            }).to_string();
+                            send_json_response(request, res_json);
+                        }
                     }
                     Err(e) => {
                         let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
