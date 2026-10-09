@@ -16,6 +16,7 @@ pub mod system_tools;
 pub mod duplicates;
 pub mod block_clone;
 pub mod usn_scanner;
+pub mod winapp2_parser;
 
 pub use cleaner::*;
 pub use disks::*;
@@ -35,3 +36,4 @@ pub use system_tools::*;
 pub use duplicates::*;
 pub use block_clone::*;
 pub use usn_scanner::*;
+pub use winapp2_parser::*;
