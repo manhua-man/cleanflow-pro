@@ -871,14 +871,58 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                             let err_json = r#"{"success": false, "error": "请求参数无效"}"#;
                             send_json_response(request, err_json.to_string());
                         }
-                    } else {
-                        let err_json = r#"{"success": false, "error": "规则文件读取失败"}"#;
-                        send_json_response(request, err_json.to_string());
                     }
                 } else {
                     let err_json = r#"{"success": false, "error": "未找到规则文件"}"#;
                     send_json_response(request, err_json.to_string());
                 }
+            } else if url == "/api/search/volumes" && method == Method::Get {
+                let vols = crate::mft_scanner::list_available_volumes();
+                let res_json = serde_json::to_string(&vols).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, res_json);
+            } else if url.starts_with("/api/search/query") && method == Method::Get {
+                // Parse query from URL, e.g. /api/search/query?q=cagro.toml
+                let query_str = if let Some(pos) = url.find("?q=") {
+                    let raw = &url[pos + 3..];
+                    // Split at next param & if any
+                    let encoded = raw.split('&').next().unwrap_or(raw);
+                    // Simple URL decoding
+                    let decoded = match percent_decode_str(encoded) {
+                        Some(s) => s,
+                        None => encoded.to_string(),
+                    };
+                    decoded
+                } else {
+                    String::new()
+                };
+
+                static SEARCH_INDEX_CACHE: std::sync::OnceLock<std::sync::RwLock<Vec<crate::search_index::VolumeIndex>>> = std::sync::OnceLock::new();
+                let lock = SEARCH_INDEX_CACHE.get_or_init(|| {
+                    std::sync::RwLock::new(crate::search_index::get_or_build_all_indexes(Some(4)))
+                });
+
+                let parsed_q = crate::search_engine::ParsedSearchQuery::parse(&query_str);
+                let hits = if let Ok(guard) = lock.read() {
+                    crate::search_engine::execute_search(&guard, &parsed_q)
+                } else {
+                    Vec::new()
+                };
+
+                let res_json = serde_json::json!({
+                    "query": query_str,
+                    "total_hits": hits.len(),
+                    "hits": hits
+                }).to_string();
+                send_json_response(request, res_json);
+            } else if url == "/api/search/rebuild" && method == Method::Post {
+                let fresh = crate::search_index::get_or_build_all_indexes(Some(4));
+                let total_indexed: usize = fresh.iter().map(|idx| idx.entries.len()).sum();
+                let res_json = serde_json::json!({
+                    "success": true,
+                    "total_indexed_entries": total_indexed,
+                    "volumes_count": fresh.len()
+                }).to_string();
+                send_json_response(request, res_json);
             } else if url == "/api/shutdown" && method == Method::Post {
                 running_clone.store(false, Ordering::SeqCst);
                 let res_json = r#"{"success": true, "message": "已关闭"}"#;
@@ -977,3 +1021,24 @@ fn send_json_response(request: tiny_http::Request, body: String) {
         .with_header(header_cors);
     let _ = request.respond(response);
 }
+
+fn percent_decode_str(input: &str) -> Option<String> {
+    let mut bytes = Vec::new();
+    let mut chars = input.bytes();
+    while let Some(b) = chars.next() {
+        if b == b'%' {
+            let h1 = chars.next()?;
+            let h2 = chars.next()?;
+            let hex_bytes = [h1, h2];
+            let hex_str = std::str::from_utf8(&hex_bytes).ok()?;
+            let byte_val = u8::from_str_radix(hex_str, 16).ok()?;
+            bytes.push(byte_val);
+        } else if b == b'+' {
+            bytes.push(b' ');
+        } else {
+            bytes.push(b);
+        }
+    }
+    String::from_utf8(bytes).ok()
+}
+

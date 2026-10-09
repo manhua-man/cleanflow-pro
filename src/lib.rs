@@ -18,6 +18,10 @@ pub mod block_clone;
 pub mod usn_scanner;
 pub mod winapp2_parser;
 pub mod winapp2_engine;
+pub mod mft_scanner;
+pub mod fuzzy_matcher;
+pub mod search_index;
+pub mod search_engine;
 
 pub use cleaner::*;
 pub use disks::*;
@@ -39,3 +43,7 @@ pub use block_clone::*;
 pub use usn_scanner::*;
 pub use winapp2_parser::*;
 pub use winapp2_engine::*;
+pub use mft_scanner::{list_available_volumes, read_volume_mft_stream, reconstruct_paths, VolumeInfo, RawMftEntry};
+pub use fuzzy_matcher::*;
+pub use search_index::*;
+pub use search_engine::*;
