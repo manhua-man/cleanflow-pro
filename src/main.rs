@@ -98,20 +98,33 @@ fn main() -> anyhow::Result<()> {
     }
 
     let default_port = 23999;
+    let is_headless = args.iter().any(|a| a == "--headless" || a == "--server-only" || a == "--daemon");
+    let mut target_port = default_port;
+    if let Some(pos) = args.iter().position(|a| a == "--port") {
+        if let Some(p_str) = args.get(pos + 1) {
+            if let Ok(p) = p_str.parse::<u16>() {
+                target_port = p;
+            }
+        }
+    }
 
     // Single Instance Guard:
-    // If port 23999 is already listening, another instance is already active!
-    // Simply launch the window to connect to the active instance and exit.
-    if TcpStream::connect(format!("127.0.0.1:{}", default_port)).is_ok() {
-        launch_app_window(default_port);
+    // If target port is already listening, another instance is already active!
+    // If not headless, simply launch the window to connect to the active instance and exit.
+    if TcpStream::connect(format!("127.0.0.1:{}", target_port)).is_ok() {
+        if !is_headless {
+            launch_app_window(target_port);
+        }
         return Ok(());
     }
 
     // Start background server
-    let (port, running) = start_server(default_port);
+    let (port, running) = start_server(target_port);
 
-    // Launch GUI App Window (Directly on screen, NO black console window)
-    launch_app_window(port);
+    // Launch GUI App Window if not headless
+    if !is_headless {
+        launch_app_window(port);
+    }
 
     // Keep server thread alive
     while running.load(Ordering::SeqCst) {
