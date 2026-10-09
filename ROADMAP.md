@@ -21,47 +21,45 @@
 
 ---
 
-## 二、当前版本已交付稳定特性矩阵 (v0.1.1 Delivered Matrix)
+## 二、当前版本已交付稳定特性矩阵 (v0.2.0 Delivered Matrix)
 
-| 模块名称 | 核心能力 | 本机实测检出 / 治理效果 | 架构与安全保障措施 |
+| 模块名称 | 核心能力 | 实测治理效果 | 架构与安全保障措施 |
 | :--- | :--- | :--- | :--- |
-| **空间健康体检与清理** | 系统垃圾、临时文件、开发包、数据库一站式聚合体检与一键治理 | **15.8 GB** 可治理资产 | 智能推荐勾选，多场景分级标签，防误删白名单机制 |
-| **全盘交互式 Treemap 树图** | Windows 11 Fluent 2 亚克力玻璃拟态全盘空间占比拓扑透视 | 实时下钻与悬浮浮层 | 320px 专业视窗，颜色编码语义化绑定，双行属性检视条 |
-| **重复文件多核流式查重** | 64 KB 自适应流式缓冲 + Rayon 工作窃取多核流式并行哈希 | 秒级完成海量重复候选归并 | 最短路径智选保留，I/O 系统调用开销锐减 87.5% |
-| **注册表并发极速巡检与清理** | 预缓存 App Paths + 递归流式解析 + `std::thread::scope` 五线程并发 | 耗时从 3.27s 降至 **0.90s** (3.6x 提升) | 修复前自动导出时间戳 `.reg` 恢复备份，Rayon 并行批处理 |
-| **目录事务型搬家 (Junction)** | C 盘大目录转移至大容量磁盘并建立虚拟联接，支持 1-Click 回滚 | 160MB 实测 2.1s 闭环完成 | 事务型暂存重命名 + 自动无损回滚 + `/J /DCOPY:DAT` 零缓存多线程 |
-| **SQLite 数据库碎片收缩** | 飞书、Chrome、Cursor 等高频读写数据库 VACUUM 物理收缩 | 释放 4.05 GB 游离碎片 | 原生 `PRAGMA freelist_count` 与 WAL 日志智能安全避让 |
-| **系统极客工具箱** | 开机启动项纳管、Docker 虚拟化专清、系统回收站清理、软件盘点 | 聚合全能系统治理 | 原生 Windows API 与轻量化注册表解析，无第三方运行库依赖 |
+| **空间健康体检与清理** | 系统垃圾、临时文件、开发包、数据库一站式聚合体检与一键治理 | 实测排查 15.8GB+ 资产 | 智能推荐勾选，多场景分级标签，防误删白名单机制 |
+| **全盘交互式 Treemap 树图** | Windows 11 Fluent 2 视觉层次，色块面积等比物理占用 | 4 秒遍历全盘 100MB+ 巨型资产 | 防截断动态检查条，多类别高光着色，支持一键资源管理器定位 |
+| **双阶段哈希智选查重** | 体积粗筛聚类 + SHA-256 并发散列，自动锁定母本与冗余副本 | 秒级归并 34 组重复资产 (712MB+) | 母本安全锁定保护，仅清除冗余副本，保护原始数据 |
+| **目录事务型搬家 (Junction)** | AI 与开发大资产 (Ollama, HuggingFace, Steam, Unity, AVD) 跨盘迁移 | 保持原路径兼容无损 | 飞行前空间校验 + 15ms 批处理独占进程排查 (`process_lock.rs`) + 原生回滚 |
+| **静默注册表保护网** | 扫描无效文件关联、死链卸载键值，后台自动导出标准 `.reg` 备份 | 耗时仅 0.9 秒完成深度巡检 | 修复前自动导出时间戳备份至 `%TEMP%`，支持原生 `reg import` 回滚 |
+| **SQLite 数据库碎片收缩** | Cursor、飞书、Chrome 等高频读写数据库 VACUUM 物理收缩 | 释放数 GB 游离碎片 | 原生 `PRAGMA freelist_count` 与 WAL 日志智能安全避让 |
+| **生产级命令行支持** | `--port`, `--server-only`, `--headless`, `--daemon`, `--version` | 支持后台守护与无头测试 | 单实例检测保护，避免多重运行冲突 |
 
 ---
 
-## 三、v0.2.0 里程碑四大核心支柱规划 (v0.2.0 Architecture Roadmap)
+## 三、v0.3.0 前沿演进路线与开源技术吸收备忘 (v0.3.0 Frontier Roadmap)
 
-### 支柱 1：AI 开发者与高容量数字资产专属搬迁预设 (AI & High-Value Asset Presets)
-- **HuggingFace 权重存储**：`%USERPROFILE%\.cache\huggingface\hub` (动辄 20GB - 100GB 大模型权重)。
-- **Ollama 本地模型镜像**：`%USERPROFILE%\.ollama\models` (本地大模型镜像集中存储)。
-- **PyTorch / TorchHub 预训练模型**：`%USERPROFILE%\.cache\torch\hub`。
-- **Unity Hub 多版本引擎编辑器**：`C:\Program Files\Unity\Hub\Editor` (单个引擎 8GB - 20GB)。
-- **Steam 游戏库与着色器缓存**：`C:\Program Files (x86)\Steam\steamapps\common` 与 `shadercache`。
+结合业内最前沿文件系统底层技术与热门开源标杆 (Czkawka, WizTree, Dev Drive)，v0.3.0 确立以下三大核心突破方向：
 
-### 支柱 2：注册表备份快照可视化时间轴与一键导入复原 (Registry Snapshot Timeline)
-- **备份时间轴面板**：在注册表工作区直观呈现 `%TEMP%\cleanflow_registry_backups\` 下的历史备份列表、创建时间戳与受影响项数。
-- **原生 1-Click 复原闭环**：前端点击“恢复该快照”，后端直接调用 `reg.exe import` 秒级完整写回，提供无懈可击的系统容灾体验。
-- **资源管理器一键定位**：支持直接打开文件夹选中目标 `.reg` 文件，便于用户手动审核备份内容。
+### 1. 极致性能突破：NTFS MFT / USN Journal 底层直读 (WizTree 级性能)
+- **现状与瓶颈**：当前采用 `walkdir` 递归遍历，面对百万级碎小文件时经历大量系统调用。
+- **架构方案**：
+  - 调用 Windows 原生 `DeviceIoControl` 与 `FSCTL_ENUM_USN_DATA`，直接从 NTFS 卷流式读取 Master File Table (`$MFT`)。
+  - 在内存中构建紧凑型树节点 (`struct MftNode { parent_frn: u64, size: u64, name_offset: u32 }`)。
+- **目标收益**：全盘百万文件大文件检索时间从 4 秒降至 **0.5 ~ 0.8 秒**，实现真正的“点击即出”。
 
-### 支柱 3：搬家前运行中进程互斥主动检测与温和接管 (Pre-Flight Mutual-Exclusion Inspector)
-- **进程句柄检测**：在启动搬家前，自动扫描是否有进程正在占用源目录（如微信对应的 `WeChat.exe`, `xwechat.exe`，Android 对应的 `adb.exe`, `qemu-system-x86_64.exe`）。
-- **友好交互指引**：主动列出占用进程名与 PID，提供“协助安全关闭进程并继续”或“暂不关闭取消操作”，提升迁移成功率与用户亲和度。
+### 2. 存储虚拟化黑科技：Windows 11 Dev Drive 与 ReFS Block Cloning (写时复制去重)
+- **现状与瓶颈**：传统去重必须物理删除副本，若第三方工具硬编码了副本路径可能导致异常。
+- **架构方案**：
+  - 针对 Windows 11 开发者的 ReFS Dev Drive 分区，调用 Win32 `FSCTL_DUPLICATE_EXTENTS_TO_FILE`。
+  - 将副本的物理扇区重定向映射至母本物理簇（Block Ref-counting）。
+- **目标收益**：
+  - 副本文件在文件系统视图中依然完整存在（路径与属性不变，零兼容风险）；
+  - 物理磁盘只占用一份数据，瞬间释放重复空间；
+  - 任何针对副本的后续修改由驱动层自动触发写时复制 (Copy-on-Write)。
 
-### 支柱 4：应用卸载深层残留猎手 (Residual Trace Hunter)
-- **已卸载应用残留目录排查**：排查 `%LOCALAPPDATA%`, `%APPDATA%`, `%PROGRAMDATA%` 中主程序已被彻底删除的陈旧数据孤岛。
-- **白名单机制**：内置严格系统服务与驱动级保护列表，确保深度清理零误伤。
-
----
-
-## 四、实施排期与演进计划 (Phased Implementation Plan)
-
-- **Phase 1 (v0.2.0-alpha)**: 扩展 AI / LLM / Steam 大资产专属搬迁预设与识别引擎。
-- **Phase 2 (v0.2.0-beta)**: 落地注册表快照管理时间轴、1-Click 导入恢复 API 与前端视图联动。
-- **Phase 3 (v0.2.0-rc)**: 集成搬迁前进程互斥主动检测与一键温和关闭工作流。
-- **Phase 4 (v0.2.0-final)**: 全量测试验证、便携包与 Inno Setup 安装向导双轨自动化打包交付。
+### 3. 去重流水线架构升级：吸收 Czkawka 流式三级分水岭与 BLAKE3
+- **现状与瓶颈**：当前体积匹配后直接执行全量 SHA-256，面对大文件时 I/O 较重。
+- **架构方案**：
+  - **一级 (体积碰撞桶)**：微秒级过滤 95% 独立体积文件。
+  - **二级 (特征头 Partial Hash)**：仅抓取候选文件前 16KB 计算快速散列，再次过滤 90% 不同内容的同体积文件。
+  - **三级 (BLAKE3 树状并发散列)**：替换 SHA-256，利用 AVX-512/AVX2 指令集，单核吞吐突破 3GB/s，跑满 NVMe SSD 带宽。
+- **可选扩展**：引入 `image_hasher` 支持图片感知哈希 (pHash/dHash)，识别相似多媒体缓存。
