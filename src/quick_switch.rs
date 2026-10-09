@@ -48,7 +48,11 @@ pub fn get_foreground_file_dialog() -> Option<isize> {
     }
 
     let class_name = get_window_class_name(hwnd);
-    if class_name == "#32770" {
+    if class_name == "#32770" 
+        || class_name == "TTOTAL_CMD" 
+        || class_name.contains("dopus") 
+        || class_name == "CabinetWClass" 
+    {
         return Some(hwnd);
     }
 

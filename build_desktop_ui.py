@@ -1720,9 +1720,9 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
     <!-- Window Caption Controls & Listary Extensions -->
     <div class="titlebar-actions">
-      <button class="btn btn-secondary" style="padding: 2px 10px; font-size: 11px; margin-right: 8px; display: inline-flex; align-items: center; gap: 6px; border-radius: 12px; height: 26px;" onclick="openSpotlight()" title="呼出毫秒级极简微型悬浮搜索框 (快捷键 Alt+Space)">
+      <button class="btn btn-secondary" style="padding: 2px 10px; font-size: 11px; margin-right: 8px; display: inline-flex; align-items: center; gap: 6px; border-radius: 12px; height: 26px;" onclick="openSpotlight()" title="呼出毫秒级极简微型悬浮搜索框 (快捷键: 双击 Ctrl 或 Alt+Space)">
         <svg style="width:12px; height:12px; fill:#60cdff;" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-        <span>Spotlight (Alt+Space)</span>
+        <span>Spotlight (双击 Ctrl / Alt+Space)</span>
       </button>
       <div id="daemonStatusPill" style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; padding: 2px 10px; background: rgba(0, 120, 212, 0.12); border: 1px solid rgba(0, 120, 212, 0.3); border-radius: 12px; color: #60cdff; margin-right: 12px; height: 26px; cursor: pointer;" onclick="loadDaemonStatus()" title="点击刷新 C: 盘容量与后台守护健康度">
         <span style="width: 6px; height: 6px; border-radius: 50%; background: #107c41; display: inline-block;" id="daemonStatusDot"></span>
@@ -2613,7 +2613,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         <svg class="spotlight-search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
         <input type="text" id="spotlightInput" class="spotlight-input" placeholder="极简秒搜: 输入名称、grep:代码、sym:符号，按 Tab 动作，Esc 退出..." autocomplete="off" oninput="onSpotlightInput(this.value)" onkeydown="handleSpotlightKeydown(event)" />
         <div class="spotlight-badges">
-          <span class="spotlight-kbd">Alt+Space 呼出</span>
+          <span class="spotlight-kbd">双击 Ctrl / Alt+Space 呼出</span>
           <span class="spotlight-kbd">Tab 动作</span>
           <span class="spotlight-kbd">Ctrl+G 跳转</span>
           <span class="spotlight-kbd" style="cursor:pointer;" onclick="closeSpotlight()">Esc</span>
@@ -5721,8 +5721,29 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       }
     }
 
-    // Global Key Listener for Spotlight (Alt+Space) & Search Focus (Ctrl+F)
+    // Global Key Listener for Spotlight (双击 Ctrl / Alt+Space) & Search Focus (Ctrl+F)
+    let lastCtrlPressTime = 0;
     window.addEventListener('keydown', (e) => {
+      // 1. Listary signature gesture: Double-tap Ctrl (双击两下 Ctrl 键)
+      if (e.key === 'Control' || e.code === 'ControlLeft' || e.code === 'ControlRight') {
+        const now = Date.now();
+        if (lastCtrlPressTime > 0 && (now - lastCtrlPressTime) <= 350) {
+          lastCtrlPressTime = 0;
+          const overlay = document.getElementById('spotlightOverlay');
+          if (overlay && overlay.style.display !== 'none') {
+            closeSpotlight();
+          } else {
+            openSpotlight();
+          }
+        } else {
+          lastCtrlPressTime = now;
+        }
+        return;
+      } else {
+        lastCtrlPressTime = 0;
+      }
+
+      // 2. Alt+Space backup hotkey for Spotlight
       if (e.altKey && (e.code === 'Space' || e.key === ' ')) {
         e.preventDefault();
         const overlay = document.getElementById('spotlightOverlay');
@@ -5732,6 +5753,8 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           openSpotlight();
         }
       }
+
+      // 3. Ctrl+F for Search tab focusing
       if (e.ctrlKey && (e.code === 'KeyF' || e.key === 'f' || e.key === 'F')) {
         const inp = document.getElementById('searchInputField');
         if (inp && state.currentTab === 'search') {
