@@ -27,6 +27,19 @@ pub struct ActionExecutionResult {
     pub details: Option<serde_json::Value>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct CustomActionDef {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub program_path: String,
+    pub arguments_template: String,
+    pub target_pattern: String,
+    pub run_as_admin: bool,
+    pub shortcut: Option<String>,
+    pub is_enabled: bool,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DetectedToolsStatus {
     pub vscode: bool,
@@ -306,12 +319,48 @@ pub fn get_available_actions(target_path: &str) -> Vec<ActionItem> {
         is_recommended: false,
     });
 
+    // 5. Append Custom Actions matching this target
+    if let Ok(mgr) = get_global_custom_actions().read() {
+        for ca in mgr.get_matching_actions(target_path, is_dir) {
+            actions.push(ActionItem {
+                id: format!("custom:{}", ca.id),
+                title: ca.name.clone(),
+                description: if ca.description.is_empty() { format!("自定义程序: {}", ca.program_path) } else { ca.description.clone() },
+                icon: "custom".to_string(),
+                shortcut: ca.shortcut.clone().unwrap_or_default(),
+                category: "custom".to_string(),
+                is_pro: true,
+                is_recommended: false,
+            });
+        }
+    }
+
     actions
 }
 
 /// Executes a selected action on the target path
 pub fn execute_action(action_id: &str, target_path: &str) -> ActionExecutionResult {
     let p = Path::new(target_path);
+
+    if action_id.starts_with("custom:") {
+        let custom_id = &action_id[7..];
+        if let Ok(mgr) = get_global_custom_actions().read() {
+            match mgr.execute_custom_action(custom_id, target_path) {
+                Ok(msg) => return ActionExecutionResult {
+                    success: true,
+                    action_id: action_id.to_string(),
+                    message: msg,
+                    details: None,
+                },
+                Err(err) => return ActionExecutionResult {
+                    success: false,
+                    action_id: action_id.to_string(),
+                    message: err,
+                    details: None,
+                },
+            }
+        }
+    }
 
     match action_id {
         "reveal" => {
@@ -535,6 +584,148 @@ pub fn execute_action(action_id: &str, target_path: &str) -> ActionExecutionResu
     }
 }
 
+#[derive(Debug)]
+pub struct CustomActionManager {
+    actions: Vec<CustomActionDef>,
+    storage_path: std::path::PathBuf,
+}
+
+impl CustomActionManager {
+    pub fn new(storage_path: std::path::PathBuf) -> Self {
+        let mut mgr = Self {
+            actions: Vec::new(),
+            storage_path,
+        };
+        mgr.load();
+        mgr
+    }
+
+    pub fn load(&mut self) {
+        if !self.storage_path.exists() {
+            return;
+        }
+        if let Ok(content) = fs::read_to_string(&self.storage_path) {
+            if let Ok(list) = serde_json::from_str::<Vec<CustomActionDef>>(&content) {
+                self.actions = list;
+            }
+        }
+    }
+
+    pub fn save(&self) {
+        if let Ok(json_str) = serde_json::to_string_pretty(&self.actions) {
+            let tmp_path = self.storage_path.with_extension("tmp");
+            if fs::write(&tmp_path, json_str).is_ok() {
+                let _ = fs::rename(&tmp_path, &self.storage_path);
+            }
+        }
+    }
+
+    pub fn list_all(&self) -> Vec<CustomActionDef> {
+        self.actions.clone()
+    }
+
+    pub fn save_action(&mut self, action: CustomActionDef) -> CustomActionDef {
+        if let Some(pos) = self.actions.iter().position(|a| a.id == action.id) {
+            self.actions[pos] = action.clone();
+        } else {
+            self.actions.push(action.clone());
+        }
+        self.save();
+        action
+    }
+
+    pub fn delete_action(&mut self, id: &str) -> bool {
+        let prev_len = self.actions.len();
+        self.actions.retain(|a| a.id != id);
+        let changed = self.actions.len() < prev_len;
+        if changed {
+            self.save();
+        }
+        changed
+    }
+
+    pub fn matches_target(&self, action: &CustomActionDef, target_path: &str, is_dir: bool) -> bool {
+        if !action.is_enabled {
+            return false;
+        }
+        let pattern = action.target_pattern.trim().to_lowercase();
+        if pattern.is_empty() || pattern == "*" {
+            return true;
+        }
+        if pattern == "directory" || pattern == "dir" || pattern == "folder" {
+            return is_dir;
+        }
+        if is_dir {
+            return false;
+        }
+        let ext = Path::new(target_path).extension().and_then(|s| s.to_str()).unwrap_or("").to_lowercase();
+        for sub_pat in pattern.split([';', ',']) {
+            let p = sub_pat.trim().trim_start_matches('*').trim_start_matches('.');
+            if !p.is_empty() && ext == p {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub fn get_matching_actions(&self, target_path: &str, is_dir: bool) -> Vec<CustomActionDef> {
+        self.actions.iter()
+            .filter(|a| self.matches_target(a, target_path, is_dir))
+            .cloned()
+            .collect()
+    }
+
+    pub fn execute_custom_action(&self, id: &str, target_path: &str) -> Result<String, String> {
+        let action = self.actions.iter().find(|a| a.id == id)
+            .ok_or_else(|| format!("Custom action not found: {}", id))?;
+
+        let expanded_program = expand_env(&action.program_path);
+        let expanded_args = expand_action_macro(&action.arguments_template, target_path);
+
+        #[cfg(windows)]
+        {
+            if action.run_as_admin {
+                let wide_prog = encode_wide_null(&expanded_program);
+                let wide_args = encode_wide_null(&expanded_args);
+                let wide_verb = encode_wide_null("runas");
+                let res = unsafe {
+                    ShellExecuteW(
+                        0,
+                        wide_verb.as_ptr(),
+                        wide_prog.as_ptr(),
+                        wide_args.as_ptr(),
+                        std::ptr::null(),
+                        1,
+                    )
+                };
+                if res > 32 {
+                    return Ok(format!("自定义动作 '{}' 已通过管理员权限提权启动", action.name));
+                } else {
+                    return Err(format!("ShellExecuteW 提权启动失败 (错误代码: {})", res));
+                }
+            }
+        }
+
+        let res = Command::new(&expanded_program)
+            .args(expanded_args.split_whitespace())
+            .spawn();
+
+        match res {
+            Ok(_) => Ok(format!("自定义动作 '{}' 已成功执行唤起", action.name)),
+            Err(e) => Err(format!("执行自定义动作异常: {}", e)),
+        }
+    }
+}
+
+static GLOBAL_CUSTOM_ACTIONS: std::sync::OnceLock<std::sync::RwLock<CustomActionManager>> = std::sync::OnceLock::new();
+
+pub fn get_global_custom_actions() -> &'static std::sync::RwLock<CustomActionManager> {
+    GLOBAL_CUSTOM_ACTIONS.get_or_init(|| {
+        let path = std::path::PathBuf::from("cleanflow_custom_actions.json");
+        std::sync::RwLock::new(CustomActionManager::new(path))
+    })
+}
+
 fn encode_wide_null(s: &str) -> Vec<u16> {
     s.encode_utf16().chain(std::iter::once(0)).collect()
 }
@@ -555,6 +746,60 @@ extern "system" {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_custom_action_manager_lifecycle() {
+        let temp_dir = std::env::temp_dir().join(format!("cleanflow_custom_act_test_{}", std::process::id()));
+        let _ = fs::remove_dir_all(&temp_dir);
+        let _ = fs::create_dir_all(&temp_dir);
+        let store_file = temp_dir.join("actions.json");
+
+        let mut mgr = CustomActionManager::new(store_file.clone());
+        assert_eq!(mgr.list_all().len(), 0);
+
+        let action = CustomActionDef {
+            id: "cursor_open".to_string(),
+            name: "在 Cursor 中打开".to_string(),
+            description: "以 Cursor AI 编辑器打开目标".to_string(),
+            program_path: "cursor.exe".to_string(),
+            arguments_template: "\"{path}\"".to_string(),
+            target_pattern: "*".to_string(),
+            run_as_admin: false,
+            shortcut: Some("U".to_string()),
+            is_enabled: true,
+        };
+
+        mgr.save_action(action.clone());
+        assert_eq!(mgr.list_all().len(), 1);
+
+        // Matching test
+        let matches = mgr.get_matching_actions("C:\\Projects\\main.rs", false);
+        assert_eq!(matches.len(), 1);
+        assert_eq!(matches[0].name, "在 Cursor 中打开");
+
+        // Specific pattern test
+        let py_action = CustomActionDef {
+            id: "py_run".to_string(),
+            name: "运行 Python 脚本".to_string(),
+            description: "执行脚本".to_string(),
+            program_path: "python.exe".to_string(),
+            arguments_template: "\"{path}\"".to_string(),
+            target_pattern: "*.py".to_string(),
+            run_as_admin: false,
+            shortcut: None,
+            is_enabled: true,
+        };
+        mgr.save_action(py_action);
+
+        assert_eq!(mgr.get_matching_actions("C:\\Projects\\test.py", false).len(), 2);
+        assert_eq!(mgr.get_matching_actions("C:\\Projects\\main.rs", false).len(), 1);
+
+        // Delete test
+        assert!(mgr.delete_action("cursor_open"));
+        assert_eq!(mgr.list_all().len(), 1);
+
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
 
     #[test]
     fn test_get_available_actions_directory() {

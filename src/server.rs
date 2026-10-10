@@ -891,6 +891,23 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                 let vols = crate::mft_scanner::list_available_volumes();
                 let res_json = serde_json::to_string(&vols).unwrap_or_else(|_| "[]".to_string());
                 send_json_response(request, res_json);
+            } else if url == "/api/search/usn-status" && method == Method::Get {
+                let vols = crate::mft_scanner::list_available_volumes();
+                let statuses: Vec<_> = vols.into_iter().map(|v| {
+                    let dl_str = v.drive_letter.to_string();
+                    let (elevated, active, journal_opt) = crate::usn_scanner::check_usn_journal_status(&dl_str);
+                    serde_json::json!({
+                        "drive_letter": v.drive_letter,
+                        "label": v.label,
+                        "is_elevated": elevated,
+                        "usn_journal_active": active,
+                        "is_monitoring": active,
+                        "journal_id": journal_opt.map(|j| j.usn_journal_id),
+                        "next_usn": journal_opt.map(|j| j.next_usn),
+                    })
+                }).collect();
+                let res_json = serde_json::to_string(&statuses).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, res_json);
             } else if url.starts_with("/api/search/query") && method == Method::Get {
                 // Parse query from URL, e.g. /api/search/query?q=cagro.toml&category=pic
                 let query_str = if let Some(pos) = url.find("?q=") {
@@ -971,6 +988,65 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                 } else {
                     send_json_response(request, r#"{"success": false}"#.to_string());
                 }
+            } else if url == "/api/favorites" && method == Method::Get {
+                let list = if let Ok(guard) = crate::favorites::get_global_favorites().read() {
+                    guard.list_all()
+                } else {
+                    Vec::new()
+                };
+                let res_json = serde_json::to_string(&list).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, res_json);
+            } else if url == "/api/favorites/add" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+                #[derive(serde::Deserialize)]
+                struct AddFavReq {
+                    path: String,
+                    name: Option<String>,
+                    alias: Option<String>,
+                }
+                if let Ok(req) = serde_json::from_str::<AddFavReq>(&content) {
+                    if let Ok(mut guard) = crate::favorites::get_global_favorites().write() {
+                        let item = guard.add(&req.path, req.name.as_deref(), req.alias.as_deref());
+                        let res_json = serde_json::json!({ "success": true, "favorite": item }).to_string();
+                        send_json_response(request, res_json);
+                        continue;
+                    }
+                }
+                send_json_response(request, r#"{"success": false, "error": "Invalid payload or lock failed"}"#.to_string());
+            } else if url == "/api/favorites/remove" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+                #[derive(serde::Deserialize)]
+                struct RemFavReq {
+                    path: String,
+                }
+                if let Ok(req) = serde_json::from_str::<RemFavReq>(&content) {
+                    if let Ok(mut guard) = crate::favorites::get_global_favorites().write() {
+                        let ok = guard.remove(&req.path);
+                        let res_json = serde_json::json!({ "success": ok }).to_string();
+                        send_json_response(request, res_json);
+                        continue;
+                    }
+                }
+                send_json_response(request, r#"{"success": false}"#.to_string());
+            } else if url == "/api/favorites/alias" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+                #[derive(serde::Deserialize)]
+                struct AliasFavReq {
+                    path: String,
+                    alias: Option<String>,
+                }
+                if let Ok(req) = serde_json::from_str::<AliasFavReq>(&content) {
+                    if let Ok(mut guard) = crate::favorites::get_global_favorites().write() {
+                        let ok = guard.update_alias(&req.path, req.alias.as_deref());
+                        let res_json = serde_json::json!({ "success": ok }).to_string();
+                        send_json_response(request, res_json);
+                        continue;
+                    }
+                }
+                send_json_response(request, r#"{"success": false}"#.to_string());
             } else if url.starts_with("/api/search/grep") && method == Method::Get {
                 let mut query_str = if let Some(pos) = url.find("?q=") {
                     let raw = &url[pos + 3..];
@@ -1062,6 +1138,40 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                 let tools = crate::action_runner::detect_installed_tools();
                 let json = serde_json::to_string(&tools).unwrap_or_else(|_| "{}".to_string());
                 send_json_response(request, json);
+            } else if url == "/api/actions/custom" && method == Method::Get {
+                let actions = if let Ok(mgr) = crate::action_runner::get_global_custom_actions().read() {
+                    mgr.list_all()
+                } else {
+                    Vec::new()
+                };
+                let json = serde_json::to_string(&actions).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/actions/custom/save" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+                if let Ok(def) = serde_json::from_str::<crate::action_runner::CustomActionDef>(&content) {
+                    if let Ok(mut mgr) = crate::action_runner::get_global_custom_actions().write() {
+                        let saved = mgr.save_action(def);
+                        let json = serde_json::json!({ "success": true, "action": saved }).to_string();
+                        send_json_response(request, json);
+                        continue;
+                    }
+                }
+                send_json_response(request, r#"{"success": false, "error": "Invalid custom action definition"}"#.to_string());
+            } else if url == "/api/actions/custom/delete" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+                #[derive(serde::Deserialize)]
+                struct DelReq { id: String }
+                if let Ok(req) = serde_json::from_str::<DelReq>(&content) {
+                    if let Ok(mut mgr) = crate::action_runner::get_global_custom_actions().write() {
+                        let ok = mgr.delete_action(&req.id);
+                        let json = serde_json::json!({ "success": ok }).to_string();
+                        send_json_response(request, json);
+                        continue;
+                    }
+                }
+                send_json_response(request, r#"{"success": false}"#.to_string());
             } else if url == "/api/actions/execute" && method == Method::Post {
                 let mut content = String::new();
                 let _ = request.as_reader().read_to_string(&mut content);

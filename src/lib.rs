@@ -31,11 +31,13 @@ pub mod launcher;
 pub mod licensing;
 pub mod pinyin_matcher;
 pub mod history;
+pub mod favorites;
 
 pub use launcher::*;
 pub use licensing::*;
 pub use pinyin_matcher::*;
 pub use history::*;
+pub use favorites::*;
 
 pub use cleaner::*;
 pub use disks::*;

@@ -2740,6 +2740,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         <div class="filter-tabs" style="padding:2px; font-size:11px;">
           <div class="filter-tab active" id="tabActionViewItems" onclick="switchActionHubTab('actions')">情境推荐动作</div>
           <div class="filter-tab" id="tabActionViewTools" onclick="switchActionHubTab('tools')">已嗅探本地工具</div>
+          <div class="filter-tab" id="tabActionViewCustom" onclick="switchActionHubTab('custom')">自定义动作 (Pro)</div>
         </div>
       </div>
 
@@ -2753,9 +2754,65 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         <!-- Injected via JS -->
       </div>
 
+      <!-- View 3: Custom Actions GUI Manager (Pro) -->
+      <div id="actionRunnerCustomContainer" style="display:none; flex-direction:column; gap:10px; max-height:360px; overflow-y:auto; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--stroke-card);">
+          <span style="font-size:12px; color:var(--text-secondary);">配置外部程序与参数模板 (支持 {path}, {dir}, {name}, {ext})</span>
+          <button class="btn btn-primary" style="padding:3px 10px; font-size:11px;" onclick="openCustomActionFormModal()">+ 添加自定义动作</button>
+        </div>
+        <div id="customActionsListTable" style="display:flex; flex-direction:column; gap:6px;">
+          <!-- Dynamically injected -->
+        </div>
+      </div>
+
       <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--stroke-divider); padding-top:12px;">
         <span style="font-size:11.5px; color:var(--text-tertiary);" id="actionRunnerHintText">按数字键 1-6 或点击卡片即刻执行</span>
         <button class="btn btn-secondary" onclick="closeActionRunnerModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Action Form Modal -->
+  <div class="fluent-modal-overlay" id="customActionEditorModal" style="display:none; z-index:10050;">
+    <div class="fluent-modal" style="width: 520px; max-width: 90vw;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:15px; font-weight:600; color:#fff;" id="customActionFormTitle">配置自定义动作 (Pro)</span>
+        <button class="inspector-close-btn" onclick="closeCustomActionFormModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px; font-size:12px;">
+        <input type="hidden" id="customActionFormId" />
+        <div>
+          <label style="display:block; color:var(--text-secondary); margin-bottom:4px;">动作名称:</label>
+          <input type="text" id="customActionFormName" placeholder="例如: 用 Cursor 打开、哈希校验、批量转码" style="width:100%; padding:6px 10px; background:rgba(0,0,0,0.3); border:1px solid var(--stroke-card); border-radius:4px; color:#fff;" />
+        </div>
+        <div>
+          <label style="display:block; color:var(--text-secondary); margin-bottom:4px;">程序路径 (支持环境变量如 %PROGRAMFILES% 或 PATH 命令):</label>
+          <input type="text" id="customActionFormProgram" placeholder="例如: cursor.exe、python.exe、C:\Tools\tool.exe" style="width:100%; padding:6px 10px; background:rgba(0,0,0,0.3); border:1px solid var(--stroke-card); border-radius:4px; color:#fff;" />
+        </div>
+        <div>
+          <label style="display:block; color:var(--text-secondary); margin-bottom:4px;">参数模板 (占位符: {path}, {dir}, {name}, {ext}):</label>
+          <input type="text" id="customActionFormArgs" placeholder="例如: &quot;{path}&quot; 或 -d &quot;{dir}&quot;" style="width:100%; padding:6px 10px; background:rgba(0,0,0,0.3); border:1px solid var(--stroke-card); border-radius:4px; color:#fff;" />
+        </div>
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <label style="display:block; color:var(--text-secondary); margin-bottom:4px;">适用对象 / 后缀 (*, directory, *.png;*.jpg, *.py):</label>
+            <input type="text" id="customActionFormPattern" placeholder="*" value="*" style="width:100%; padding:6px 10px; background:rgba(0,0,0,0.3); border:1px solid var(--stroke-card); border-radius:4px; color:#fff;" />
+          </div>
+          <div style="width:90px;">
+            <label style="display:block; color:var(--text-secondary); margin-bottom:4px;">快捷键:</label>
+            <input type="text" id="customActionFormShortcut" placeholder="如 7, U" style="width:100%; padding:6px 10px; background:rgba(0,0,0,0.3); border:1px solid var(--stroke-card); border-radius:4px; color:#fff;" />
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+          <input type="checkbox" id="customActionFormAdmin" style="cursor:pointer;" />
+          <label for="customActionFormAdmin" style="color:var(--text-secondary); cursor:pointer;">以管理员身份提权运行 (Runas)</label>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+        <button class="btn btn-secondary" onclick="closeCustomActionFormModal()">取消</button>
+        <button class="btn btn-primary" onclick="submitCustomActionForm()">保存动作</button>
       </div>
     </div>
   </div>
@@ -3611,9 +3668,27 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         const pillsContainer = document.getElementById('searchVolumePills');
         if (!pillsContainer || !vols || vols.length === 0) return;
         
+        let usnMap = {};
+        try {
+          const usnRes = await fetch('/api/search/usn-status');
+          if (usnRes.ok) {
+            const usnData = await usnRes.json();
+            if (Array.isArray(usnData)) {
+              usnData.forEach(u => {
+                if (u.drive_letter) usnMap[u.drive_letter.toUpperCase()] = u;
+              });
+            }
+          }
+        } catch(e) {}
+
         pillsContainer.innerHTML = '<span style="font-size: 12px; color: var(--text-secondary); font-weight:600;">已就绪卷:</span>' + 
           vols.map(v => {
-            const accelBadge = v.is_ntfs ? 'NTFS / MFT' : v.fs_type;
+            const letter = (v.drive_letter || '').toUpperCase();
+            const u = usnMap[letter];
+            let accelBadge = v.is_ntfs ? 'NTFS / MFT' : v.fs_type;
+            if (v.is_ntfs && u && u.is_monitoring) {
+              accelBadge = 'NTFS / MFT + USN实时增量';
+            }
             return `<span class="badge-pill badge-safe">${v.drive_letter}: [${v.label || '系统卷'}] · ${accelBadge}</span>`;
           }).join('');
       } catch(e) {
@@ -3812,8 +3887,15 @@ HTML_CONTENT = r'''<!DOCTYPE html>
             actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="startJunctionMigrateQuick('${escapePath(h.path)}')">搬迁</button>`;
           }
 
+          if (h.is_dir) {
+            const favText = h.is_favorite ? (h.favorite_alias ? `[${h.favorite_alias}·收藏]` : '[已收藏]') : '[收藏]';
+            actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px; color: ${h.is_favorite ? '#60cdff' : 'var(--text-tertiary)'};" onclick="toggleFavoritePrompt('${escapePath(h.path)}', '${escapeHtml(h.name)}')" title="设置常用目录收藏与短别名">${favText}</button>`;
+          }
+
+          const favBadge = h.favorite_alias ? `<span class="badge-pill badge-safe" style="font-size:10px; margin-left:6px;">别名: ${escapeHtml(h.favorite_alias)}</span>` : '';
+
           return `<tr>
-            <td style="font-weight: 600; color: #fff; display: flex; align-items: center;">${iconSvg}<span title="${escapeHtml(h.name)}">${escapeHtml(h.name)}</span></td>
+            <td style="font-weight: 600; color: #fff; display: flex; align-items: center;">${iconSvg}<span title="${escapeHtml(h.name)}">${escapeHtml(h.name)}</span>${favBadge}</td>
             <td>${qualityBadge}</td>
             <td style="color: var(--text-secondary);">${sizeStr}</td>
             <td style="color: var(--text-tertiary); font-family: monospace; font-size: 11px;" title="${escapeHtml(h.path)}">${escapeHtml(h.path)}</td>
@@ -5760,11 +5842,63 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       }
     }
 
+    let favoriteFoldersList = [];
+
+    async function loadFavoriteFolders() {
+      try {
+        const res = await fetch('/api/favorites');
+        if (res.ok) {
+          favoriteFoldersList = await res.json();
+        }
+      } catch (e) {
+        console.warn('加载收藏夹失败:', e);
+      }
+    }
+
+    async function toggleFavoritePrompt(path, name) {
+      await loadFavoriteFolders();
+      const norm = path.toLowerCase().replace(/[\\/]+$/, '');
+      const existing = favoriteFoldersList.find(f => f.path.toLowerCase().replace(/[\\/]+$/, '') === norm);
+      if (existing) {
+        if (confirm(`确定要从常用收藏夹移除目录 "${name}" 吗？`)) {
+          await fetch('/api/favorites/remove', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path })
+          });
+          showToast(`已从收藏夹移除: ${name}`);
+          await loadFavoriteFolders();
+          const inp = document.getElementById('spotlightInput');
+          if (inp && !inp.value.trim()) loadRecentSpotlightFiles();
+          else if (inp) executeSpotlightSearch(inp.value.trim());
+          const mainInp = document.getElementById('searchInputField');
+          if (mainInp && mainInp.value.trim()) executeDiskSearch(mainInp.value.trim());
+        }
+      } else {
+        const alias = prompt(`将目录 "${name}" 添加至常用收藏夹。\n可设置快捷别名（如 dl, wx, work，在搜索框直接输入别名秒达；留空直接点确定）:`, '');
+        if (alias !== null) {
+          await fetch('/api/favorites/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path, name, alias: alias.trim() || null })
+          });
+          showToast(`已加入常用收藏夹: ${name} ${alias.trim() ? '(别名: ' + alias.trim() + ')' : ''}`);
+          await loadFavoriteFolders();
+          const inp = document.getElementById('spotlightInput');
+          if (inp && !inp.value.trim()) loadRecentSpotlightFiles();
+          else if (inp) executeSpotlightSearch(inp.value.trim());
+          const mainInp = document.getElementById('searchInputField');
+          if (mainInp && mainInp.value.trim()) executeDiskSearch(mainInp.value.trim());
+        }
+      }
+    }
+
     async function loadRecentSpotlightFiles() {
       const container = document.getElementById('spotlightResultsContainer');
       const statusText = document.getElementById('spotlightStatusText');
       if (!container) return;
       try {
+        await loadFavoriteFolders();
         const res = await fetch('/api/history/recent');
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
@@ -5785,25 +5919,58 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           });
         }
 
-        spotlightHits = items.map(it => ({
-          name: it.file_name || it.path,
-          path: it.path,
-          is_dir: it.is_dir,
-          size_bytes: 0,
-          detail: `历史访问: ${it.access_count} 次 · ${it.accessed_at || '近期'}`,
-          is_recent: true
-        }));
+        // Favorites pinned at the top if in all or folder mode
+        const favHits = (spotlightCurrentCategory === 'all' || spotlightCurrentCategory === 'folder')
+          ? favoriteFoldersList.map(f => ({
+              name: f.name,
+              path: f.path,
+              is_dir: true,
+              size_bytes: 0,
+              detail: f.alias ? `常用收藏夹 · 快捷别名 [${f.alias}]` : '常用收藏夹',
+              is_favorite: true,
+              favorite_alias: f.alias,
+              is_pinned_favorite: true,
+            }))
+          : [];
+
+        const recentHits = items.map(it => {
+          const norm = it.path.toLowerCase().replace(/[\\/]+$/, '');
+          const fav = favoriteFoldersList.find(f => f.path.toLowerCase().replace(/[\\/]+$/, '') === norm);
+          return {
+            name: it.file_name || it.path,
+            path: it.path,
+            is_dir: it.is_dir,
+            size_bytes: 0,
+            detail: `历史访问: ${it.access_count} 次 · ${it.accessed_at || '近期'}`,
+            is_recent: true,
+            is_favorite: !!fav,
+            favorite_alias: fav ? fav.alias : null,
+          };
+        });
+
+        // Merge favorites and recents, avoiding duplicate paths
+        const seenPaths = new Set();
+        spotlightHits = [];
+        for (const h of [...favHits, ...recentHits]) {
+          const norm = h.path.toLowerCase();
+          if (!seenPaths.has(norm)) {
+            seenPaths.add(norm);
+            spotlightHits.push(h);
+          }
+        }
+
         spotlightSelectedIndex = 0;
         spotlightIsShowingRecent = true;
 
         if (statusText) {
-          statusText.innerText = items.length > 0 
-            ? `最近打开与历史访问 (${items.length} 项) · ↑↓ 翻看检索词历史，回车快速打开`
+          const count = spotlightHits.length;
+          statusText.innerText = count > 0 
+            ? `常用收藏与最近访问 (${count} 项) · ↑↓ 翻看检索词历史，回车快速打开`
             : '输入关键词或拼音首字母即刻全盘毫秒检索 · 上下键选择 · 回车打开 · Tab 动作流水线';
         }
         renderSpotlightHits();
       } catch (e) {
-        console.warn('加载最近文件历史失败:', e);
+        console.warn('加载最近文件与收藏夹失败:', e);
       }
     }
 
@@ -5973,17 +6140,26 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
         const pathDisplay = h.is_recent ? `${h.detail} · ${h.path}` : h.path;
 
+        const favBadge = h.favorite_alias 
+          ? `<span class="badge-pill badge-safe" style="font-size:10px; margin-left:6px;">别名: ${escapeHtml(h.favorite_alias)}</span>`
+          : (h.is_favorite ? '<span class="badge-pill badge-safe" style="font-size:10px; margin-left:6px;">已收藏</span>' : '');
+
+        const starBtn = h.is_dir 
+          ? `<button class="btn btn-secondary" style="padding:2px 6px; font-size:10px; color:${h.is_favorite ? '#60cdff' : 'var(--text-tertiary)'};" onclick="event.stopPropagation(); toggleFavoritePrompt('${escapePath(h.path)}', '${escapeHtml(h.name)}')" title="设置常用目录收藏与短别名">${h.is_favorite ? (h.favorite_alias ? '[' + escapeHtml(h.favorite_alias) + '·收藏]' : '[已收藏]') : '[收藏]'}</button>`
+          : '';
+
         return `
           <div class="spotlight-item ${isSelected ? 'selected' : ''}" onclick="selectAndExecuteSpotlightHit(${idx})">
             <div class="spotlight-item-left">
               ${iconSvg}
               <div style="display:flex; flex-direction:column; overflow:hidden;">
-                <div class="spotlight-item-name">${escapeHtml(h.name)}</div>
+                <div class="spotlight-item-name">${escapeHtml(h.name)}${favBadge}</div>
                 <div class="spotlight-item-path" title="${escapeHtml(pathDisplay)}">${escapeHtml(pathDisplay)}</div>
               </div>
             </div>
             <div class="spotlight-item-meta">
               ${sizeBadge}
+              ${starBtn}
               <button class="btn btn-secondary" style="padding:2px 6px; font-size:10px;" onclick="event.stopPropagation(); triggerQuickSwitch('${escapePath(h.path)}')">跳转</button>
               <button class="btn btn-primary" style="padding:2px 6px; font-size:10px;" onclick="event.stopPropagation(); openActionRunnerModal('${escapePath(h.path)}', '${escapeHtml(h.name)}')">动作</button>
             </div>
@@ -6132,29 +6308,208 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     // ==========================================
     let currentActionTargetPath = '';
     let currentActionList = [];
+    let customActionsCachedList = [];
 
     function switchActionHubTab(tab) {
       const tabActions = document.getElementById('tabActionViewItems');
       const tabTools = document.getElementById('tabActionViewTools');
+      const tabCustom = document.getElementById('tabActionViewCustom');
       const boxActions = document.getElementById('actionRunnerItemsContainer');
       const boxTools = document.getElementById('actionRunnerToolsContainer');
+      const boxCustom = document.getElementById('actionRunnerCustomContainer');
       const hintText = document.getElementById('actionRunnerHintText');
 
       if (tab === 'tools') {
         if (tabActions) tabActions.classList.remove('active');
         if (tabTools) tabTools.classList.add('active');
+        if (tabCustom) tabCustom.classList.remove('active');
         if (boxActions) boxActions.style.display = 'none';
+        if (boxCustom) boxCustom.style.display = 'none';
         if (boxTools) {
           boxTools.style.display = 'flex';
           loadDetectedToolsView();
         }
         if (hintText) hintText.innerText = 'CleanFlow 已全自动侦测您的本地工具链，无需手动配置路径';
+      } else if (tab === 'custom') {
+        if (tabActions) tabActions.classList.remove('active');
+        if (tabTools) tabTools.classList.remove('active');
+        if (tabCustom) tabCustom.classList.add('active');
+        if (boxActions) boxActions.style.display = 'none';
+        if (boxTools) boxTools.style.display = 'none';
+        if (boxCustom) {
+          boxCustom.style.display = 'flex';
+          loadCustomActionsView();
+        }
+        if (hintText) hintText.innerText = '支持宏参数 {path}, {dir}, {name}, {ext} 及管理员提权，自由绑定任意外部程序';
       } else {
         if (tabActions) tabActions.classList.add('active');
         if (tabTools) tabTools.classList.remove('active');
+        if (tabCustom) tabCustom.classList.remove('active');
         if (boxActions) boxActions.style.display = 'flex';
         if (boxTools) boxTools.style.display = 'none';
+        if (boxCustom) boxCustom.style.display = 'none';
         if (hintText) hintText.innerText = '按数字键 1-6 或点击卡片即刻执行';
+      }
+    }
+
+    async function loadCustomActionsView() {
+      const container = document.getElementById('customActionsListTable');
+      if (!container) return;
+      container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-tertiary);">正在加载自定义动作...</div>';
+      try {
+        const res = await fetch('/api/actions/custom');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        customActionsCachedList = await res.json();
+        if (!customActionsCachedList || customActionsCachedList.length === 0) {
+          container.innerHTML = `
+            <div style="padding:24px; text-align:center; color:var(--text-secondary); background:rgba(0,0,0,0.2); border-radius:var(--radius-sm); border:1px dashed var(--stroke-card);">
+              <div style="font-size:13px; font-weight:600; color:#fff; margin-bottom:4px;">暂无自定义动作</div>
+              <div style="font-size:11.5px; color:var(--text-tertiary); margin-bottom:12px;">点击上方按钮添加您的第一个外部程序动作 (例如: Cursor、Beyond Compare、专用脚本)</div>
+              <button class="btn btn-primary" style="padding:4px 12px; font-size:11.5px;" onclick="openCustomActionFormModal()">+ 立即添加</button>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = customActionsCachedList.map(act => {
+          const shortcutBadge = act.shortcut ? `<span class="spotlight-kbd" style="font-weight:700; margin-left:6px;">${escapeHtml(act.shortcut)}</span>` : '';
+          const adminBadge = act.run_as_admin ? `<span class="badge-pill badge-neutral" style="font-size:10px; margin-left:6px; color:#ff8c00; border-color:rgba(255,140,0,0.4);">管理员</span>` : '';
+          const patternBadge = `<span class="badge-pill badge-neutral" style="font-size:10.5px;">匹配: ${escapeHtml(act.pattern || '*')}</span>`;
+          
+          return `
+            <div style="background:rgba(0,0,0,0.3); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:12px;">
+              <div style="flex:1; min-width:0;">
+                <div style="display:flex; align-items:center; gap:4px; margin-bottom:3px;">
+                  <span style="font-size:13px; font-weight:600; color:#fff;">${escapeHtml(act.name)}</span>
+                  ${shortcutBadge}
+                  ${adminBadge}
+                </div>
+                <div style="font-size:11px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  <code style="color:#60cdff; background:rgba(96,205,255,0.1); padding:1px 4px; border-radius:3px;">${escapeHtml(act.program)}</code>
+                  <span style="margin-left:6px; color:var(--text-tertiary);">${escapeHtml(act.arguments)}</span>
+                </div>
+                <div style="margin-top:4px;">${patternBadge}</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                ${currentActionTargetPath ? `<button class="btn btn-primary" style="padding:3px 8px; font-size:11px;" onclick="executeSelectedAction('custom:' + '${escapeHtml(act.id)}', '${escapePath(currentActionTargetPath)}', true)">运行</button>` : ''}
+                <button class="btn btn-secondary" style="padding:3px 8px; font-size:11px;" onclick="openCustomActionFormModal('${escapeHtml(act.id)}')">编辑</button>
+                <button class="btn btn-secondary" style="padding:3px 8px; font-size:11px; color:var(--status-danger);" onclick="deleteCustomAction('${escapeHtml(act.id)}')">删除</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = `<div style="padding:16px; color:var(--status-danger); text-align:center;">加载失败: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    function openCustomActionFormModal(actionId) {
+      const modal = document.getElementById('customActionEditorModal');
+      const titleEl = document.getElementById('customActionFormTitle');
+      const idEl = document.getElementById('customActionFormId');
+      const nameEl = document.getElementById('customActionFormName');
+      const progEl = document.getElementById('customActionFormProgram');
+      const argsEl = document.getElementById('customActionFormArgs');
+      const pattEl = document.getElementById('customActionFormPattern');
+      const shortEl = document.getElementById('customActionFormShortcut');
+      const adminEl = document.getElementById('customActionFormAdmin');
+      if (!modal) return;
+
+      if (actionId) {
+        const act = (customActionsCachedList || []).find(a => a.id === actionId);
+        if (act) {
+          if (titleEl) titleEl.innerText = '编辑自定义动作 (Pro)';
+          if (idEl) idEl.value = act.id;
+          if (nameEl) nameEl.value = act.name;
+          if (progEl) progEl.value = act.program;
+          if (argsEl) argsEl.value = act.arguments;
+          if (pattEl) pattEl.value = act.pattern;
+          if (shortEl) shortEl.value = act.shortcut || '';
+          if (adminEl) adminEl.checked = !!act.run_as_admin;
+        }
+      } else {
+        if (titleEl) titleEl.innerText = '添加自定义动作 (Pro)';
+        if (idEl) idEl.value = '';
+        if (nameEl) nameEl.value = '';
+        if (progEl) progEl.value = '';
+        if (argsEl) argsEl.value = '"{path}"';
+        if (pattEl) pattEl.value = '*';
+        if (shortEl) shortEl.value = '';
+        if (adminEl) adminEl.checked = false;
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeCustomActionFormModal() {
+      const modal = document.getElementById('customActionEditorModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function submitCustomActionForm() {
+      const id = document.getElementById('customActionFormId').value.trim();
+      const name = document.getElementById('customActionFormName').value.trim();
+      const program = document.getElementById('customActionFormProgram').value.trim();
+      const argumentsVal = document.getElementById('customActionFormArgs').value.trim();
+      const pattern = document.getElementById('customActionFormPattern').value.trim() || '*';
+      const shortcut = document.getElementById('customActionFormShortcut').value.trim() || null;
+      const runAsAdmin = document.getElementById('customActionFormAdmin').checked;
+
+      if (!name) {
+        showToast('请填写动作名称');
+        return;
+      }
+      if (!program) {
+        showToast('请填写程序路径或命令');
+        return;
+      }
+
+      const payload = {
+        id: id || ('act_' + Math.random().toString(36).substring(2, 9)),
+        name: name,
+        program: program,
+        arguments: argumentsVal || '"{path}"',
+        pattern: pattern,
+        shortcut: shortcut,
+        run_as_admin: runAsAdmin,
+        is_enabled: true
+      };
+
+      try {
+        const res = await fetch('/api/actions/custom/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`自定义动作 "${name}" 保存成功`);
+          closeCustomActionFormModal();
+          loadCustomActionsView();
+        } else {
+          showToast(`保存失败: ${data.error || '未知错误'}`);
+        }
+      } catch (e) {
+        showToast('请求异常: ' + e.message);
+      }
+    }
+
+    async function deleteCustomAction(actionId) {
+      if (!confirm('确定要删除此自定义动作吗？')) return;
+      try {
+        const res = await fetch('/api/actions/custom/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: actionId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('自定义动作已删除');
+          loadCustomActionsView();
+        } else {
+          showToast(`删除失败: ${data.error || '未知错误'}`);
+        }
+      } catch (e) {
+        showToast('请求异常: ' + e.message);
       }
     }
 

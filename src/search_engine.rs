@@ -207,6 +207,9 @@ pub struct SearchResultHit {
     pub can_junction_migrate: bool,
     pub can_block_clone: bool,
     pub can_check_lock: bool,
+    // Favorite & Alias Metadata
+    pub is_favorite: bool,
+    pub favorite_alias: Option<String>,
 }
 
 pub fn execute_search(
@@ -327,6 +330,20 @@ pub fn execute_search(
                         total_score += 25;
                     }
 
+                    // Favorite Folder Enrichment & Priority Boost
+                    let (is_fav, fav_alias) = if let Ok(fav_guard) = crate::favorites::get_global_favorites().read() {
+                        let norm = entry.path.trim_end_matches(['\\', '/']).to_lowercase();
+                        fav_guard.list_all().into_iter().find(|f| f.path.trim_end_matches(['\\', '/']).to_lowercase() == norm)
+                            .map(|f| (true, f.alias))
+                            .unwrap_or((false, None))
+                    } else {
+                        (false, None)
+                    };
+
+                    if is_fav {
+                        total_score += 40;
+                    }
+
                     // Action Bridge Enrichment
                     let can_junction_migrate = entry.is_dir || entry.size_bytes > 50 * 1024 * 1024;
                     let can_block_clone = is_refs && !entry.is_dir;
@@ -343,11 +360,38 @@ pub fn execute_search(
                         can_junction_migrate,
                         can_block_clone,
                         can_check_lock,
+                        is_favorite: is_fav,
+                        favorite_alias: fav_alias,
                     })
                 })
                 .collect::<Vec<_>>()
         })
         .collect();
+
+    // Direct Favorite Alias Injection: If user typed an alias, guarantee favorite appears at top
+    if let Ok(fav_guard) = crate::favorites::get_global_favorites().read() {
+        for term in &query.terms {
+            let clean_t = if term.starts_with("fav:") { &term[4..] } else { term.as_str() };
+            if let Some(fav) = fav_guard.get_by_alias(clean_t) {
+                if !all_hits.iter().any(|h| h.path.eq_ignore_ascii_case(&fav.path)) {
+                    all_hits.push(SearchResultHit {
+                        name: fav.name.clone(),
+                        path: fav.path.clone(),
+                        size_bytes: 0,
+                        is_dir: true,
+                        modified_timestamp: 0,
+                        score: 350,
+                        match_quality: MatchQuality::Exact,
+                        can_junction_migrate: true,
+                        can_block_clone: false,
+                        can_check_lock: false,
+                        is_favorite: true,
+                        favorite_alias: fav.alias.clone(),
+                    });
+                }
+            }
+        }
+    }
 
     // Sort by score descending, then by path
     all_hits.sort_by(|a, b| b.score.cmp(&a.score));

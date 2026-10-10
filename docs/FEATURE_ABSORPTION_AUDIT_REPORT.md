@@ -18,7 +18,7 @@
 | 序号 | 功能模块 | 原版细分特性名称 | 吸收状态 | 对应源码文件 / 实现符号 | 商业版本 | 详细说明与现状 |
 | :---: | :--- | :--- | :---: | :--- | :---: | :--- |
 | 1 | 检索与索引 | 1.1 NTFS MFT 裸设备流式解析 | [已吸收落地] | src/mft_scanner.rs (`read_volume_mft_stream`) | 免费版 | 纯 Rust 绕过 Win32 API 直读裸卷，1-3ms 检索数十万节点并重建路径树 |
-| 2 | 检索与索引 | 1.2 USN Journal 增量监听 | [部分吸收] | src/usn_scanner.rs (`enum_usn_giant_files`) | Pro版 | 已实现 USN 大文件流式枚举，后台常驻实时变更监听线程正在补齐 |
+| 2 | 检索与索引 | 1.2 USN Journal 增量监听 | [已吸收落地] | src/usn_scanner.rs (`FSCTL_READ_USN_JOURNAL`, `UsnJournalMonitor`) | Pro版 | 已实现 FSCTL_READ_USN_JOURNAL 流式解析与 UsnJournalMonitor 后台常驻监听管道，实时捕获创建/重命名/删除变更，暴露 /api/search/usn-status 并在前端就绪卷呈现 |
 | 3 | 检索与索引 | 1.3 汉字拼音与声母全拼检索 | [已吸收落地] | src/pinyin_matcher.rs, src/search_engine.rs | 免费版 | 内置 pinyin 拼音影子索引，支持声母缩写(如 jsq 搜计算器、wx 搜微信)与全拼秒搜 |
 | 4 | 检索与索引 | 1.4 字符非连续模糊子序列匹配 | [已吸收落地] | src/fuzzy_matcher.rs (`fuzzy_match`) | 免费版 | 支持跳跃字符匹配，按连续命中长度与词首边界加权评分 |
 | 5 | 检索与索引 | 1.5 系统保护与敏感目录默认排除 | [已吸收落地] | src/search_engine.rs (`is_dev_noise_path`) | 免费版 | 内置屏蔽 $Recycle.Bin, System Volume Information, pagefile.sys 等 |
@@ -37,7 +37,7 @@
 | 18 | 对话框穿透 | 3.5 常用文件选择器联动 (XYplorer等) | [部分吸收] | src/quick_switch.rs | Pro版 | 若第三方软件使用标准 #32770 窗口则通用支持，非标准窗口暂未适配 |
 | 19 | 动作流水线 | 4.1 预置通用动作 (定位/打开/复制路径) | [已吸收落地] | src/action_runner.rs (`reveal`, `copy_path`) | 免费版 | 支持在资源管理器中定位并高亮、复制绝对路径、复制目录、默认应用打开 |
 | 20 | 动作流水线 | 4.2 键盘动作手势与数字键直达 | [已吸收落地] | generate_consumer_ui.py (`actionRunnerModal`) | 免费版 | 选定文件后展开智能动作抽屉，支持按数字键 1-6 毫秒级直接执行 |
-| 21 | 动作流水线 | 4.3 自定义外部动作 GUI 配置 | [部分吸收] | src/action_runner.rs (`CustomActionDef`) | Pro版 | 后端支持运行外部程序与参数替换，前端界面尚未提供增删改查表单 |
+| 21 | 动作流水线 | 4.3 自定义外部动作 GUI 配置 | [已吸收落地] | src/action_runner.rs (`CustomActionManager`), generate_consumer_ui.py | Pro版 | 实现 CustomActionManager 持久化存储与 GUI 完整表单，支持宏占位符、适用后缀模式匹配、管理员提权 runas 与前端一键增删改查 |
 | 22 | 动作流水线 | 4.4 参数宏占位符替换引擎 | [已吸收落地] | src/action_runner.rs (`expand_action_macro`) | Pro版 | 原生支持 {path}, {dir}, {name}, {basename}, {ext} 宏展开 |
 | 23 | 动作流水线 | 4.5 动作适用文件类型匹配器 | [已吸收落地] | src/action_runner.rs (`get_available_actions`) | 免费/Pro | 情境识别：目录推荐终端与迁移；代码推荐VS Code；压缩包推荐7-Zip |
 | 24 | 动作流水线 | 4.6 管理员身份提权运行动作 | [已吸收落地] | src/action_runner.rs (`runas`) | Pro版 | Win32 ShellExecuteW("runas", ...) 提权启动指定程序或脚本 |
@@ -50,7 +50,7 @@
 | 31 | 网络直达 | 6.2 预置搜索引擎与开发者生态直达 | [已吸收落地] | src/launcher.rs | 免费/Pro | 免费版开放 bd, bing, gg；Pro 版开放 gh, cargo, npm, so, py, docker |
 | 32 | 网络直达 | 6.3 默认浏览器原生无损唤起 | [已吸收落地] | src/launcher.rs | 免费版 | Win32 ShellExecuteW(0, "open", url) 直接调用默认浏览器打开 |
 | 33 | 收藏与历史 | 7.1 最近打开文件历史记录 | [已吸收落地] | src/history.rs, src/server.rs, generate_consumer_ui.py | 免费版 | 全局持久化维护最近打开记录，Spotlight 空查询状态直接展示常用文件历史快捷启动 |
-| 34 | 收藏与历史 | 7.2 目录收藏夹管理与短别名 | [未吸收] | 尚未开发 | Pro版 | 目前尚未开发用户手动将目录加星标并设置别名的功能 |
+| 34 | 收藏与历史 | 7.2 目录收藏夹管理与短别名 | [已吸收落地] | src/favorites.rs (`FavoriteManager`), src/search_engine.rs, generate_consumer_ui.py | Pro版 | 实现 FavoriteManager 持久化单例，支持一键加星收藏目录与设置短别名(如 dl, wx)，Spotlight 空查询与历史并列置顶，输入别名以 350 分直接置顶直达 |
 | 35 | 收藏与历史 | 7.3 检索词历史记忆 (上下键翻看) | [已吸收落地] | src/history.rs, src/server.rs, generate_consumer_ui.py | 免费版 | 搜索框与 Spotlight 支持上下方向键无缝翻看历史检索词，回车即搜 |
 | 36 | 系统集成 | 8.1 便携免安装配置存储 (Portable Mode) | [已吸收落地] | src/licensing.rs | 免费版 | 数据与授权文件均保存在工作区同级目录，无冗余注册表依赖 |
 | 37 | 系统集成 | 8.2 开机静默自启与托盘驻留 | [部分吸收] | src/server.rs | 免费版 | 支持后台运行服务，系统托盘图标模块正在接入 |
@@ -87,7 +87,7 @@
 | 23 | 排除与保护 | 5.4 软链接与重解析点防循环死锁 | [已吸收落地] | src/analyzer.rs, src/migrator.rs | 免费版 | 深度遍历时检测 Reparse Point，防符号链接循环递归 |
 | 24 | 索引持久化 | 6.1 磁盘索引数据库持久化存储 | [部分吸收] | src/mft_scanner.rs | 免费版 | 内存索引为主，正在完善本地轻量级持久化缓存文件 |
 | 25 | 并发架构 | 6.2 多线程并发扫描与任务通道 | [已吸收落地] | src/scanner.rs, src/search_engine.rs | 免费版 | Rayon 与 mpsc 通道并发处理多卷盘符 |
-| 26 | 文件监视 | 6.3 实时文件系统变更通知 | [部分吸收] | src/usn_scanner.rs | Pro版 | 依赖 USN 枚举，主动常驻变更通知管道持续完善中 |
+| 26 | 文件监视 | 6.3 实时文件系统变更通知 | [已吸收落地] | src/usn_scanner.rs (`UsnJournalMonitor`) | Pro版 | 基于 USN Journal 增量读取与多卷后台常驻监视管道，毫秒级感知磁盘节点变动 |
 
 ---
 
@@ -110,14 +110,14 @@
 ================================================================================
 
 1. Listary 原版特性 (共 38 项)
-   [已吸收落地] : 22 项 (57.9%) -> 核心检索、拼音全拼/声母、分类药丸、历史记忆流、双击Ctrl、Quick Switch、动作宏、启动器等
-   [部分吸收]   :  5 项 (13.2%) -> USN日志、自定义动作GUI、属性面板、系统托盘等
-   [未吸收]     :  8 项 (21.1%) -> 目录收藏夹、TC/DOpus适配、鼠标中键滚轮等
+   [已吸收落地] : 25 项 (65.8%) -> 核心检索、拼音全拼/声母、USN增量监听、分类药丸、历史记忆流、目录收藏夹与别名、双击Ctrl、Quick Switch、动作宏、自定义动作GUI、启动器等
+   [部分吸收]   :  3 项 ( 7.9%) -> 常用文件选择器、属性面板、系统托盘
+   [未吸收]     :  7 项 (18.4%) -> 鼠标滚轮中键、TC适配、DOpus适配等
    [主动舍弃]   :  3 项 ( 7.9%) -> 鼠标空白双击钩子、Explorer DLL注入、手写复杂宏
 
 2. fsearch 原版特性 (共 26 项)
-   [已吸收落地] : 13 项 (50.0%) -> 紧凑内存节点、1-Edit容错、正则匹配、多列正逆序排序等
-   [部分吸收]   :  8 项 (30.8%) -> 复合查询语法、虚拟列表长滚动、排除规则GUI等
+   [已吸收落地] : 14 项 (53.8%) -> 紧凑内存节点、1-Edit容错、正则匹配、多列正逆序排序、实时USN变更监视等
+   [部分吸收]   :  7 项 (26.9%) -> 复合查询语法、虚拟列表长滚动、排除规则GUI等
    [未吸收]     :  5 项 (19.2%) -> 关键词逐字高亮、原生图标提取等
 
 3. CleanFlow 独家超越 (共 4 项)

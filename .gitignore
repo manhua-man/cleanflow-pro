@@ -11,4 +11,6 @@ test_sqlite.ps1
 .vscode/
 dist/*.zip
 cleanflow_history.json
+cleanflow_favorites.json
+cleanflow_custom_actions.json
 *.json.tmp
