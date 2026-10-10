@@ -1047,6 +1047,70 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                     }
                 }
                 send_json_response(request, r#"{"success": false}"#.to_string());
+            } else if url == "/api/exclusions" && method == Method::Get {
+                let custom = if let Ok(guard) = crate::exclusions::get_global_exclusion_manager().read() {
+                    guard.list_rules()
+                } else {
+                    Vec::new()
+                };
+                let builtin = crate::exclusions::ExclusionManager::list_builtin_exclusions();
+                let res_json = serde_json::json!({
+                    "custom": custom,
+                    "builtin": builtin
+                }).to_string();
+                send_json_response(request, res_json);
+            } else if url == "/api/exclusions/save" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+                if let Ok(rule) = serde_json::from_str::<crate::exclusions::ExclusionRule>(&content) {
+                    if let Ok(mut guard) = crate::exclusions::get_global_exclusion_manager().write() {
+                        match guard.add_rule(rule) {
+                            Ok(_) => {
+                                send_json_response(request, r#"{"success": true}"#.to_string());
+                                continue;
+                            }
+                            Err(e) => {
+                                let res_json = serde_json::json!({ "success": false, "error": e }).to_string();
+                                send_json_response(request, res_json);
+                                continue;
+                            }
+                        }
+                    }
+                }
+                send_json_response(request, r#"{"success": false, "error": "Invalid payload or lock failed"}"#.to_string());
+            } else if url == "/api/exclusions/delete" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+                #[derive(serde::Deserialize)]
+                struct DelExclReq {
+                    id: String,
+                }
+                if let Ok(req) = serde_json::from_str::<DelExclReq>(&content) {
+                    if let Ok(mut guard) = crate::exclusions::get_global_exclusion_manager().write() {
+                        let ok = guard.remove_rule(&req.id);
+                        let res_json = serde_json::json!({ "success": ok }).to_string();
+                        send_json_response(request, res_json);
+                        continue;
+                    }
+                }
+                send_json_response(request, r#"{"success": false}"#.to_string());
+            } else if url == "/api/exclusions/toggle" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+                #[derive(serde::Deserialize)]
+                struct ToggleExclReq {
+                    id: String,
+                }
+                if let Ok(req) = serde_json::from_str::<ToggleExclReq>(&content) {
+                    if let Ok(mut guard) = crate::exclusions::get_global_exclusion_manager().write() {
+                        if let Some(state) = guard.toggle_rule(&req.id) {
+                            let res_json = serde_json::json!({ "success": true, "is_enabled": state }).to_string();
+                            send_json_response(request, res_json);
+                            continue;
+                        }
+                    }
+                }
+                send_json_response(request, r#"{"success": false}"#.to_string());
             } else if url.starts_with("/api/search/grep") && method == Method::Get {
                 let mut query_str = if let Some(pos) = url.find("?q=") {
                     let raw = &url[pos + 3..];

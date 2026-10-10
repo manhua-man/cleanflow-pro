@@ -264,6 +264,13 @@ pub fn execute_search(
                         }
                     }
 
+                    // 1.5 Custom user exclusions filter (fsearch 5.1 & 5.2 parity)
+                    if let Ok(excl_mgr) = crate::exclusions::get_global_exclusion_manager().read() {
+                        if excl_mgr.matches_path(&entry.path) {
+                            return None;
+                        }
+                    }
+
                     // 2. Directory constraint
                     if let Some(ref req_dir) = query.in_directory {
                         if !entry.path.to_lowercase().starts_with(&req_dir.to_lowercase()) {

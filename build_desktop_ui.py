@@ -2207,7 +2207,11 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               <h1>全盘毫秒检索与资产中枢</h1>
               <p>NTFS MFT 纯流式直读 · fsearch 级 1-Edit 拼写容错纠错 · 检索与治理闭环 (Junction 迁移 / 块克隆 / 进程锁)</p>
             </div>
-            <div class="workspace-controls">
+            <div class="workspace-controls" style="display:flex; gap:8px;">
+              <button class="btn btn-secondary" onclick="openExclusionsModal()" id="btnOpenExclusions" title="配置黑名单与自定义排除规则 (fsearch 5.1/5.2 特性)">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20zm6.31-3.1L7.1 5.69C8.45 4.63 10.15 4 12 4c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9z"/></svg>
+                <span>排除黑名单</span>
+              </button>
               <button class="btn btn-secondary" onclick="rebuildSearchIndexes()" id="btnRebuildSearch">
                 <svg class="icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
                 <span>重建全盘索引</span>
@@ -2863,6 +2867,96 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       <div style="border-top:1px solid var(--stroke-divider); padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
         <span style="font-size:11px; color:var(--text-tertiary);">CleanFlow 坚持纯净克制理念 · 社区版永久免费 · PRO 版释放极客生产力</span>
         <button class="btn btn-secondary" onclick="closeLicenseModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exclusions & Blacklist Manager Modal (fsearch 5.1/5.2) -->
+  <div class="fluent-modal-overlay" id="exclusionsModal" style="display:none; z-index:10040;">
+    <div class="fluent-modal" style="width: 680px; max-width: 92vw;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+        <div style="display:flex; align-items:center; gap: 8px;">
+          <svg style="width:20px;height:20px;fill:#60cdff;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20zm6.31-3.1L7.1 5.69C8.45 4.63 10.15 4 12 4c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9z"/></svg>
+          <span style="font-size:16px; font-weight:700; color:#fff;">黑名单与排除规则管理器 (fsearch 级过滤)</span>
+        </div>
+        <button class="inspector-close-btn" onclick="closeExclusionsModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+
+      <div style="font-size:12px; color:var(--text-secondary); margin-bottom:14px; line-height:1.5;">
+        自定义在全盘检索、空间透视分析中自动跳过的敏感路径、通配符或正则表达式。被排除的目标将不再占用索引资源。
+      </div>
+
+      <!-- Exclusion Tabs -->
+      <div class="filter-tabs" id="exclFilterTabs" style="margin-bottom:12px;">
+        <div class="filter-tab active" id="tabExclCustom" onclick="switchExclusionsTab('custom')">用户自定义规则</div>
+        <div class="filter-tab" id="tabExclBuiltin" onclick="switchExclusionsTab('builtin')">系统内置保护 (降噪盾牌)</div>
+      </div>
+
+      <!-- Tab 1: Custom Rules Container -->
+      <div id="exclCustomContainer" style="display:flex; flex-direction:column; gap:10px; max-height:380px; overflow-y:auto; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.25); padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--stroke-card);">
+          <span style="font-size:11.5px; color:var(--text-secondary);">支持前缀路径 (D:\Data)、通配符 (*.log, *cache*) 与正则表达式</span>
+          <button class="btn btn-primary" style="padding:3px 10px; font-size:11px;" onclick="openExclusionFormModal()">+ 添加排除规则</button>
+        </div>
+        <div id="customExclusionsListTable" style="display:flex; flex-direction:column; gap:6px;">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+
+      <!-- Tab 2: Built-in Protection Container -->
+      <div id="exclBuiltinContainer" style="display:none; flex-direction:column; gap:8px; max-height:380px; overflow-y:auto; margin-bottom:16px;">
+        <div style="font-size:11.5px; color:var(--text-tertiary); margin-bottom:4px;">
+          以下系统关键目录和深层依赖已由 CleanFlow 底层降噪盾牌自动保护排除，防止误删系统组件或被深层构建缓存干扰。
+        </div>
+        <div id="builtinExclusionsListTable" style="display:flex; flex-direction:column; gap:6px;">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--stroke-divider); padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11.5px; color:var(--text-tertiary);" id="exclSummaryHint">已配置 0 条自定义排除规则</span>
+        <button class="btn btn-secondary" onclick="closeExclusionsModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exclusion Form Modal -->
+  <div class="fluent-modal-overlay" id="exclusionEditorModal" style="display:none; z-index:10050;">
+    <div class="fluent-modal" style="width: 480px; max-width: 90vw;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:14px; font-weight:600; color:#fff;" id="exclFormTitle">添加排除规则</span>
+        <button class="inspector-close-btn" onclick="closeExclusionFormModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px; font-size:12px;">
+        <input type="hidden" id="exclFormId" />
+        <div>
+          <label style="display:block; color:var(--text-secondary); margin-bottom:4px;">排除模式 / 路径 (Pattern):</label>
+          <input type="text" id="exclFormPattern" placeholder="例如: D:\SecretData, *.log, *cache*, ^.*_backup$" style="width:100%; padding:6px 10px; background:rgba(0,0,0,0.3); border:1px solid var(--stroke-card); border-radius:4px; color:#fff; font-family:var(--font-mono);" />
+        </div>
+        <div>
+          <label style="display:block; color:var(--text-secondary); margin-bottom:4px;">匹配类型:</label>
+          <select id="exclFormType" style="width:100%; padding:6px 10px; background:rgba(20,20,25,0.9); border:1px solid var(--stroke-card); border-radius:4px; color:#fff;">
+            <option value="path">前缀路径匹配 (Path Prefix, 如 D:\Private)</option>
+            <option value="wildcard">通配符表达式 (Wildcard, 如 *.log, *temp*)</option>
+            <option value="regex">正则表达式 (RegEx, 如 ^.*_bak$)</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block; color:var(--text-secondary); margin-bottom:4px;">规则描述 / 备注 (可选):</label>
+          <input type="text" id="exclFormDesc" placeholder="例如: 个人私密资料、日志缓存目录" style="width:100%; padding:6px 10px; background:rgba(0,0,0,0.3); border:1px solid var(--stroke-card); border-radius:4px; color:#fff;" />
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+          <input type="checkbox" id="exclFormEnabled" checked style="cursor:pointer;" />
+          <label for="exclFormEnabled" style="color:var(--text-secondary); cursor:pointer;">立即启用此排除规则</label>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+        <button class="btn btn-secondary" onclick="closeExclusionFormModal()">取消</button>
+        <button class="btn btn-primary" onclick="submitExclusionForm()">保存规则</button>
       </div>
     </div>
   </div>
@@ -6770,6 +6864,238 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         }
       } catch (e) {
         showToast('执行异常: ' + e.message);
+      }
+    }
+
+    // ==========================================
+    // Exclusion & Blacklist Manager (fsearch 5.1/5.2)
+    // ==========================================
+    let cachedExclusions = { custom: [], builtin: [] };
+
+    function openExclusionsModal() {
+      const modal = document.getElementById('exclusionsModal');
+      if (modal) modal.style.display = 'flex';
+      switchExclusionsTab('custom');
+      loadExclusionsView();
+    }
+
+    function closeExclusionsModal() {
+      const modal = document.getElementById('exclusionsModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function switchExclusionsTab(tab) {
+      const tabCustom = document.getElementById('tabExclCustom');
+      const tabBuiltin = document.getElementById('tabExclBuiltin');
+      const boxCustom = document.getElementById('exclCustomContainer');
+      const boxBuiltin = document.getElementById('exclBuiltinContainer');
+      if (!tabCustom || !tabBuiltin || !boxCustom || !boxBuiltin) return;
+
+      if (tab === 'custom') {
+        tabCustom.classList.add('active');
+        tabBuiltin.classList.remove('active');
+        boxCustom.style.display = 'flex';
+        boxBuiltin.style.display = 'none';
+      } else {
+        tabBuiltin.classList.add('active');
+        tabCustom.classList.remove('active');
+        boxBuiltin.style.display = 'flex';
+        boxCustom.style.display = 'none';
+      }
+    }
+
+    async function loadExclusionsView() {
+      const customContainer = document.getElementById('customExclusionsListTable');
+      const builtinContainer = document.getElementById('builtinExclusionsListTable');
+      const hint = document.getElementById('exclSummaryHint');
+      if (!customContainer || !builtinContainer) return;
+
+      try {
+        const res = await fetch('/api/exclusions');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        cachedExclusions = data || { custom: [], builtin: [] };
+
+        if (hint) {
+          hint.innerText = `已配置 ${(cachedExclusions.custom || []).length} 条自定义排除规则`;
+        }
+
+        // Render Custom Rules
+        const customRules = cachedExclusions.custom || [];
+        if (customRules.length === 0) {
+          customContainer.innerHTML = '<div style="padding:24px; text-align:center; color:var(--text-tertiary); background:rgba(0,0,0,0.2); border-radius:var(--radius-sm); border:1px dashed var(--stroke-card);">暂无自定义排除规则，点击上方按钮添加排除目录或文件模式。</div>';
+        } else {
+          customContainer.innerHTML = customRules.map(r => {
+            let typeLabel = '路径';
+            let typeBg = 'rgba(96,205,255,0.15)';
+            let typeColor = '#60cdff';
+            if (r.rule_type === 'wildcard') {
+              typeLabel = '通配符';
+              typeBg = 'rgba(255,185,0,0.15)';
+              typeColor = '#ffb900';
+            } else if (r.rule_type === 'regex') {
+              typeLabel = '正则';
+              typeBg = 'rgba(180,100,255,0.15)';
+              typeColor = '#d29bff';
+            }
+
+            const statusBadge = r.is_enabled
+              ? '<span class="badge-pill badge-safe" style="cursor:pointer;" onclick="toggleExclusionRule(\'' + escapeHtml(r.id) + '\')">已启用</span>'
+              : '<span class="badge-pill badge-neutral" style="cursor:pointer; opacity:0.6;" onclick="toggleExclusionRule(\'' + escapeHtml(r.id) + '\')">已禁用</span>';
+
+            return `
+              <div style="background:rgba(0,0,0,0.3); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:12px;">
+                <div style="display:flex; flex-direction:column; gap:4px; min-width:0; flex:1;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="background:${typeBg}; color:${typeColor}; font-size:10.5px; padding:2px 6px; border-radius:3px; font-weight:600;">${typeLabel}</span>
+                    <span style="font-family:var(--font-mono); font-size:12.5px; font-weight:600; color:#fff; word-break:break-all;">${escapeHtml(r.pattern)}</span>
+                  </div>
+                  ${r.description ? `<div style="font-size:11px; color:var(--text-secondary); margin-left:2px;">${escapeHtml(r.description)}</div>` : ''}
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                  ${statusBadge}
+                  <button class="btn btn-secondary" style="padding:3px 8px; font-size:11px;" onclick="openExclusionFormModal('${escapeHtml(r.id)}')">编辑</button>
+                  <button class="btn btn-secondary" style="padding:3px 8px; font-size:11px; color:var(--status-danger);" onclick="deleteExclusionRule('${escapeHtml(r.id)}')">删除</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        // Render Built-in Protection Rules
+        const builtinList = cachedExclusions.builtin || [];
+        builtinContainer.innerHTML = builtinList.map(b => {
+          return `
+            <div style="background:rgba(0,0,0,0.25); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:12px;">
+              <div style="display:flex; flex-direction:column; gap:3px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="background:rgba(255,255,255,0.08); color:var(--text-tertiary); font-size:10px; padding:2px 6px; border-radius:3px;">${escapeHtml(b.category)}</span>
+                  <span style="font-family:var(--font-mono); font-size:12px; font-weight:600; color:#ddd;">${escapeHtml(b.pattern)}</span>
+                </div>
+                <div style="font-size:11px; color:var(--text-secondary);">${escapeHtml(b.description)}</div>
+              </div>
+              <span class="badge-pill badge-neutral" style="font-size:10px;">内置常驻</span>
+            </div>
+          `;
+        }).join('');
+
+      } catch (e) {
+        customContainer.innerHTML = `<div style="padding:16px; color:var(--status-danger); text-align:center;">加载失败: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    function openExclusionFormModal(ruleId) {
+      const modal = document.getElementById('exclusionEditorModal');
+      const titleEl = document.getElementById('exclFormTitle');
+      const idEl = document.getElementById('exclFormId');
+      const patternEl = document.getElementById('exclFormPattern');
+      const typeEl = document.getElementById('exclFormType');
+      const descEl = document.getElementById('exclFormDesc');
+      const enabledEl = document.getElementById('exclFormEnabled');
+      if (!modal) return;
+
+      if (ruleId) {
+        const rule = (cachedExclusions.custom || []).find(r => r.id === ruleId);
+        if (rule) {
+          if (titleEl) titleEl.innerText = '编辑排除规则';
+          if (idEl) idEl.value = rule.id;
+          if (patternEl) patternEl.value = rule.pattern;
+          if (typeEl) typeEl.value = rule.rule_type;
+          if (descEl) descEl.value = rule.description || '';
+          if (enabledEl) enabledEl.checked = !!rule.is_enabled;
+        }
+      } else {
+        if (titleEl) titleEl.innerText = '添加排除规则';
+        if (idEl) idEl.value = '';
+        if (patternEl) patternEl.value = '';
+        if (typeEl) typeEl.value = 'path';
+        if (descEl) descEl.value = '';
+        if (enabledEl) enabledEl.checked = true;
+      }
+      modal.style.display = 'flex';
+      if (patternEl) setTimeout(() => patternEl.focus(), 50);
+    }
+
+    function closeExclusionFormModal() {
+      const modal = document.getElementById('exclusionEditorModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function submitExclusionForm() {
+      const id = document.getElementById('exclFormId').value.trim();
+      const pattern = document.getElementById('exclFormPattern').value.trim();
+      const ruleType = document.getElementById('exclFormType').value.trim();
+      const desc = document.getElementById('exclFormDesc').value.trim();
+      const isEnabled = document.getElementById('exclFormEnabled').checked;
+
+      if (!pattern) {
+        showToast('请填写排除模式或路径');
+        return;
+      }
+
+      const payload = {
+        id: id || ('excl_' + Math.random().toString(36).substring(2, 9)),
+        pattern: pattern,
+        rule_type: ruleType,
+        description: desc,
+        is_enabled: isEnabled
+      };
+
+      try {
+        const res = await fetch('/api/exclusions/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('排除规则保存成功！');
+          closeExclusionFormModal();
+          loadExclusionsView();
+        } else {
+          showToast('保存失败: ' + (data.error || '未知错误'));
+        }
+      } catch (e) {
+        showToast('请求异常: ' + e.message);
+      }
+    }
+
+    async function deleteExclusionRule(id) {
+      if (!confirm('确定要删除这条排除规则吗？')) return;
+      try {
+        const res = await fetch('/api/exclusions/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('已删除排除规则');
+          loadExclusionsView();
+        } else {
+          showToast('删除失败');
+        }
+      } catch (e) {
+        showToast('请求异常: ' + e.message);
+      }
+    }
+
+    async function toggleExclusionRule(id) {
+      try {
+        const res = await fetch('/api/exclusions/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('规则已' + (data.is_enabled ? '启用' : '禁用'));
+          loadExclusionsView();
+        } else {
+          showToast('切换失败');
+        }
+      } catch (e) {
+        showToast('请求异常: ' + e.message);
       }
     }
 
