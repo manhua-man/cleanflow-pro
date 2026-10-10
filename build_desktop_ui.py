@@ -2652,30 +2652,42 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     </div>
   </div>
 
-  <!-- Action Runner Pipeline Modal (Listary Feature C) -->
+  <!-- Smart Action Hub Modal (Contextual & Auto-Discovered) -->
   <div class="fluent-modal-overlay" id="actionRunnerModal">
-    <div class="fluent-modal" style="width: 640px; max-width: 90vw;">
+    <div class="fluent-modal" style="width: 660px; max-width: 92vw;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:16px; font-weight:600; color:#fff;">搜索动作流水线 (Action Pipeline)</span>
-          <span class="badge-pill badge-safe">Listary 对齐</span>
+          <div style="background: #0078d4; color:#fff; font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px;">智能动作</div>
+          <span style="font-size:16px; font-weight:600; color:#fff;">智能动作中心 (Smart Action Hub)</span>
         </div>
         <button class="inspector-close-btn" onclick="closeActionRunnerModal()">
           <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
       </div>
 
-      <div style="font-size:12px; color:var(--text-secondary); margin-bottom:14px;">
-        当前目标路径: <span id="actionRunnerTargetPath" style="font-family:var(--font-mono); color:#60cdff; word-break:break-all;"></span>
+      <!-- Target Info & Sub-view Switcher -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; background:rgba(0,0,0,0.25); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:8px 12px;">
+        <div style="font-size:12px; color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:420px;">
+          目标: <span id="actionRunnerTargetPath" style="font-family:var(--font-mono); color:#60cdff;"></span>
+        </div>
+        <div class="filter-tabs" style="padding:2px; font-size:11px;">
+          <div class="filter-tab active" id="tabActionViewItems" onclick="switchActionHubTab('actions')">情境推荐动作</div>
+          <div class="filter-tab" id="tabActionViewTools" onclick="switchActionHubTab('tools')">已嗅探本地工具</div>
+        </div>
       </div>
 
-      <!-- Action items list -->
+      <!-- View 1: Action items list -->
       <div id="actionRunnerItemsContainer" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; margin-bottom:16px;">
         <!-- Dynamically injected -->
       </div>
 
+      <!-- View 2: Detected tools overview (Zero-config display) -->
+      <div id="actionRunnerToolsContainer" style="display:none; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; margin-bottom:16px;">
+        <!-- Injected via JS -->
+      </div>
+
       <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--stroke-divider); padding-top:12px;">
-        <span style="font-size:11.5px; color:var(--text-tertiary);">按快捷键或点击卡片即刻执行治理与联动动作</span>
+        <span style="font-size:11.5px; color:var(--text-tertiary);" id="actionRunnerHintText">按数字键 1-6 或点击卡片即刻执行</span>
         <button class="btn btn-secondary" onclick="closeActionRunnerModal()">关闭</button>
       </div>
     </div>
@@ -5867,59 +5879,147 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     }
 
     // ==========================================
-    // Listary Feature C: Action Runner Pipeline
+    // ==========================================
+    // Smart Action Hub (Contextual & Zero-Config)
     // ==========================================
     let currentActionTargetPath = '';
+    let currentActionList = [];
+
+    function switchActionHubTab(tab) {
+      const tabActions = document.getElementById('tabActionViewItems');
+      const tabTools = document.getElementById('tabActionViewTools');
+      const boxActions = document.getElementById('actionRunnerItemsContainer');
+      const boxTools = document.getElementById('actionRunnerToolsContainer');
+      const hintText = document.getElementById('actionRunnerHintText');
+
+      if (tab === 'tools') {
+        if (tabActions) tabActions.classList.remove('active');
+        if (tabTools) tabTools.classList.add('active');
+        if (boxActions) boxActions.style.display = 'none';
+        if (boxTools) {
+          boxTools.style.display = 'flex';
+          loadDetectedToolsView();
+        }
+        if (hintText) hintText.innerText = 'CleanFlow 已全自动侦测您的本地工具链，无需手动配置路径';
+      } else {
+        if (tabActions) tabActions.classList.add('active');
+        if (tabTools) tabTools.classList.remove('active');
+        if (boxActions) boxActions.style.display = 'flex';
+        if (boxTools) boxTools.style.display = 'none';
+        if (hintText) hintText.innerText = '按数字键 1-6 或点击卡片即刻执行';
+      }
+    }
+
+    async function loadDetectedToolsView() {
+      const container = document.getElementById('actionRunnerToolsContainer');
+      if (!container) return;
+      container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-tertiary);">正在侦测系统已安装工具链...</div>';
+      try {
+        const res = await fetch('/api/actions/detected-tools');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const tools = await res.json();
+
+        const toolList = [
+          { name: 'Visual Studio Code', key: tools.vscode, desc: tools.vscode ? '已侦测就绪，支持在工程目录和代码文件中一键呼出' : '未检测到默认安装路径' },
+          { name: 'Windows Terminal (wt.exe)', key: tools.windows_terminal, desc: tools.windows_terminal ? '已就绪，秒开现代化多标签终端' : '未检测到，将回退至 PowerShell / CMD' },
+          { name: 'Notepad++ 文本编辑器', key: tools.notepad_plus, desc: tools.notepad_plus ? '已侦测就绪，支持轻量级源码与配置高亮' : '未检测到' },
+          { name: '7-Zip 压缩归档工具', key: tools.seven_zip, desc: tools.seven_zip ? '已侦测就绪，支持一键解压与归档' : '未检测到，将使用系统自带解压' },
+          { name: 'Git 控制台与版本管理', key: tools.git, desc: tools.git ? '已侦测就绪，支持仓库快速初始化与定位' : '未检测到' },
+        ];
+
+        container.innerHTML = toolList.map(t => {
+          const badge = t.key 
+            ? '<span class="badge-pill badge-safe">已就绪 · 开箱即用</span>'
+            : '<span class="badge-pill badge-neutral">未就绪</span>';
+          const dotColor = t.key ? '#107c41' : '#8a8886';
+
+          return `
+            <div style="background:rgba(0,0,0,0.3); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="width:8px; height:8px; border-radius:50%; background:${dotColor};"></span>
+                <div>
+                  <div style="font-size:12.5px; font-weight:600; color:#fff;">${escapeHtml(t.name)}</div>
+                  <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">${escapeHtml(t.desc)}</div>
+                </div>
+              </div>
+              <div>${badge}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = `<div style="padding:16px; color:var(--status-danger); text-align:center;">探测工具失败: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
     async function openActionRunnerModal(targetPath, targetName) {
       currentActionTargetPath = targetPath;
+      currentActionList = [];
       const modal = document.getElementById('actionRunnerModal');
       const pathLabel = document.getElementById('actionRunnerTargetPath');
       const container = document.getElementById('actionRunnerItemsContainer');
       if (!modal || !container) return;
 
+      switchActionHubTab('actions');
       if (pathLabel) pathLabel.innerText = targetPath;
-      container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-tertiary);">正在分析该项目支持的动作流水线...</div>';
+      container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-tertiary);">正在分析该项目适用的智能动作流水线...</div>';
       modal.classList.add('active');
 
       try {
         const res = await fetch('/api/actions/list?path=' + encodeURIComponent(targetPath));
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const actions = await res.json();
+        currentActionList = actions || [];
 
-        if (!actions || actions.length === 0) {
+        if (currentActionList.length === 0) {
           container.innerHTML = '<div style="padding:16px; color:var(--text-secondary); text-align:center;">暂无匹配动作</div>';
           return;
         }
 
-        container.innerHTML = actions.map(act => {
+        container.innerHTML = currentActionList.map((act, idx) => {
           let iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>';
-          if (act.icon === 'swap') {
-            iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>';
+          if (act.icon === 'code') {
+            iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>';
           } else if (act.icon === 'terminal') {
             iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10zm-2-1h-6v-2h6v2zM7.5 17l-1.41-1.41L8.67 13l-2.58-2.59L7.5 9l4 4-4 4z"/></svg>';
+          } else if (act.icon === 'switch') {
+            iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>';
           } else if (act.icon === 'copy') {
             iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
-          } else if (act.icon === 'link') {
-            iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>';
           } else if (act.icon === 'lock') {
             iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
-          } else if (act.icon === 'fingerprint') {
+          } else if (act.icon === 'hash') {
             iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M17.81 4.47c-.08 0-.16-.02-.23-.06C15.66 3.42 14 3 12.01 3c-1.98 0-3.86.47-5.57 1.41-.24.13-.54.04-.68-.2-.13-.24-.04-.55.2-.68C7.82 2.52 9.86 2 12.01 2c2.13 0 3.99.47 6.03 1.52.25.13.34.43.21.67-.1.18-.28.28-.44.28zM3.5 9.72c-.1 0-.2-.03-.29-.09-.23-.16-.28-.47-.12-.7.99-1.4 2.25-2.5 3.75-3.27.25-.13.55-.03.67.22.12.24.03.54-.21.67-1.34.69-2.46 1.67-3.35 2.92-.1.16-.27.25-.45.25zM12 11c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2s2-.9 2-2v-8c0-1.1-.9-2-2-2z"/></svg>';
+          } else if (act.icon === 'archive') {
+            iconSvg = '<svg class="icon" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>';
           }
 
+          let badgesHtml = '';
+          if (act.is_recommended) {
+            badgesHtml += '<span class="badge-pill badge-safe" style="font-size:10px; margin-right:4px;">推荐</span>';
+          }
+          if (act.is_pro) {
+            badgesHtml += '<span class="badge-pill badge-neutral" style="font-size:10px; color:#60cdff; border-color:rgba(96,205,255,0.4);">PRO</span>';
+          }
+
+          const shortcutBadge = `<span class="spotlight-kbd" style="font-weight:700;">${escapeHtml(act.shortcut || String(idx + 1))}</span>`;
+          const isHighlightBorder = act.is_recommended ? 'border-left: 3px solid #60cdff;' : '';
+
           return `
-            <div class="action-card" onclick="executeSelectedAction('${escapeHtml(act.id)}', '${escapePath(targetPath)}')">
+            <div class="action-card" style="${isHighlightBorder}" onclick="executeSelectedAction('${escapeHtml(act.id)}', '${escapePath(targetPath)}', ${act.is_pro})">
               <div class="action-card-left">
                 <div class="action-card-icon" style="color:#60cdff;">
                   ${iconSvg}
                 </div>
                 <div>
-                  <div class="action-card-title">${escapeHtml(act.title)}</div>
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span class="action-card-title">${escapeHtml(act.title)}</span>
+                    ${badgesHtml}
+                  </div>
                   <div class="action-card-desc">${escapeHtml(act.description)}</div>
                 </div>
               </div>
               <div>
-                <span class="spotlight-kbd">${escapeHtml(act.shortcut || '点击')}</span>
+                ${shortcutBadge}
               </div>
             </div>
           `;
@@ -5934,7 +6034,35 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       if (modal) modal.classList.remove('active');
     }
 
-    async function executeSelectedAction(actionId, targetPath) {
+    // Number key listener for instant action activation
+    window.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('actionRunnerModal');
+      if (!modal || !modal.classList.contains('active')) return;
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeActionRunnerModal();
+        return;
+      }
+
+      // Check number keys 1-9
+      const num = parseInt(e.key, 10);
+      if (!isNaN(num) && num >= 1 && num <= currentActionList.length) {
+        e.preventDefault();
+        const act = currentActionList[num - 1];
+        if (act) {
+          executeSelectedAction(act.id, currentActionTargetPath, act.is_pro);
+        }
+      }
+    });
+
+    async function executeSelectedAction(actionId, targetPath, isPro) {
+      if (isPro && (!currentLicenseStatus || !currentLicenseStatus.is_pro)) {
+        showToast('此动作为 PRO 专享特性，已为您展开授权面板，可立即免费开启 7 天体验！');
+        openLicenseModal();
+        return;
+      }
+
       if (actionId === 'junction_migrate') {
         closeActionRunnerModal();
         startJunctionMigrateQuick(targetPath);
@@ -5956,9 +6084,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         const data = await res.json();
         if (data.success) {
           showToast(`动作执行成功: ${data.message}`);
-          if (data.payload) {
-            prompt('动作输出结果 (Ctrl+C 复制):', data.payload);
-          }
+          closeActionRunnerModal();
         } else {
           showToast(`动作执行失败: ${data.error || '未知错误'}`);
         }

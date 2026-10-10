@@ -1013,6 +1013,10 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                 let actions = crate::action_runner::get_available_actions(&target_path);
                 let json = serde_json::to_string(&actions).unwrap_or_else(|_| "[]".to_string());
                 send_json_response(request, json);
+            } else if url == "/api/actions/detected-tools" && method == Method::Get {
+                let tools = crate::action_runner::detect_installed_tools();
+                let json = serde_json::to_string(&tools).unwrap_or_else(|_| "{}".to_string());
+                send_json_response(request, json);
             } else if url == "/api/actions/execute" && method == Method::Post {
                 let mut content = String::new();
                 let _ = request.as_reader().read_to_string(&mut content);
