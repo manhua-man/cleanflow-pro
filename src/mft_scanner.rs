@@ -284,17 +284,26 @@ pub fn read_volume_mft_stream(drive_letter: char) -> Result<Vec<RawMftEntry>, St
     Ok(entries)
 }
 
+pub fn filetime_to_unix_secs(ft: i64) -> u64 {
+    const UNIX_EPOCH_FILETIME: i64 = 116444736000000000;
+    if ft <= UNIX_EPOCH_FILETIME {
+        0
+    } else {
+        ((ft - UNIX_EPOCH_FILETIME) / 10_000_000) as u64
+    }
+}
+
 pub fn reconstruct_paths(
     drive_letter: char,
     entries: &[RawMftEntry],
-) -> Vec<(String, bool, u64)> {
+) -> Vec<(String, bool, u64, u64)> {
     let mut frn_to_parent: HashMap<u64, (u64, &str, bool)> = HashMap::with_capacity(entries.len());
     for e in entries {
         frn_to_parent.insert(e.frn, (e.parent_frn, &e.name, e.is_dir));
     }
 
     let root_prefix = format!("{}:\\", drive_letter);
-    let mut resolved: Vec<(String, bool, u64)> = Vec::with_capacity(entries.len());
+    let mut resolved: Vec<(String, bool, u64, u64)> = Vec::with_capacity(entries.len());
 
     let mut path_cache: HashMap<u64, String> = HashMap::new();
 
@@ -326,7 +335,8 @@ pub fn reconstruct_paths(
             path_cache.insert(e.frn, full_path.clone());
         }
 
-        resolved.push((full_path, e.is_dir, e.frn));
+        let ts_sec = filetime_to_unix_secs(e.timestamp);
+        resolved.push((full_path, e.is_dir, e.frn, ts_sec));
     }
 
     resolved
@@ -376,7 +386,17 @@ mod tests {
         let paths = reconstruct_paths('C', &entries);
         assert_eq!(paths.len(), 3);
         assert_eq!(paths[0].0, "C:\\Users");
+        assert_eq!(paths[0].3, 0);
         assert_eq!(paths[1].0, "C:\\Users\\EDY");
         assert_eq!(paths[2].0, "C:\\Users\\EDY\\test.txt");
+    }
+
+    #[test]
+    fn test_filetime_to_unix_secs() {
+        // Windows FILETIME for approx 2024+
+        let ft = 133500000000000000i64;
+        let s = filetime_to_unix_secs(ft);
+        assert!(s > 1700000000);
+        assert_eq!(filetime_to_unix_secs(0), 0);
     }
 }

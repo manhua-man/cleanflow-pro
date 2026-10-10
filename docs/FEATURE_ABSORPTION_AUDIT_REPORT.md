@@ -42,7 +42,7 @@
 | 23 | 动作流水线 | 4.5 动作适用文件类型匹配器 | [已吸收落地] | src/action_runner.rs (`get_available_actions`) | 免费/Pro | 情境识别：目录推荐终端与迁移；代码推荐VS Code；压缩包推荐7-Zip |
 | 24 | 动作流水线 | 4.6 管理员身份提权运行动作 | [已吸收落地] | src/action_runner.rs (`runas`) | Pro版 | Win32 ShellExecuteW("runas", ...) 提权启动指定程序或脚本 |
 | 25 | 动作流水线 | 4.7 打开所在上级目录 (Open Containing Folder) | [已吸收落地] | src/action_runner.rs (`open_parent_dir`) | 免费版 | 直接打开并聚焦到文件所在的父级物理文件夹 |
-| 26 | 动作流水线 | 4.8 弹出系统原生属性面板 | [部分吸收] | src/action_runner.rs | 免费版 | 目前通过 explorer 间接调用，尚未直接触发 Properties 对话框 |
+| 26 | 动作流水线 | 4.8 弹出系统原生属性面板 | [已吸收落地] | src/action_runner.rs (`ShellExecuteExW`, `open_native_properties`) | 免费版 | 封装 Win32 原生 ShellExecuteExW(SEE_MASK_INVOKEIDLIST, "properties")，一键唤出原生属性对话框 |
 | 27 | 命令启动器 | 5.1 常用系统工具极速别名 (calc, notepad) | [已吸收落地] | src/launcher.rs | 免费版 | 搜索框直接输入 calc, notepad, regedit, taskmgr, cleanmgr 秒开 |
 | 28 | 命令启动器 | 5.2 终端环境秒级唤醒 (cmd:, wt:, pwsh:) | [已吸收落地] | src/launcher.rs | Pro版 | 支持 cmd: <command>, wt: <dir>, code: <path> 快速唤起控制台 |
 | 29 | 命令启动器 | 5.3 系统环境变量动态展开 (%TEMP%等) | [已吸收落地] | src/action_runner.rs (`expand_env_vars`) | 免费版 | 自动将 %APPDATA%, %LOCALAPPDATA%, %PROGRAMFILES% 展开为物理路径 |
@@ -70,15 +70,15 @@
 | 6 | 匹配算法 | 2.2 工业级正则表达式流式检索 | [已吸收落地] | src/search_engine.rs (`regex::Regex`) | Pro版 | 原生支持 regex:^pattern$ 表达式语法，流式过滤 MFT 节点 |
 | 7 | 匹配算法 | 2.3 模糊子序列加权记分器 | [已吸收落地] | src/fuzzy_matcher.rs | 免费版 | 连续命中加权、词首边界加权与扩展名加权记分完整实现 |
 | 8 | 匹配算法 | 2.4 通配符匹配 (* 和 ?) | [已吸收落地] | src/search_engine.rs | 免费版 | 优化 * 与 ? 扫描匹配性能 |
-| 9 | 匹配算法 | 2.5 复合查询语法 (size:, in:, ext:) | [部分吸收] | src/search_engine.rs (`extension_filter`) | 免费版 | ext: 已完整支持，size: 和 in: 语法解析正在完善 |
+| 9 | 匹配算法 | 2.5 复合查询语法 (size:, in:, ext:) | [已吸收落地] | src/search_engine.rs (`parse_size_str`, `extension_filter`) | 免费版 | ext: 与 in: 完整支持，size: 支持 size:>100mb, size:<=500kb, size:10mb..50mb 范围与 >1gb 直观筛选 |
 | 10 | 数据网格 | 3.1 内存级即时多列正逆序排序 | [已吸收落地] | generate_consumer_ui.py (`sortAndRenderSearchResults`) | 免费版 | 内存即时快速排序，耗时 < 1ms，无需重复发起磁盘 I/O |
 | 11 | 数据网格 | 3.2 按文件名 (Name) 字母升降序重排 | [已吸收落地] | generate_consumer_ui.py | 免费版 | 表头点击动态切换升序/降序 |
 | 12 | 数据网格 | 3.3 按匹配质量得分 (Score) 降序排列 | [已吸收落地] | generate_consumer_ui.py | 免费版 | 默认优先展示最高质量命中结果 |
 | 13 | 数据网格 | 3.4 按物理文件大小 (Size) 排序 | [已吸收落地] | generate_consumer_ui.py | 免费版 | 支持 64 位无符号字节大小数值正逆序 |
 | 14 | 数据网格 | 3.5 按完整路径 (Path) 字典序排序 | [已吸收落地] | generate_consumer_ui.py | 免费版 | 目录层级升降序快速聚合归类 |
-| 15 | 数据网格 | 3.6 按最后修改时间 (Modified Timestamp) 排序 | [部分吸收] | src/search_engine.rs | 免费版 | 后端已读取时间戳，前端表头字段待追加时间排序列 |
+| 15 | 数据网格 | 3.6 按最后修改时间 (Modified Timestamp) 排序 | [已吸收落地] | src/search_engine.rs, generate_consumer_ui.py | 免费版 | MFT 与爬虫均提取 64 位修改时间，前端数据表格新增“修改时间”列并支持点击表头正逆序秒级重排 |
 | 16 | 渲染视图 | 4.1 虚拟列表滚动渲染 (Virtual Scrolling) | [部分吸收] | generate_consumer_ui.py | 免费版 | 采用高效 DOM 与分页截断，未做数十万条超长连续惯性滚动控件 |
-| 17 | 渲染视图 | 4.2 命中关键词局部逐字高亮渲染 | [未吸收] | 尚未开发 | 免费版 | 目前结果列表中尚未将匹配到的字符片段标记黄色高亮 |
+| 17 | 渲染视图 | 4.2 命中关键词局部逐字高亮渲染 | [已吸收落地] | generate_consumer_ui.py (`highlightMatch`) | 免费版 | 主搜索数据表与 Spotlight 悬浮窗均已支持命中关键词及拼音首字母字符的高亮荧光包裹渲染 |
 | 18 | 渲染视图 | 4.3 文件类型图标动态关联渲染 | [部分吸收] | generate_consumer_ui.py | 免费版 | 目前采用预置 SVG 分类图标，未提取 Windows 原生关联图标 |
 | 19 | 渲染视图 | 4.4 状态栏统计信息 (命中总数与耗时) | [已吸收落地] | generate_consumer_ui.py | 免费版 | 实时呈现命中文件总数与检索耗时毫秒数 |
 | 20 | 排除与保护 | 5.1 正则表达式黑名单排除规则 | [部分吸收] | src/search_engine.rs | Pro版 | 代码硬编码排除规则已就绪，缺少前端自定义规则编辑器 |
@@ -110,15 +110,15 @@
 ================================================================================
 
 1. Listary 原版特性 (共 38 项)
-   [已吸收落地] : 25 项 (65.8%) -> 核心检索、拼音全拼/声母、USN增量监听、分类药丸、历史记忆流、目录收藏夹与别名、双击Ctrl、Quick Switch、动作宏、自定义动作GUI、启动器等
-   [部分吸收]   :  3 项 ( 7.9%) -> 常用文件选择器、属性面板、系统托盘
+   [已吸收落地] : 26 项 (68.4%) -> 核心检索、拼音全拼/声母、USN增量监听、分类药丸、历史记忆流、目录收藏夹与别名、双击Ctrl、Quick Switch、原生属性面板、动作宏、自定义动作GUI、启动器等
+   [部分吸收]   :  2 项 ( 5.3%) -> 常用文件选择器、系统托盘
    [未吸收]     :  7 项 (18.4%) -> 鼠标滚轮中键、TC适配、DOpus适配等
    [主动舍弃]   :  3 项 ( 7.9%) -> 鼠标空白双击钩子、Explorer DLL注入、手写复杂宏
 
 2. fsearch 原版特性 (共 26 项)
-   [已吸收落地] : 14 项 (53.8%) -> 紧凑内存节点、1-Edit容错、正则匹配、多列正逆序排序、实时USN变更监视等
-   [部分吸收]   :  7 项 (26.9%) -> 复合查询语法、虚拟列表长滚动、排除规则GUI等
-   [未吸收]     :  5 项 (19.2%) -> 关键词逐字高亮、原生图标提取等
+   [已吸收落地] : 17 项 (65.4%) -> 紧凑内存节点、1-Edit容错、正则匹配、多列正逆序排序、修改时间排序、复合大小范围筛选、关键词逐字高亮、实时USN变更监视等
+   [部分吸收]   :  5 项 (19.2%) -> 虚拟列表长滚动、图标关联、排除规则GUI、磁盘持久化缓存
+   [未吸收]     :  4 项 (15.4%) -> 原生系统图标提取等
 
 3. CleanFlow 独家超越 (共 4 项)
    [独家落地]   :  4 项 (100%)  -> Junction迁移、ReFS块克隆、进程解锁、源码全文Grep

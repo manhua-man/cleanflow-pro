@@ -50,7 +50,7 @@ impl VolumeIndex {
                 let resolved = reconstruct_paths(vol.drive_letter, &raw_entries);
                 let entries: Vec<CompactFileEntry> = resolved
                     .into_iter()
-                    .map(|(path, is_dir, frn)| {
+                    .map(|(path, is_dir, frn, ts)| {
                         let name = Path::new(&path)
                             .file_name()
                             .and_then(|n| n.to_str())
@@ -62,7 +62,7 @@ impl VolumeIndex {
                             path,
                             size_bytes: 0,
                             is_dir,
-                            modified_timestamp: 0,
+                            modified_timestamp: ts,
                         }
                     })
                     .collect();

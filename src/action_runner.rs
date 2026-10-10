@@ -319,6 +319,17 @@ pub fn get_available_actions(target_path: &str) -> Vec<ActionItem> {
         is_recommended: false,
     });
 
+    actions.push(ActionItem {
+        id: "properties".to_string(),
+        title: "查看系统原生属性".to_string(),
+        description: "呼出 Windows 原生文件/目录属性配置面板".to_string(),
+        icon: "properties".to_string(),
+        shortcut: "P".to_string(),
+        category: "system".to_string(),
+        is_pro: false,
+        is_recommended: false,
+    });
+
     // 5. Append Custom Actions matching this target
     if let Ok(mgr) = get_global_custom_actions().read() {
         for ca in mgr.get_matching_actions(target_path, is_dir) {
@@ -471,6 +482,20 @@ pub fn execute_action(action_id: &str, target_path: &str) -> ActionExecutionResu
                 }
             }
         }
+        "properties" => match open_native_properties(target_path) {
+            Ok(_) => ActionExecutionResult {
+                success: true,
+                action_id: action_id.to_string(),
+                message: "已成功弹出 Windows 原生属性面板".to_string(),
+                details: None,
+            },
+            Err(e) => ActionExecutionResult {
+                success: false,
+                action_id: action_id.to_string(),
+                message: e,
+                details: None,
+            },
+        },
         "extract_archive" => {
             let parent_dir = p.parent().unwrap_or(p).to_string_lossy().to_string();
             let stem = p.file_stem().unwrap_or_default().to_string_lossy().to_string();
@@ -730,6 +755,25 @@ fn encode_wide_null(s: &str) -> Vec<u16> {
     s.encode_utf16().chain(std::iter::once(0)).collect()
 }
 
+#[repr(C)]
+struct ShellExecuteInfoW {
+    cb_size: u32,
+    f_mask: u32,
+    hwnd: isize,
+    lp_verb: *const u16,
+    lp_file: *const u16,
+    lp_parameters: *const u16,
+    lp_directory: *const u16,
+    n_show: i32,
+    h_inst_app: isize,
+    lp_id_list: *mut std::ffi::c_void,
+    lp_class: *const u16,
+    hkey_class: isize,
+    dw_hot_key: u32,
+    h_icon_or_monitor: isize,
+    h_process: isize,
+}
+
 #[cfg(windows)]
 #[link(name = "shell32")]
 extern "system" {
@@ -741,6 +785,53 @@ extern "system" {
         lpDirectory: *const u16,
         nShowCmd: i32,
     ) -> isize;
+
+    fn ShellExecuteExW(pExecInfo: *mut ShellExecuteInfoW) -> i32;
+}
+
+pub fn open_native_properties(target_path: &str) -> Result<(), String> {
+    if !Path::new(target_path).exists() {
+        return Err(format!("目标路径不存在: {}", target_path));
+    }
+
+    #[cfg(windows)]
+    {
+        let wide_verb = encode_wide_null("properties");
+        let wide_file = encode_wide_null(target_path);
+
+        const SEE_MASK_INVOKEIDLIST: u32 = 0x0000000C;
+        const SW_SHOW: i32 = 5;
+
+        let mut sei = ShellExecuteInfoW {
+            cb_size: std::mem::size_of::<ShellExecuteInfoW>() as u32,
+            f_mask: SEE_MASK_INVOKEIDLIST,
+            hwnd: 0,
+            lp_verb: wide_verb.as_ptr(),
+            lp_file: wide_file.as_ptr(),
+            lp_parameters: std::ptr::null(),
+            lp_directory: std::ptr::null(),
+            n_show: SW_SHOW,
+            h_inst_app: 0,
+            lp_id_list: std::ptr::null_mut(),
+            lp_class: std::ptr::null(),
+            hkey_class: 0,
+            dw_hot_key: 0,
+            h_icon_or_monitor: 0,
+            h_process: 0,
+        };
+
+        let ret = unsafe { ShellExecuteExW(&mut sei) };
+        if ret != 0 {
+            Ok(())
+        } else {
+            let err = std::io::Error::last_os_error();
+            Err(format!("呼出系统属性面板失败: {}", err))
+        }
+    }
+    #[cfg(not(windows))]
+    {
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -808,6 +899,7 @@ mod tests {
         assert!(actions.iter().any(|a| a.id == "reveal"));
         assert!(actions.iter().any(|a| a.id == "quick_switch"));
         assert!(actions.iter().any(|a| a.id == "junction_migrate"));
+        assert!(actions.iter().any(|a| a.id == "properties"));
     }
 
     #[test]
@@ -817,6 +909,7 @@ mod tests {
         assert!(actions.iter().any(|a| a.id == "reveal"));
         assert!(actions.iter().any(|a| a.id == "open_vscode" || a.id == "open_notepad"));
         assert!(actions.iter().any(|a| a.id == "blake3_hash"));
+        assert!(actions.iter().any(|a| a.id == "properties"));
     }
 
     #[test]
@@ -833,5 +926,12 @@ mod tests {
         let res = execute_action("copy_path", "C:\\TestPath\\demo.txt");
         assert!(res.success);
         assert_eq!(res.message, "C:\\TestPath\\demo.txt");
+    }
+
+    #[test]
+    fn test_execute_properties_action_nonexistent() {
+        let res = execute_action("properties", "C:\\nonexistent_dummy_file_for_unit_test.xyz");
+        assert!(!res.success);
+        assert!(res.message.contains("目标路径不存在"));
     }
 }

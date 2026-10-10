@@ -47,10 +47,31 @@ impl ParsedSearchQuery {
                 regex_pattern = Some(part[6..].to_string());
             } else if lower == "noise:all" || lower == "shield:off" || lower == "noise:show" {
                 shield_noise = false;
+            } else if lower.starts_with("size:>=") {
+                min_size = parse_size_str(&part[7..]);
+            } else if lower.starts_with("size:<=") {
+                max_size = parse_size_str(&part[7..]);
             } else if lower.starts_with("size:>") {
                 min_size = parse_size_str(&part[6..]);
             } else if lower.starts_with("size:<") {
                 max_size = parse_size_str(&part[6..]);
+            } else if lower.starts_with("size:") {
+                let range_val = &part[5..];
+                if let Some((low_s, high_s)) = range_val.split_once("..").or_else(|| range_val.split_once('-')) {
+                    min_size = parse_size_str(low_s);
+                    max_size = parse_size_str(high_s);
+                } else {
+                    min_size = parse_size_str(range_val);
+                }
+            } else if (lower.starts_with('>') || lower.starts_with('<'))
+                && lower.chars().skip(1).any(|c| c.is_ascii_digit())
+                && (lower.ends_with('b') || lower.ends_with('k') || lower.ends_with("kb") || lower.ends_with('m') || lower.ends_with("mb") || lower.ends_with('g') || lower.ends_with("gb"))
+            {
+                if lower.starts_with('>') {
+                    min_size = parse_size_str(&part[1..]);
+                } else {
+                    max_size = parse_size_str(&part[1..]);
+                }
             } else if lower.starts_with("category:") || lower.starts_with("cat:") {
                 let cat = if lower.starts_with("category:") { &lower[9..] } else { &lower[4..] };
                 category = Some(cat.to_string());
@@ -179,7 +200,7 @@ pub fn is_high_priority_path(path: &str) -> bool {
 }
 
 fn parse_size_str(s: &str) -> Option<u64> {
-    let lower = s.to_lowercase();
+    let lower = s.trim().replace(' ', "").to_lowercase();
     let num_str: String = lower.chars().take_while(|c| c.is_ascii_digit() || *c == '.').collect();
     let val: f64 = num_str.parse().ok()?;
 
@@ -496,5 +517,21 @@ mod tests {
         let q_regex = ParsedSearchQuery::parse("regex:^package\\..*");
         let hits_regex = execute_search(&[vol_idx], &q_regex);
         assert_eq!(hits_regex.len(), 1);
+    }
+
+    #[test]
+    fn test_advanced_size_query_parsing() {
+        let q1 = ParsedSearchQuery::parse("video size:>100mb");
+        assert_eq!(q1.min_size, Some(100 * 1024 * 1024));
+
+        let q2 = ParsedSearchQuery::parse("doc size:<=500kb");
+        assert_eq!(q2.max_size, Some(500 * 1024));
+
+        let q3 = ParsedSearchQuery::parse("archive size:10mb..50mb");
+        assert_eq!(q3.min_size, Some(10 * 1024 * 1024));
+        assert_eq!(q3.max_size, Some(50 * 1024 * 1024));
+
+        let q4 = ParsedSearchQuery::parse(">1gb");
+        assert_eq!(q4.min_size, Some(1024 * 1024 * 1024));
     }
 }

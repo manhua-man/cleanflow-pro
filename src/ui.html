@@ -2298,16 +2298,17 @@
               <table class="fluent-table" style="width: 100%;">
                 <thead id="searchResultsThead">
                   <tr>
-                    <th style="width: 28%; cursor: pointer; user-select: none;" id="thSearchCol1" onclick="toggleSearchSort('name')" title="点击正逆序重排">文件 / 目录名</th>
-                    <th style="width: 14%; cursor: pointer; user-select: none;" id="thSearchCol2" onclick="toggleSearchSort('quality')" title="点击正逆序重排">匹配质量</th>
-                    <th style="width: 12%; cursor: pointer; user-select: none;" id="thSearchCol3" onclick="toggleSearchSort('size')" title="点击正逆序重排">大小</th>
-                    <th style="width: 32%; cursor: pointer; user-select: none;" id="thSearchCol4" onclick="toggleSearchSort('path')" title="点击正逆序重排">完整路径</th>
+                    <th style="width: 25%; cursor: pointer; user-select: none;" id="thSearchCol1" onclick="toggleSearchSort('name')" title="点击正逆序重排">文件 / 目录名</th>
+                    <th style="width: 12%; cursor: pointer; user-select: none;" id="thSearchCol2" onclick="toggleSearchSort('quality')" title="点击正逆序重排">匹配质量</th>
+                    <th style="width: 10%; cursor: pointer; user-select: none;" id="thSearchCol3" onclick="toggleSearchSort('size')" title="点击正逆序重排">大小</th>
+                    <th style="width: 14%; cursor: pointer; user-select: none;" id="thSearchColTime" onclick="toggleSearchSort('time')" title="点击正逆序重排">修改时间</th>
+                    <th style="width: 25%; cursor: pointer; user-select: none;" id="thSearchCol4" onclick="toggleSearchSort('path')" title="点击正逆序重排">完整路径</th>
                     <th style="width: 14%; text-align: right;" id="thSearchCol5">治理动作</th>
                   </tr>
                 </thead>
                 <tbody id="searchResultsTableBody">
                   <tr>
-                    <td colspan="5" style="text-align: center; padding: 36px; color: var(--text-tertiary);">
+                    <td colspan="6" style="text-align: center; padding: 36px; color: var(--text-tertiary);">
                       请输入检索词或点击上方预设，体验 ~1ms 极速检索与治理动作
                     </td>
                   </tr>
@@ -3707,10 +3708,81 @@
     }
 
     let currentSearchHits = [];
+    let currentSearchQuery = '';
     let currentSearchGrepMode = false;
     let currentSearchSort = { col: null, asc: true };
     let devNoiseShieldEnabled = true;
     let currentLauncherHit = null;
+
+    function formatTimestamp(ts) {
+      if (!ts || ts <= 0) return '-';
+      const d = new Date(ts * 1000);
+      if (isNaN(d.getTime())) return '-';
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${y}-${m}-${day} ${hh}:${mm}`;
+    }
+
+    function highlightMatch(text, query) {
+      if (!text) return '';
+      if (!query || typeof query !== 'string' || !query.trim()) {
+        return escapeHtml(text);
+      }
+      let cleanTerms = query.trim().split(/\s+/).map(t => {
+        const idx = t.indexOf(':');
+        return idx >= 0 ? t.substring(idx + 1) : t;
+      }).filter(t => t.length > 0 && !t.startsWith('>') && !t.startsWith('<'));
+
+      if (cleanTerms.length === 0) {
+        return escapeHtml(text);
+      }
+
+      const lowerText = text.toLowerCase();
+      let markedIndices = new Array(text.length).fill(false);
+
+      for (const term of cleanTerms) {
+        const lowerTerm = term.toLowerCase();
+        let startIdx = 0;
+        while ((startIdx = lowerText.indexOf(lowerTerm, startIdx)) !== -1) {
+          for (let i = startIdx; i < startIdx + lowerTerm.length; i++) {
+            markedIndices[i] = true;
+          }
+          startIdx += lowerTerm.length;
+        }
+
+        if (!lowerText.includes(lowerTerm) && lowerTerm.length <= 8) {
+          let ti = 0;
+          let matchedIndices = [];
+          for (let i = 0; i < lowerText.length && ti < lowerTerm.length; i++) {
+            if (lowerText[i] === lowerTerm[ti]) {
+              matchedIndices.push(i);
+              ti++;
+            }
+          }
+          if (ti === lowerTerm.length) {
+            matchedIndices.forEach(idx => markedIndices[idx] = true);
+          }
+        }
+      }
+
+      let html = '';
+      let inMark = false;
+      for (let i = 0; i < text.length; i++) {
+        if (markedIndices[i] && !inMark) {
+          html += '<mark style="background:rgba(96,205,255,0.28); color:#60cdff; border-radius:2px; padding:0 1px; font-weight:700;">';
+          inMark = true;
+        } else if (!markedIndices[i] && inMark) {
+          html += '</mark>';
+          inMark = false;
+        }
+        html += escapeHtml(text[i]);
+      }
+      if (inMark) html += '</mark>';
+      return html;
+    }
 
     function toggleDevNoiseShield() {
       devNoiseShieldEnabled = !devNoiseShieldEnabled;
@@ -3780,6 +3852,7 @@
         name: { id: 'thSearchCol1', text: currentSearchGrepMode ? '代码文件 : 行号' : '文件 / 目录名' },
         quality: { id: 'thSearchCol2', text: currentSearchGrepMode ? '匹配代码内容' : '匹配质量' },
         size: { id: 'thSearchCol3', text: currentSearchGrepMode ? '得分' : '大小' },
+        time: { id: 'thSearchColTime', text: currentSearchGrepMode ? '-' : '修改时间' },
         path: { id: 'thSearchCol4', text: currentSearchGrepMode ? '完整文件路径' : '完整路径' },
       };
       for (const [k, v] of Object.entries(colMap)) {
@@ -3818,6 +3891,8 @@
               cmp = (a.score || 0) - (b.score || 0);
             } else if (col === 'size') {
               cmp = (a.size_bytes || 0) - (b.size_bytes || 0);
+            } else if (col === 'time') {
+              cmp = (a.modified_timestamp || 0) - (b.modified_timestamp || 0);
             } else if (col === 'path') {
               cmp = (a.path || '').localeCompare(b.path || '');
             }
@@ -3832,7 +3907,7 @@
       const tbody = document.getElementById('searchResultsTableBody');
       if (!tbody) return;
       if (!currentSearchHits || currentSearchHits.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 36px; color: var(--text-tertiary);">未找到匹配结果</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 36px; color: var(--text-tertiary);">未找到匹配结果</td></tr>';
         return;
       }
 
@@ -3851,6 +3926,7 @@
               <div style="font-family: Consolas, monospace; font-size: 11.5px; background: rgba(0,0,0,0.4); padding: 3px 8px; border-radius: 4px; color: #a8d1ff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 380px;">${lineSnippet}</div>
             </td>
             <td style="color: var(--text-secondary);">${h.score || 100}</td>
+            <td style="color: var(--text-tertiary); font-size: 11.5px;">-</td>
             <td style="color: var(--text-tertiary); font-family: monospace; font-size: 11px;" title="${escapeHtml(h.file_path)}">${escapeHtml(h.file_path)}</td>
             <td style="text-align: right; white-space: nowrap;">${actionsHtml}</td>
           </tr>`;
@@ -3864,12 +3940,14 @@
           else if (h.match_quality === 'TypoTolerant') qualityBadge = '<span class="badge-pill badge-warn" style="color:#ffb900; background:rgba(255,185,0,0.15);">1-edit 容错纠正</span>';
 
           const sizeStr = h.is_dir ? '<span style="color:var(--text-tertiary);">[目录]</span>' : formatBytes(h.size_bytes);
+          const timeStr = formatTimestamp(h.modified_timestamp);
           const iconSvg = h.is_dir 
             ? '<svg style="width:14px;height:14px;fill:#ffb900;margin-right:6px;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
             : '<svg style="width:14px;height:14px;fill:var(--text-secondary);margin-right:6px;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
 
           let actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.path)}')">定位</button>`;
           actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="triggerQuickSwitch('${escapePath(h.path)}')" title="跳转至当前前台文件选择对话框 (Listary 看家本领)">跳转</button>`;
+          actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="executeSelectedAction('properties', '${escapePath(h.path)}', false)" title="呼出 Windows 原生属性配置面板">属性</button>`;
           actionsHtml += ` <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="openActionRunnerModal('${escapePath(h.path)}', '${escapeHtml(h.name)}')" title="展开 Listary 动作流水线">动作...</button>`;
           if (h.can_check_lock) {
             actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="checkFileLockQuick('${escapePath(h.path)}')">查锁</button>`;
@@ -3884,11 +3962,13 @@
           }
 
           const favBadge = h.favorite_alias ? `<span class="badge-pill badge-safe" style="font-size:10px; margin-left:6px;">别名: ${escapeHtml(h.favorite_alias)}</span>` : '';
+          const nameHighlighted = highlightMatch(h.name, currentSearchQuery);
 
           return `<tr>
-            <td style="font-weight: 600; color: #fff; display: flex; align-items: center;">${iconSvg}<span title="${escapeHtml(h.name)}">${escapeHtml(h.name)}</span>${favBadge}</td>
+            <td style="font-weight: 600; color: #fff; display: flex; align-items: center;">${iconSvg}<span title="${escapeHtml(h.name)}">${nameHighlighted}</span>${favBadge}</td>
             <td>${qualityBadge}</td>
             <td style="color: var(--text-secondary);">${sizeStr}</td>
+            <td style="color: var(--text-secondary); font-size: 11.5px; white-space: nowrap;">${timeStr}</td>
             <td style="color: var(--text-tertiary); font-family: monospace; font-size: 11px;" title="${escapeHtml(h.path)}">${escapeHtml(h.path)}</td>
             <td style="text-align: right; white-space: nowrap;">${actionsHtml}</td>
           </tr>`;
@@ -3897,6 +3977,7 @@
     }
 
     async function executeDiskSearch(query) {
+      currentSearchQuery = query || '';
       const tbody = document.getElementById('searchResultsTableBody');
       const title = document.getElementById('searchResultsCountTitle');
       const latencyStats = document.getElementById('searchLatencyStats');
@@ -3911,7 +3992,7 @@
 
       if (!query && mainSearchCurrentCategory === 'all') {
         currentSearchHits = [];
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 36px; color: var(--text-tertiary);">请输入检索词、拼音首字母(如jsq/wx)或点击分类药丸/预设，体验 ~1ms 极速检索与治理动作</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 36px; color: var(--text-tertiary);">请输入检索词、拼音首字母(如jsq/wx)或点击分类药丸/预设，体验 ~1ms 极速检索与治理动作</td></tr>';
         if (title) title.innerText = '检索结果 (0 项)';
         return;
       }
@@ -6139,12 +6220,16 @@
           ? `<button class="btn btn-secondary" style="padding:2px 6px; font-size:10px; color:${h.is_favorite ? '#60cdff' : 'var(--text-tertiary)'};" onclick="event.stopPropagation(); toggleFavoritePrompt('${escapePath(h.path)}', '${escapeHtml(h.name)}')" title="设置常用目录收藏与短别名">${h.is_favorite ? (h.favorite_alias ? '[' + escapeHtml(h.favorite_alias) + '·收藏]' : '[已收藏]') : '[收藏]'}</button>`
           : '';
 
+        const spInp = document.getElementById('spotlightInput');
+        const spQuery = spInp ? spInp.value.trim() : '';
+        const nameHighlighted = highlightMatch(h.name, spQuery);
+
         return `
           <div class="spotlight-item ${isSelected ? 'selected' : ''}" onclick="selectAndExecuteSpotlightHit(${idx})">
             <div class="spotlight-item-left">
               ${iconSvg}
               <div style="display:flex; flex-direction:column; overflow:hidden;">
-                <div class="spotlight-item-name">${escapeHtml(h.name)}${favBadge}</div>
+                <div class="spotlight-item-name">${nameHighlighted}${favBadge}</div>
                 <div class="spotlight-item-path" title="${escapeHtml(pathDisplay)}">${escapeHtml(pathDisplay)}</div>
               </div>
             </div>
