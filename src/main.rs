@@ -135,6 +135,10 @@ fn main() -> anyhow::Result<()> {
     let daemon = cleanflow::daemon_service::DaemonService::new();
     daemon.start();
 
+    // Start Windows System Tray Service (Listary 8.2 parity)
+    let tray = cleanflow::tray::TrayService::new(port);
+    tray.start();
+
     let hotkey = cleanflow::hotkey_manager::HotkeyService::new();
     hotkey.start(
         || {

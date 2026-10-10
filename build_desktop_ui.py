@@ -1764,9 +1764,13 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         <span style="background: #60cdff; color: #080b10; font-size: 9px; font-weight: 800; padding: 1px 4px; border-radius: 3px;" id="licenseTierTag">FREE</span>
         <span id="licenseStatusText">社区免费版</span>
       </div>
-      <div id="daemonStatusPill" style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; padding: 2px 10px; background: rgba(0, 120, 212, 0.12); border: 1px solid rgba(0, 120, 212, 0.3); border-radius: 12px; color: #60cdff; margin-right: 12px; height: 26px; cursor: pointer;" onclick="loadDaemonStatus()" title="点击刷新 C: 盘容量与后台守护健康度">
+      <div id="daemonStatusPill" style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; padding: 2px 10px; background: rgba(0, 120, 212, 0.12); border: 1px solid rgba(0, 120, 212, 0.3); border-radius: 12px; color: #60cdff; margin-right: 8px; height: 26px; cursor: pointer;" onclick="loadDaemonStatus()" title="点击刷新 C: 盘容量与后台守护健康度">
         <span style="width: 6px; height: 6px; border-radius: 50%; background: #107c41; display: inline-block;" id="daemonStatusDot"></span>
         <span id="daemonStatusText">守护: 监听中</span>
+      </div>
+      <div id="autostartStatusPill" style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; padding: 2px 10px; background: rgba(255, 255, 255, 0.06); border: 1px solid var(--stroke-card); border-radius: 12px; color: var(--text-secondary); margin-right: 12px; height: 26px; cursor: pointer;" onclick="toggleAutostartQuick()" title="点击一键切换 Windows 开机静默自启与托盘常驻 (对标 Listary 8.2)">
+        <svg style="width:11px; height:11px; fill:#60cdff;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>
+        <span id="autostartStatusText">自启: 检测中</span>
       </div>
       <button class="win-caption-btn" onclick="minimizeWindow()" title="最小化">
         <svg style="width:10px; height:10px; fill:currentColor;" viewBox="0 0 10 10"><path d="M0 5h10v1H0z"/></svg>
@@ -2299,9 +2303,9 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               <span style="font-size: 13px; font-weight: 600; color: #fff;" id="searchResultsCountTitle">检索结果 (0 项)</span>
               <span style="font-size: 11px; color: var(--text-tertiary);" id="searchMatchHint">支持 1-edit 拼写容错纠错 · 点击表头即时排序</span>
             </div>
-            <div style="max-height: 440px; overflow-y: auto;">
-              <table class="fluent-table" style="width: 100%;">
-                <thead id="searchResultsThead">
+            <div style="max-height: 480px; overflow-y: auto; position: relative;" id="searchResultsScrollWrapper" onscroll="handleSearchVirtualScroll()">
+              <table class="fluent-table" style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                <thead id="searchResultsThead" style="position: sticky; top: 0; z-index: 10; background: rgba(30, 30, 36, 0.95); backdrop-filter: blur(8px);">
                   <tr>
                     <th style="width: 25%; cursor: pointer; user-select: none;" id="thSearchCol1" onclick="toggleSearchSort('name')" title="点击正逆序重排">文件 / 目录名</th>
                     <th style="width: 12%; cursor: pointer; user-select: none;" id="thSearchCol2" onclick="toggleSearchSort('quality')" title="点击正逆序重排">匹配质量</th>
@@ -3998,23 +4002,58 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       renderSearchResultsTableRows();
     }
 
+    const SEARCH_ROW_HEIGHT = 40;
+    const SEARCH_BUFFER_COUNT = 6;
+    let searchVirtualScrollTicking = false;
+
+    function handleSearchVirtualScroll() {
+      if (!searchVirtualScrollTicking) {
+        requestAnimationFrame(() => {
+          renderSearchResultsTableRows();
+          searchVirtualScrollTicking = false;
+        });
+        searchVirtualScrollTicking = true;
+      }
+    }
+
     function renderSearchResultsTableRows() {
       const tbody = document.getElementById('searchResultsTableBody');
+      const wrapper = document.getElementById('searchResultsScrollWrapper');
       if (!tbody) return;
       if (!currentSearchHits || currentSearchHits.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 36px; color: var(--text-tertiary);">未找到匹配结果</td></tr>';
         return;
       }
 
+      const totalCount = currentSearchHits.length;
+      let startIndex = 0;
+      let endIndex = totalCount;
+
+      if (wrapper && totalCount > 25) {
+        const scrollTop = wrapper.scrollTop || 0;
+        const viewportHeight = wrapper.clientHeight || 480;
+        startIndex = Math.max(0, Math.floor(scrollTop / SEARCH_ROW_HEIGHT) - SEARCH_BUFFER_COUNT);
+        endIndex = Math.min(totalCount, Math.ceil((scrollTop + viewportHeight) / SEARCH_ROW_HEIGHT) + SEARCH_BUFFER_COUNT);
+      }
+
+      const topSpacerHeight = startIndex * SEARCH_ROW_HEIGHT;
+      const bottomSpacerHeight = (totalCount - endIndex) * SEARCH_ROW_HEIGHT;
+      const visibleHits = currentSearchHits.slice(startIndex, endIndex);
+
+      let rowsHtml = '';
+      if (topSpacerHeight > 0) {
+        rowsHtml += `<tr style="height: ${topSpacerHeight}px;"><td colspan="6" style="padding:0; border:none; height:${topSpacerHeight}px;"></td></tr>`;
+      }
+
       if (currentSearchGrepMode) {
-        tbody.innerHTML = currentSearchHits.map(h => {
+        rowsHtml += visibleHits.map(h => {
           const fileLoc = `${h.file_name}:${h.line_number}`;
           const fileIcon = '<svg style="width:14px;height:14px;fill:#60cdff;margin-right:6px;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
           const lineSnippet = escapeHtml(h.line_content || '');
           const actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.file_path)}')">定位</button> <button class="btn btn-primary" style="padding: 2px 8px; font-size: 11px;" onclick="openActionRunnerModal('${escapePath(h.file_path)}', '${escapeHtml(h.file_name)}')">动作...</button>`;
 
-          return `<tr>
-            <td style="font-weight: 600; color: #fff; display: flex; align-items: center; white-space: nowrap;">
+          return `<tr style="height: ${SEARCH_ROW_HEIGHT}px;">
+            <td style="font-weight: 600; color: #fff; display: flex; align-items: center; white-space: nowrap; height: ${SEARCH_ROW_HEIGHT}px; box-sizing: border-box;">
               ${fileIcon}<span title="${escapeHtml(fileLoc)}">${escapeHtml(fileLoc)}</span>
             </td>
             <td>
@@ -4027,7 +4066,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           </tr>`;
         }).join('');
       } else {
-        tbody.innerHTML = currentSearchHits.map(h => {
+        rowsHtml += visibleHits.map(h => {
           let qualityBadge = '<span class="badge-pill badge-neutral">模糊子序列</span>';
           if (h.match_quality === 'Exact') qualityBadge = '<span class="badge-pill badge-safe">精确匹配</span>';
           else if (h.match_quality === 'Prefix') qualityBadge = '<span class="badge-pill badge-safe">前缀匹配</span>';
@@ -4038,7 +4077,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           const timeStr = formatTimestamp(h.modified_timestamp);
           const iconSvg = h.is_dir 
             ? '<svg style="width:14px;height:14px;fill:#ffb900;margin-right:6px;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
-            : '<svg style="width:14px;height:14px;fill:var(--text-secondary);margin-right:6px;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
+            : `<img src="/api/icon?path=${encodeURIComponent(h.path)}" style="width:15px;height:15px;margin-right:6px;object-fit:contain;vertical-align:middle;" onerror="this.onerror=null;this.src='';this.outerHTML='<svg style=\\'width:14px;height:14px;fill:var(--text-secondary);margin-right:6px;\\' viewBox=\\'0 0 24 24\\'><path d=\\'M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z\\'/></svg>';" />`;
 
           let actionsHtml = `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="revealInExplorer('${escapePath(h.path)}')">定位</button>`;
           actionsHtml += ` <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="triggerQuickSwitch('${escapePath(h.path)}')" title="跳转至当前前台文件选择对话框 (Listary 看家本领)">跳转</button>`;
@@ -4059,8 +4098,8 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           const favBadge = h.favorite_alias ? `<span class="badge-pill badge-safe" style="font-size:10px; margin-left:6px;">别名: ${escapeHtml(h.favorite_alias)}</span>` : '';
           const nameHighlighted = highlightMatch(h.name, currentSearchQuery);
 
-          return `<tr>
-            <td style="font-weight: 600; color: #fff; display: flex; align-items: center;">${iconSvg}<span title="${escapeHtml(h.name)}">${nameHighlighted}</span>${favBadge}</td>
+          return `<tr style="height: ${SEARCH_ROW_HEIGHT}px;">
+            <td style="font-weight: 600; color: #fff; display: flex; align-items: center; height: ${SEARCH_ROW_HEIGHT}px; box-sizing: border-box;">${iconSvg}<span title="${escapeHtml(h.name)}">${nameHighlighted}</span>${favBadge}</td>
             <td>${qualityBadge}</td>
             <td style="color: var(--text-secondary);">${sizeStr}</td>
             <td style="color: var(--text-secondary); font-size: 11.5px; white-space: nowrap;">${timeStr}</td>
@@ -4069,6 +4108,12 @@ HTML_CONTENT = r'''<!DOCTYPE html>
           </tr>`;
         }).join('');
       }
+
+      if (bottomSpacerHeight > 0) {
+        rowsHtml += `<tr style="height: ${bottomSpacerHeight}px;"><td colspan="6" style="padding:0; border:none; height:${bottomSpacerHeight}px;"></td></tr>`;
+      }
+
+      tbody.innerHTML = rowsHtml;
     }
 
     async function executeDiskSearch(query) {
@@ -4142,6 +4187,8 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         }
 
         currentSearchHits = data.hits || [];
+        const scrollWrapper = document.getElementById('searchResultsScrollWrapper');
+        if (scrollWrapper) scrollWrapper.scrollTop = 0;
         if (currentSearchHits.length === 0 && !data.launcher_hit) {
           tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 36px; color: var(--text-tertiary);">未找到与 "' + escapeHtml(query) + '" 匹配的' + (isGrepMode ? '代码行或符号' : '文件或目录') + '</td></tr>';
           return;
@@ -6294,7 +6341,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
         const iconSvg = h.is_dir
           ? '<svg style="width:16px;height:16px;fill:#ffb900;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
-          : '<svg style="width:16px;height:16px;fill:#60cdff;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
+          : `<img src="/api/icon?path=${encodeURIComponent(h.path)}" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.onerror=null;this.src='';this.outerHTML='<svg style=\\'width:16px;height:16px;fill:#60cdff;\\' viewBox=\\'0 0 24 24\\'><path d=\\'M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z\\'/></svg>';" />`;
         
         let sizeBadge = '';
         if (h.is_dir) {
@@ -7127,6 +7174,54 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       }
     }
 
+    async function loadAutostartStatus() {
+      const textEl = document.getElementById('autostartStatusText');
+      const pillEl = document.getElementById('autostartStatusPill');
+      if (!textEl) return;
+      try {
+        const res = await fetch('/api/tray/autostart');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.enabled) {
+          textEl.innerText = '自启: 已开启';
+          if (pillEl) {
+            pillEl.style.color = '#60cdff';
+            pillEl.style.borderColor = 'rgba(96, 205, 255, 0.4)';
+          }
+        } else {
+          textEl.innerText = '自启: 已关闭';
+          if (pillEl) {
+            pillEl.style.color = 'var(--text-tertiary)';
+            pillEl.style.borderColor = 'var(--stroke-card)';
+          }
+        }
+      } catch (e) {
+        // Silently tolerate
+      }
+    }
+
+    async function toggleAutostartQuick() {
+      try {
+        const checkRes = await fetch('/api/tray/autostart');
+        const checkData = await checkRes.json();
+        const nextState = !checkData.enabled;
+        const res = await fetch('/api/tray/autostart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: nextState })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.enabled ? '已开启开机静默自启与托盘常驻' : '已关闭开机自启');
+          loadAutostartStatus();
+        } else {
+          showToast('切换自启失败: ' + (data.error || '未知错误'));
+        }
+      } catch (e) {
+        showToast('请求异常: ' + e.message);
+      }
+    }
+
     // Global Key Listener for Spotlight (双击 Ctrl / Alt+Space) & Search Focus (Ctrl+F)
     let lastCtrlPressTime = 0;
     window.addEventListener('keydown', (e) => {
@@ -7293,6 +7388,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       loadGiantFiles();
       loadDaemonStatus();
       loadLicenseStatus();
+      loadAutostartStatus();
       setInterval(loadDaemonStatus, 15000);
       setInterval(loadLicenseStatus, 60000);
     });

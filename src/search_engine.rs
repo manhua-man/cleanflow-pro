@@ -33,7 +33,7 @@ impl ParsedSearchQuery {
         let mut regex_pattern = None;
         let mut shield_noise = true; // Enabled by default
         let mut category = None;
-        let limit = 50;
+        let mut limit = 200;
 
         for part in trimmed.split_whitespace() {
             let lower = part.to_lowercase();
@@ -109,6 +109,11 @@ impl ParsedSearchQuery {
                 category = Some("folder".to_string());
             } else if lower == "type:file" || lower == "kind:file" {
                 only_files = true;
+            } else if lower.starts_with("limit:") || lower.starts_with("count:") {
+                let num_str = if lower.starts_with("limit:") { &part[6..] } else { &part[6..] };
+                if let Ok(n) = num_str.parse::<usize>() {
+                    limit = n.clamp(1, 10000);
+                }
             } else {
                 terms.push(part.to_string());
             }
@@ -540,5 +545,11 @@ mod tests {
 
         let q4 = ParsedSearchQuery::parse(">1gb");
         assert_eq!(q4.min_size, Some(1024 * 1024 * 1024));
+
+        let q5 = ParsedSearchQuery::parse("test limit:500");
+        assert_eq!(q5.limit, 500);
+
+        let q6 = ParsedSearchQuery::parse("music count:1000");
+        assert_eq!(q6.limit, 1000);
     }
 }

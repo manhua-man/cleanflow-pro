@@ -33,6 +33,8 @@ pub mod pinyin_matcher;
 pub mod history;
 pub mod favorites;
 pub mod exclusions;
+pub mod icon_extractor;
+pub mod tray;
 
 pub use launcher::*;
 pub use licensing::*;
@@ -40,6 +42,8 @@ pub use pinyin_matcher::*;
 pub use history::*;
 pub use favorites::*;
 pub use exclusions::*;
+pub use icon_extractor::*;
+pub use tray::*;
 
 pub use cleaner::*;
 pub use disks::*;

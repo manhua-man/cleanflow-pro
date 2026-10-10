@@ -1186,6 +1186,27 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                     "volumes_count": fresh.len()
                 }).to_string();
                 send_json_response(request, res_json);
+            } else if url.starts_with("/api/icon") && method == Method::Get {
+                let target = if let Some(pos) = url.find("?path=") {
+                    let raw = &url[pos + 6..];
+                    let encoded = raw.split('&').next().unwrap_or(raw);
+                    percent_decode_str(encoded).unwrap_or_else(|| encoded.to_string())
+                } else if let Some(pos) = url.find("?ext=") {
+                    let raw = &url[pos + 5..];
+                    let encoded = raw.split('&').next().unwrap_or(raw);
+                    percent_decode_str(encoded).unwrap_or_else(|| encoded.to_string())
+                } else {
+                    String::new()
+                };
+
+                if !target.is_empty() {
+                    if let Some(png) = crate::icon_extractor::get_global_icon_cache().get_icon_png(&target) {
+                        send_png_response(request, &png);
+                        continue;
+                    }
+                }
+                let res = Response::empty(404);
+                let _ = request.respond(res);
             } else if url.starts_with("/api/actions/list") && method == Method::Get {
                 let target_path = if let Some(pos) = url.find("?path=") {
                     let raw = &url[pos + 6..];
@@ -1380,6 +1401,30 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                 let status = svc.get_status();
                 let json = serde_json::to_string(&status).unwrap_or_else(|_| "{}".to_string());
                 send_json_response(request, json);
+            } else if url == "/api/tray/autostart" && method == Method::Get {
+                let enabled = crate::tray::is_autostart_enabled();
+                let json = serde_json::json!({ "enabled": enabled }).to_string();
+                send_json_response(request, json);
+            } else if url == "/api/tray/autostart" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+                #[derive(serde::Deserialize)]
+                struct AutoReq { enabled: bool }
+                if let Ok(req) = serde_json::from_str::<AutoReq>(&content) {
+                    match crate::tray::set_autostart_enabled(req.enabled) {
+                        Ok(state) => {
+                            let json = serde_json::json!({ "success": true, "enabled": state }).to_string();
+                            send_json_response(request, json);
+                            continue;
+                        }
+                        Err(e) => {
+                            let json = serde_json::json!({ "success": false, "error": e }).to_string();
+                            send_json_response(request, json);
+                            continue;
+                        }
+                    }
+                }
+                send_json_response(request, r#"{"success": false, "error": "Invalid request"}"#.to_string());
             } else if url == "/api/shutdown" && method == Method::Post {
                 running_clone.store(false, Ordering::SeqCst);
                 let res_json = r#"{"success": true, "message": "已关闭"}"#;
@@ -1475,6 +1520,17 @@ fn send_json_response(request: tiny_http::Request, body: String) {
     let header_cors = Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap();
     let response = Response::from_string(body)
         .with_header(header_type)
+        .with_header(header_cors);
+    let _ = request.respond(response);
+}
+
+fn send_png_response(request: tiny_http::Request, bytes: &[u8]) {
+    let header_type = Header::from_bytes(&b"Content-Type"[..], &b"image/png"[..]).unwrap();
+    let header_cache = Header::from_bytes(&b"Cache-Control"[..], &b"public, max-age=86400"[..]).unwrap();
+    let header_cors = Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap();
+    let response = Response::from_data(bytes)
+        .with_header(header_type)
+        .with_header(header_cache)
         .with_header(header_cors);
     let _ = request.respond(response);
 }

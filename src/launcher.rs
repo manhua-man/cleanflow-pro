@@ -221,6 +221,11 @@ pub fn detect_launcher_action(query: &str) -> Option<LauncherActionHit> {
     }
 }
 
+/// Opens a URL in default browser
+pub fn open_browser(url: &str) -> Result<String, String> {
+    execute_launcher_action("web_search", url)
+}
+
 /// Executes a detected launcher action
 pub fn execute_launcher_action(kind: &str, payload: &str) -> Result<String, String> {
     if kind == "web_search" {
