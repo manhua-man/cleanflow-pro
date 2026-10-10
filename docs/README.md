@@ -26,7 +26,10 @@ docs/
 │   ├── TEST_BASELINE.md                # 90 项自动化测试基线与物理机实测性能数据
 │   └── FEATURE_ABSORPTION_AUDIT_REPORT.md # Listary Pro 与 fsearch 特性 1:1 吸收审计总表
 ├── 06-复盘与沉淀/                      # 架构经验沉淀、外部借鉴与历史日志
-│   ├── EXTERNAL_REFERENCES.md          # 业界标杆项目 (Czkawka/WizTree/SteamMover) 深度借鉴沉淀
+│   ├── EXTERNAL_REFERENCES.md          # 业界标杆项目 (Czkawka/WizTree/Listary/fsearch) 深度借鉴沉淀
+│   ├── references/                     # 外部标杆专项架构与算法深度剖析档案
+│   │   ├── LISTARY_PRO_ANALYSIS.md     # Listary Pro 架构深度剖析与解包反编译归档
+│   │   └── FSEARCH_ANALYSIS.md         # fsearch 核心算法与高吞吐虚拟表格深度剖析
 │   ├── CONSUMER_EXPERIENCE_IMPROVEMENT_PLAN.md # 大众化易用性专项研发复盘与方案总结
 │   └── RELEASE_NOTES_v0.1.0.md         # v0.1.0 架构收敛历史发布说明
 └── 08-迭代方向/                        # 未来演进规划与技术探索

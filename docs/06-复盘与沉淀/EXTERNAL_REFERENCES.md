@@ -1,17 +1,19 @@
 # CleanFlow 外部参考项目与技术演进借鉴文档
 
-本文档系统性梳理并归档了在构建 CleanFlow (净流) 桌面端磁盘空间资产治理引擎过程中，所参考和借鉴的业界经典开源项目、底层系统机制与设计模式。
+本文档系统性梳理并归档了在构建 CleanFlow (净流) 桌面端空间资产治理引擎与全盘极速检索中枢过程中，所参考和借鉴的业界经典开源项目、底层系统机制、逆向反编译资产与设计模式。
 
 ---
 
 ## 1. 核心参考项目与灵感矩阵
 
-| 参考项目 | 核心技术领域 | GitHub / 官网参考 | 对 CleanFlow 的关键借鉴与沉淀 |
-| :--- | :--- | :--- | :--- |
-| **Czkawka** | Rust 极致性能磁盘清理与重复文件治理 | [qarmin/czkawka](https://github.com/qarmin/czkawka) | 多线程并发遍历架构、两阶段校验初筛、系统关键目录强制白名单安全屏障 (Safety Sentinel) |
-| **WizTree** / **SpaceSniffer** | Windows 磁盘容量热力与快速索引标杆 | [antibodysoft.com/wiztree](https://antibodysoft.com/wiztree) | 空间占用全景地平线视觉条 (Treemap / Horizon Barometer)、全盘 Top 单体超大文件透视分析 |
-| **SteamMover** / **FolderMove** | Windows 资产无感软搬迁与目录符号重定向 | [steammove.sourceforge.net](https://steammover.sourceforge.net/) | NTFS Junction 目录联接机制、双向生命周期账本 (注册与一键还原)、搬迁前进程独占探测与解绑 |
-| **BleachBit** / **Litestream** | SQLite 深度瘦身、WAL 事务截断与无损原子压缩 | [bleachbit/bleachbit](https://github.com/bleachbit/bleachbit) | 基于 VACUUM 的空洞碎片整理、WAL 日志强制检查点截断、无损物理扇区重组 |
+| 参考项目 | 核心技术领域 | 官方/开源参考 | 对 CleanFlow 的关键借鉴与沉淀 | 详细分析档案 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Czkawka** | Rust 极致性能磁盘清理与重复文件治理 | [qarmin/czkawka](https://github.com/qarmin/czkawka) | 多线程并发遍历架构、两阶段校验初筛、系统关键目录强制白名单安全屏障 (Safety Sentinel) | 本文 2.1 节 |
+| **WizTree** / **SpaceSniffer** | Windows 磁盘容量热力与快速索引标杆 | [antibodysoft.com/wiztree](https://antibodysoft.com/wiztree) | 空间占用全景地平线视觉条 (Treemap / Horizon Barometer)、全盘 Top 单体超大文件透视分析 | 本文 2.2 节 |
+| **SteamMover** / **FolderMove** | Windows 资产无感软搬迁与目录符号重定向 | [steammove.sourceforge.net](https://steammover.sourceforge.net/) | NTFS Junction 目录联接机制、双向生命周期账本 (注册与一键还原)、搬迁前进程独占探测与解绑 | 本文 2.3 节 |
+| **BleachBit** / **Litestream** | SQLite 深度瘦身、WAL 事务截断与无损原子压缩 | [bleachbit/bleachbit](https://github.com/bleachbit/bleachbit) | 基于 VACUUM 的空洞碎片整理、WAL 日志强制检查点截断、无损物理扇区重组 | 本文 2.4 节 |
+| **Listary Pro** | Windows 原生交互、对话框穿透与动作启动中枢 | [listary.com](https://www.listary.com/) | 双击 Ctrl 底层键盘钩子、标准文件对话框 (#32770) Quick Switch 自动穿透跳转、动作宏展开流水线、Spotlight 悬浮交互 | [LISTARY_PRO_ANALYSIS.md](references/LISTARY_PRO_ANALYSIS.md) |
+| **fsearch** | 紧凑内存拓扑、1-Edit 容错与高吞吐虚拟表格 | [cboxdoerfer/fsearch](https://github.com/cboxdoerfer/fsearch) | 扁平父节点拓扑内存节约、1-Edit Damerau-Levenshtein 拼写容错纠错打分、3-Gram 倒排预过滤、60fps 虚拟视口复用数据网格 | [FSEARCH_ANALYSIS.md](references/FSEARCH_ANALYSIS.md) |
 
 ---
 
@@ -63,11 +65,40 @@
     - 执行序列：`PRAGMA busy_timeout = 8000; PRAGMA wal_checkpoint(TRUNCATE); VACUUM; PRAGMA optimize;`。
     - 前端呈现物理占用与压缩后预期柱状图（如 `4.02 GB -> 38.5 MB，无损挤出 99.1% 水分`），并在执行前后即时刷新驱动器剩余空间。
 
+### 2.5 Listary Pro (Windows 原生桌面交互与文件对话框穿透标杆)
+- **技术原理与资产沉淀**：
+  - Listary 是 Windows 桌面文件检索与全局工作流效率的绝对标杆，其杀手级体验包括：双击 Ctrl 快速唤醒 Spotlight、Win32 文件对话框（`#32770`）Quick Switch 穿透、动作流水线与宏展开替换引擎。
+  - **逆向反编译成果物归档**：
+    - 解包与反编译资产完整保存在本地物理路径：`C:\Users\EDY\.gemini\antigravity\scratch\listary_unpack\`；
+    - 包含反编译工程 `decompiled/Listary`、`decompiled/Listary.Common`、`decompiled/Listary.Interop`，以及核心组件 `extracted/app/listary_engine.dll`、`extracted/app/cnmatch.bin`；
+    - 详见专项技术剖析报告：[LISTARY_PRO_ANALYSIS.md](references/LISTARY_PRO_ANALYSIS.md)。
+- **CleanFlow 的架构落地与超越**：
+  - **纯 Rust 单一二进制重构**：彻底抛弃 Listary 的 .NET 6/WPF 笨重运行时，将常驻物理内存从 150MB+ 降至 18MB；
+  - **MFT 裸卷流式直读**：自研 `src/mft_scanner.rs`，1~3 秒直接流式解码裸盘 NTFS MFT 簇链并重组路径树，超越外置闭源引擎依赖；
+  - **Quick Switch 对话框穿透**：自研 `src/quick_switch.rs`，纯 Win32 API 递归寻找 `#32770` 窗口子控件并发送 `WM_SETTEXT`，零 DLL 注入保证系统稳定性；
+  - **检索与空间资产治理闭环**：检索结果直接联动跨卷 Junction 搬家、ReFS 零拷贝块克隆去重与进程占用强制解锁。
+
+### 2.6 fsearch (极致紧凑内存拓扑、1-Edit 拼写容错与高吞吐虚拟表格)
+- **技术原理与工程沉淀**：
+  - fsearch 证明了在海量全盘文件检索中，算法设计与内存组织比盲目多线程并发更加关键：
+    1. **扁平父指针拓扑**：仅存父节点整型 ID 而不重复分配完整路径字符串，将节点内存压缩至 24 字节；
+    2. **1-Edit Damerau-Levenshtein 容错**：对 $\ge 4$ 字符的输入容忍 1 处击键失误（包括相邻字母对换）；
+    3. **Trigram 3-Gram 倒排预过滤**：三元组倒排表瞬间剔除 95% 无关候选；
+    4. **虚拟视口复用渲染**：仅复用 25~30 个可见 DOM 节点，保障 10 万条结果 60fps 平滑惯性滚动。
+  - 详见专项技术剖析报告：[FSEARCH_ANALYSIS.md](references/FSEARCH_ANALYSIS.md)。
+- **CleanFlow 的架构落地与超越**：
+  - **自研 1-Edit 拼写容错打分器**：在 `src/fuzzy_matcher.rs` 中完整实现与 fsearch 算法对齐的 Damerau-Levenshtein 拼写容错与边界加权；
+  - **千万行源码全文毫秒 Grep**：创新性地将 Trigram 预过滤技术从文件名检索拓展至工程代码全文 Grep 检索（`src/trigram_indexer.rs`）；
+  - **Fluent Mica 高级虚拟数据网格**：在 `src/ui.html` 中实现基于双向弹性占位器的虚拟视口，支持按文件名、路径、大小、修改时间与匹配得分进行内存即时多列升降序重排 (< 1ms)。
+
 ---
 
-## 3. 架构结语与工程指导原则
+## 3. 功能吸收审计与架构指导原则
 
-CleanFlow 的核心愿景是打造一款**完全属于 Windows 桌面生态、面向全体客户的工业级独立资产治理工具**：
-1. **单一二进制交付**：保持 5~6 MB 独立 Release 单文件分发，无 Node.js、Python、WebView2 运行环境安装门槛。
+关于 CleanFlow 对 Listary（原版 38 项）与 fsearch（原版 26 项）特性的逐项 1 对 1 吸收审计与状态对比，请参阅：
+- [FEATURE_ABSORPTION_AUDIT_REPORT.md](../05-测试与基准/FEATURE_ABSORPTION_AUDIT_REPORT.md)
+
+CleanFlow 的核心愿景是打造一款**完全属于 Windows 桌面生态、面向全体客户的工业级独立资产治理与极速检索中枢**：
+1. **单一二进制交付**：保持 9.6 MB 独立 Release 单文件分发，无 Node.js、Python、.NET、WebView2 运行环境安装门槛。
 2. **严苛安全防呆**：只做 100% 确定性的安全清理；对大资产只搬迁不删除；对软联接提供双向可逆还原保障；对数据库做只挤水分不删业务记录的原生 VACUUM。
 3. **沉浸式桌面质感**：严格遵循 Windows 11 Fluent Design / Mica 设计系统与 Master-Detail 双栏工作台，保障现代化桌面端操作手感。
