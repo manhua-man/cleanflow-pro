@@ -1724,6 +1724,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         <svg style="width:12px; height:12px; fill:#60cdff;" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
         <span>Spotlight (双击 Ctrl / Alt+Space)</span>
       </button>
+      <div id="licenseStatusBadge" style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; padding: 2px 10px; background: rgba(96, 205, 255, 0.12); border: 1px solid rgba(96, 205, 255, 0.35); border-radius: 12px; color: #60cdff; margin-right: 8px; height: 26px; cursor: pointer; font-weight: 600;" onclick="openLicenseModal()" title="点击查看当前授权状态、开启 7 天 PRO 体验或激活终身版">
+        <span style="background: #60cdff; color: #080b10; font-size: 9px; font-weight: 800; padding: 1px 4px; border-radius: 3px;" id="licenseTierTag">FREE</span>
+        <span id="licenseStatusText">社区免费版</span>
+      </div>
       <div id="daemonStatusPill" style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; padding: 2px 10px; background: rgba(0, 120, 212, 0.12); border: 1px solid rgba(0, 120, 212, 0.3); border-radius: 12px; color: #60cdff; margin-right: 12px; height: 26px; cursor: pointer;" onclick="loadDaemonStatus()" title="点击刷新 C: 盘容量与后台守护健康度">
         <span style="width: 6px; height: 6px; border-radius: 50%; background: #107c41; display: inline-block;" id="daemonStatusDot"></span>
         <span id="daemonStatusText">守护: 监听中</span>
@@ -2673,6 +2677,63 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--stroke-divider); padding-top:12px;">
         <span style="font-size:11.5px; color:var(--text-tertiary);">按快捷键或点击卡片即刻执行治理与联动动作</span>
         <button class="btn btn-secondary" onclick="closeActionRunnerModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Licensing & Pro Upgrade Modal -->
+  <div class="fluent-modal-overlay" id="licenseModal">
+    <div class="fluent-modal" style="width: 620px; max-width: 92vw;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="background:linear-gradient(135deg, #0078d4, #00c7ff); padding:4px 8px; border-radius:4px; font-weight:800; font-size:11px; color:#fff;">PRO</div>
+          <span style="font-size:16px; font-weight:600; color:#fff;">关于与授权管理 (CleanFlow Pro)</span>
+        </div>
+        <button class="inspector-close-btn" onclick="closeLicenseModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+
+      <!-- Current Status Card -->
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:14px; font-weight:700; color:#fff;" id="licModalTierTitle">检测中...</span>
+            <span class="badge-pill badge-neutral" id="licModalTierBadge">FREE</span>
+          </div>
+          <span style="font-size:11px; color:var(--text-tertiary); font-family:var(--font-mono);" id="licModalFingerprint">设备指纹: ----</span>
+        </div>
+        <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;" id="licModalDescription">
+          正在加载授权信息...
+        </div>
+      </div>
+
+      <!-- Free Trial Banner -->
+      <div id="licTrialBanner" style="background: linear-gradient(135deg, rgba(96,205,255,0.12), rgba(0,120,212,0.08)); border: 1px solid rgba(96,205,255,0.35); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 14px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:13px; font-weight:700; color:#60cdff;">开启 7 天 PRO 全特权免费体验</div>
+          <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">一键体验双击 Ctrl 唤醒、Quick Switch 穿透、ReFS 块克隆去重与代码 Grep</div>
+        </div>
+        <button class="btn btn-primary" onclick="startProTrialQuick()" style="white-space:nowrap; padding:4px 12px; font-size:12px;">立即开启</button>
+      </div>
+
+      <!-- Activation Code Form -->
+      <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 16px;">
+        <div style="font-size:12.5px; font-weight:600; color:#fff; margin-bottom:8px;">激活授权码</div>
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <input type="text" id="licInputName" placeholder="授权持有人 (如: 开发者姓名/团队名，选填)" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:6px 10px; color:#fff; font-size:12px; outline:none;" />
+          <input type="text" id="licInputKey" placeholder="输入 25 位激活码或 Dev Key" style="flex:2; background:rgba(0,0,0,0.3); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:6px 10px; color:#fff; font-size:12px; outline:none; font-family:var(--font-mono);" />
+          <button class="btn btn-primary" onclick="submitLicenseActivation()" style="white-space:nowrap; padding:6px 14px; font-size:12px;">激活</button>
+        </div>
+        <div style="font-size:11px; color:var(--text-tertiary);">
+          内置演示激活码: <code style="color:#60cdff; cursor:pointer;" onclick="document.getElementById('licInputKey').value='CFPRO-LIFETIME-2026-DEVMASTER-KEY'">CFPRO-LIFETIME-2026-DEVMASTER-KEY</code>
+        </div>
+      </div>
+
+      <!-- Tier Comparison Matrix Preview -->
+      <div style="border-top:1px solid var(--stroke-divider); padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; color:var(--text-tertiary);">CleanFlow 坚持纯净克制理念 · 社区版永久免费 · PRO 版释放极客生产力</span>
+        <button class="btn btn-secondary" onclick="closeLicenseModal()">关闭</button>
       </div>
     </div>
   </div>
@@ -5978,6 +6039,117 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       }
     });
 
+    // ==========================================
+    // CleanFlow Licensing & Pro Management
+    // ==========================================
+    let currentLicenseStatus = null;
+
+    async function loadLicenseStatus() {
+      try {
+        const res = await fetch('/api/license/status');
+        if (!res.ok) return;
+        currentLicenseStatus = await res.json();
+        updateLicenseUI();
+      } catch (e) {
+        // Silently tolerate
+      }
+    }
+
+    function updateLicenseUI() {
+      if (!currentLicenseStatus) return;
+      const badge = document.getElementById('licenseStatusBadge');
+      const tag = document.getElementById('licenseTierTag');
+      const text = document.getElementById('licenseStatusText');
+      if (badge && tag && text) {
+        if (currentLicenseStatus.is_pro) {
+          tag.innerText = currentLicenseStatus.tier === 'enterprise' ? 'ENT' : 'PRO';
+          tag.style.background = '#60cdff';
+          text.innerText = currentLicenseStatus.tier_display_name;
+          badge.style.borderColor = 'rgba(96, 205, 255, 0.5)';
+        } else {
+          tag.innerText = 'FREE';
+          tag.style.background = 'var(--text-tertiary)';
+          text.innerText = '社区免费版';
+          badge.style.borderColor = 'var(--stroke-card)';
+        }
+      }
+
+      // Update Modal elements if open
+      const modalTitle = document.getElementById('licModalTierTitle');
+      const modalBadge = document.getElementById('licModalTierBadge');
+      const modalDesc = document.getElementById('licModalDescription');
+      const modalFp = document.getElementById('licModalFingerprint');
+      const trialBanner = document.getElementById('licTrialBanner');
+
+      if (modalTitle) modalTitle.innerText = currentLicenseStatus.tier_display_name;
+      if (modalBadge) {
+        modalBadge.innerText = currentLicenseStatus.is_pro ? 'PRO 尊享' : 'FREE 社区';
+        modalBadge.className = currentLicenseStatus.is_pro ? 'badge-pill badge-safe' : 'badge-pill badge-neutral';
+      }
+      if (modalDesc) modalDesc.innerText = currentLicenseStatus.activation_message;
+      if (modalFp) modalFp.innerText = '设备指纹: ' + (currentLicenseStatus.device_fingerprint || '----');
+      if (trialBanner) {
+        trialBanner.style.display = currentLicenseStatus.tier === 'community' ? 'flex' : 'none';
+      }
+    }
+
+    function openLicenseModal() {
+      const modal = document.getElementById('licenseModal');
+      if (modal) modal.classList.add('active');
+      loadLicenseStatus();
+    }
+
+    function closeLicenseModal() {
+      const modal = document.getElementById('licenseModal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    async function startProTrialQuick() {
+      try {
+        const res = await fetch('/api/license/start-trial', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          currentLicenseStatus = data.status;
+          updateLicenseUI();
+          showToast('PRO 7天全功能体验已成功开启！已解锁全部底层黑科技与工作流穿透！');
+        } else {
+          showToast(data.error || '开启体验失败');
+        }
+      } catch (e) {
+        showToast('请求异常: ' + e.message);
+      }
+    }
+
+    async function submitLicenseActivation() {
+      const nameInp = document.getElementById('licInputName');
+      const keyInp = document.getElementById('licInputKey');
+      if (!keyInp || !keyInp.value.trim()) {
+        showToast('请输入有效的激活码');
+        return;
+      }
+      try {
+        const res = await fetch('/api/license/activate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            licensee: nameInp ? nameInp.value.trim() : '',
+            key: keyInp.value.trim()
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          currentLicenseStatus = data.status;
+          updateLicenseUI();
+          showToast('恭喜！授权激活成功，您已解锁 CleanFlow 终身 Pro 全部特权！');
+          closeLicenseModal();
+        } else {
+          showToast(data.error || '激活失败，请检查激活码输入');
+        }
+      } catch (e) {
+        showToast('激活请求网络异常: ' + e.message);
+      }
+    }
+
     // Init
     window.addEventListener('DOMContentLoaded', () => {
       refreshDisks();
@@ -5988,7 +6160,9 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       loadInstalledApps();
       loadGiantFiles();
       loadDaemonStatus();
+      loadLicenseStatus();
       setInterval(loadDaemonStatus, 15000);
+      setInterval(loadLicenseStatus, 60000);
     });
   </script>
 </body>

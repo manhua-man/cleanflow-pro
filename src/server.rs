@@ -80,6 +80,9 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
 
     let actual_port = server.server_addr().to_ip().map(|a| a.port()).unwrap_or(preferred_port);
 
+    let license_mgr = Arc::new(crate::licensing::LicenseManager::new());
+    let license_mgr_clone = license_mgr.clone();
+
     std::thread::spawn(move || {
         while running_clone.load(Ordering::SeqCst) {
             let mut request = match server.recv() {
@@ -1037,7 +1040,9 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
 
                 #[derive(serde::Deserialize)]
                 struct LauncherReq {
+                    #[serde(alias = "action_type")]
                     kind: String,
+                    #[serde(alias = "target")]
                     payload: String,
                 }
 
@@ -1054,6 +1059,65 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                     },
                     Err(e) => {
                         let json = serde_json::json!({ "success": false, "error": format!("解析请求失败: {}", e) }).to_string();
+                        send_json_response(request, json);
+                    }
+                }
+            } else if url == "/api/license/status" && method == Method::Get {
+                let status = license_mgr_clone.get_status();
+                let json = serde_json::to_string(&status).unwrap_or_else(|_| "{}".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/license/start-trial" && method == Method::Post {
+                match license_mgr_clone.start_pro_trial() {
+                    Ok(status) => {
+                        let json = serde_json::json!({
+                            "success": true,
+                            "status": status
+                        }).to_string();
+                        send_json_response(request, json);
+                    }
+                    Err(e) => {
+                        let json = serde_json::json!({
+                            "success": false,
+                            "error": e
+                        }).to_string();
+                        send_json_response(request, json);
+                    }
+                }
+            } else if url == "/api/license/activate" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct ActivateReq {
+                    licensee: Option<String>,
+                    key: String,
+                }
+
+                match serde_json::from_str::<ActivateReq>(&content) {
+                    Ok(req) => {
+                        let licensee = req.licensee.unwrap_or_default();
+                        match license_mgr_clone.activate_license(&licensee, &req.key) {
+                            Ok(status) => {
+                                let json = serde_json::json!({
+                                    "success": true,
+                                    "status": status
+                                }).to_string();
+                                send_json_response(request, json);
+                            }
+                            Err(e) => {
+                                let json = serde_json::json!({
+                                    "success": false,
+                                    "error": e
+                                }).to_string();
+                                send_json_response(request, json);
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        let json = serde_json::json!({
+                            "success": false,
+                            "error": format!("解析激活请求失败: {}", e)
+                        }).to_string();
                         send_json_response(request, json);
                     }
                 }

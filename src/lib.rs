@@ -28,8 +28,10 @@ pub mod action_runner;
 pub mod hotkey_manager;
 pub mod daemon_service;
 pub mod launcher;
+pub mod licensing;
 
 pub use launcher::*;
+pub use licensing::*;
 
 pub use cleaner::*;
 pub use disks::*;
