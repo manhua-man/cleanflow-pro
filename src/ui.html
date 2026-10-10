@@ -2665,6 +2665,95 @@
                 正在探测云端同步盘及检索按需文件占位状态...
               </div>
             </div>
+          <!-- Intelligent Guard & Self-Healing Engine Section -->
+          <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 18px; margin-top: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 16px;">
+              <div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size: 14px; font-weight: 600; color: #fff;">智能空间护航与自愈规则引擎</span>
+                  <span class="nav-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">免打扰 & 消耗预测</span>
+                </div>
+                <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 4px;">
+                  原生感知 Win32 全屏/游戏专注状态与空闲时段，实时计算空间消耗斜率与耗尽倒计时，支持用户按需配置低容量自愈策略
+                </div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="loadIntelligentGuardStatus(true)">
+                  <span>刷新护航状态</span>
+                </button>
+                <button class="btn btn-primary" style="padding: 4px 12px; font-size: 11px;" onclick="triggerSelfHealingEvaluation()">
+                  <span>立即评估自愈</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 3 Summary Metrics Cards -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+              <!-- Metric 1: Work Context & DND -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size: 11px; color: var(--text-tertiary); font-weight: 500;">用户工作场景与专注状态</span>
+                  <span id="guardDndBadge" style="font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: #60a5fa;">检测中</span>
+                </div>
+                <div style="margin-top: 6px; display:flex; align-items:baseline; gap:6px;">
+                  <span style="font-size: 15px; font-weight: 700; color: #fff;" id="guardNotificationState">正常接收通知</span>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-tertiary); margin-top: 4px;" id="guardIdleInfo">
+                  键鼠空闲: 0 秒 (作业调度感知)
+                </div>
+              </div>
+
+              <!-- Metric 2: Burn-Rate & Exhaustion Forecasting -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size: 11px; color: var(--text-tertiary); font-weight: 500;">空间消耗速率与预测</span>
+                  <span id="guardBurnBadge" style="font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); color: #34d399;">平稳</span>
+                </div>
+                <div style="margin-top: 6px; display:flex; align-items:baseline; gap:6px;">
+                  <span style="font-size: 18px; font-weight: 700; color: #fff;" id="guardBurnRate">0.0 MB/min</span>
+                  <span style="font-size: 11px; color: var(--text-secondary);" id="guardEstimatedTime">容量充裕</span>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-tertiary); margin-top: 4px;" id="guardBurnWarning">
+                  时序斜率监控中，未见突发吞噬
+                </div>
+              </div>
+
+              <!-- Metric 3: Self-Healing Active Rules -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size: 11px; color: var(--text-tertiary); font-weight: 500;">自适应自愈引擎</span>
+                  <span id="guardRulesBadge" style="font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(192, 132, 252, 0.15); color: #c084fc;">已就绪</span>
+                </div>
+                <div style="margin-top: 6px; display:flex; align-items:baseline; gap:6px;">
+                  <span style="font-size: 18px; font-weight: 700; color: #fff;" id="guardActiveRulesCount">3 条规则</span>
+                  <span style="font-size: 11px; color: var(--text-secondary);" id="guardSavedBytes">已自愈 0 B</span>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-tertiary); margin-top: 4px;">
+                  纯本地微秒级决策，零网络上报
+                </div>
+              </div>
+            </div>
+
+            <!-- Self-Healing Rules List -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+              <span style="font-size: 12px; font-weight: 600; color: #fff;">自愈策略触发器与运行开关</span>
+              <span style="font-size: 11px; color: var(--text-tertiary);">满足容量阈值并自动避让工作状态时静默触发</span>
+            </div>
+
+            <div id="guardRulesContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
+              <!-- Rules will be injected here -->
+            </div>
+
+            <!-- Recent Self-Healing History -->
+            <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-sm); padding: 10px 12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+                <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">自愈审计轨迹 (最近执行事件)</span>
+                <span style="font-size: 10.5px; color: var(--text-tertiary);" id="guardEventCount">暂无自愈事件</span>
+              </div>
+              <div id="guardEventList" style="font-size: 11px; color: var(--text-tertiary);">
+                系统环境健康，规则引擎待命中
+              </div>
+            </div>
           </div>
         </section>
 
@@ -3831,6 +3920,7 @@
         loadActiveJunctions();
         loadSystemStorageAudit();
         loadCloudStorageAudit();
+        loadIntelligentGuardStatus();
       }
       if (tabId === 'search') {
         loadSearchVolumes();
@@ -6147,6 +6237,229 @@
           }
         }
       );
+    }
+
+    // ==========================================
+    // Intelligent Guard & Self-Healing Engine
+    // ==========================================
+    window.currentGuardStatus = null;
+
+    async function loadIntelligentGuardStatus(forceRefresh = false) {
+      const container = document.getElementById('guardRulesContainer');
+      if (!container) return;
+
+      try {
+        const res = await fetch('/api/guard/status?drive=C:');
+        const data = await res.json();
+        window.currentGuardStatus = data;
+      } catch (e) {
+        console.error('Failed to load guard status', e);
+        return;
+      }
+
+      const status = window.currentGuardStatus;
+      if (!status) return;
+
+      // Update Card 1: Notification Context & DND
+      const dndBadge = document.getElementById('guardDndBadge');
+      const notifState = document.getElementById('guardNotificationState');
+      const idleInfo = document.getElementById('guardIdleInfo');
+
+      if (notifState) notifState.textContent = status.notification_state_label || '正常接收通知';
+      if (dndBadge) {
+        if (status.is_dnd_active) {
+          dndBadge.textContent = '免打扰中';
+          dndBadge.style.background = 'rgba(239, 68, 68, 0.15)';
+          dndBadge.style.color = '#f87171';
+        } else {
+          dndBadge.textContent = '可提示';
+          dndBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+          dndBadge.style.color = '#34d399';
+        }
+      }
+      if (idleInfo) {
+        idleInfo.textContent = `键鼠空闲: ${status.user_idle_seconds || 0} 秒 ${status.is_idle_for_background_task ? '(适合自愈作业)' : '(活跃使用中)'}`;
+      }
+
+      // Update Card 2: Burn-Rate & Forecasting
+      const fc = status.forecast || {};
+      const burnBadge = document.getElementById('guardBurnBadge');
+      const burnRate = document.getElementById('guardBurnRate');
+      const estTime = document.getElementById('guardEstimatedTime');
+      const burnWarning = document.getElementById('guardBurnWarning');
+
+      if (burnRate) {
+        const rateVal = fc.rate_mb_per_min || 0;
+        if (rateVal < -0.1) {
+          burnRate.textContent = `${rateVal.toFixed(1)} MB/min`;
+          burnRate.style.color = '#fbbf24';
+        } else if (rateVal > 0.1) {
+          burnRate.textContent = `+${rateVal.toFixed(1)} MB/min`;
+          burnRate.style.color = '#34d399';
+        } else {
+          burnRate.textContent = '0.0 MB/min';
+          burnRate.style.color = '#fff';
+        }
+      }
+
+      if (burnBadge) {
+        if (fc.trend === 'CriticalSurge') {
+          burnBadge.textContent = '突发暴增';
+          burnBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+          burnBadge.style.color = '#f87171';
+        } else if (fc.trend === 'FillingFast') {
+          burnBadge.textContent = '快速消耗';
+          burnBadge.style.background = 'rgba(245, 158, 11, 0.2)';
+          burnBadge.style.color = '#fbbf24';
+        } else if (fc.trend === 'Reclaiming') {
+          burnBadge.textContent = '释放中';
+          burnBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+          burnBadge.style.color = '#34d399';
+        } else {
+          burnBadge.textContent = '平稳';
+          burnBadge.style.background = 'rgba(59, 130, 246, 0.15)';
+          burnBadge.style.color = '#60a5fa';
+        }
+      }
+
+      if (estTime) {
+        if (fc.estimated_minutes_to_exhaustion) {
+          estTime.textContent = `预计 ${fc.estimated_minutes_to_exhaustion} 分钟耗尽`;
+          estTime.style.color = '#f87171';
+        } else {
+          estTime.textContent = '容量充裕安全';
+          estTime.style.color = 'var(--text-secondary)';
+        }
+      }
+
+      if (burnWarning) {
+        burnWarning.textContent = fc.forecast_warning || '时序斜率监控中，未见异常吞噬';
+      }
+
+      // Update Card 3: Rules & Events count
+      const activeRulesCount = document.getElementById('guardActiveRulesCount');
+      const savedBytesEl = document.getElementById('guardSavedBytes');
+      const rules = status.rules || [];
+      const enabledCount = rules.filter(r => r.enabled).length;
+      let totalSaved = 0;
+      rules.forEach(r => totalSaved += (r.total_bytes_saved || 0));
+
+      if (activeRulesCount) activeRulesCount.textContent = `${enabledCount} / ${rules.length} 条生效中`;
+      if (savedBytesEl) savedBytesEl.textContent = `已自愈 ${formatBytes(totalSaved)}`;
+
+      renderGuardRules(rules);
+      renderGuardEvents(status.recent_events || []);
+    }
+
+    function renderGuardRules(rules) {
+      const container = document.getElementById('guardRulesContainer');
+      if (!container) return;
+
+      if (!rules || rules.length === 0) {
+        container.innerHTML = '<div style="padding: 12px; color: var(--text-tertiary); font-size: 11.5px; text-align: center;">暂无配置自愈规则</div>';
+        return;
+      }
+
+      let html = '';
+      rules.forEach(r => {
+        const isEn = r.enabled;
+        const btnClass = isEn ? 'btn-primary' : 'btn-secondary';
+        const btnText = isEn ? '运行中 (点击关闭)' : '已停用 (点击启用)';
+        const btnStyle = isEn 
+          ? 'background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 11px; padding: 3px 10px;'
+          : 'background: rgba(255, 255, 255, 0.05); color: var(--text-tertiary); border: 1px solid rgba(255, 255, 255, 0.1); font-size: 11px; padding: 3px 10px;';
+
+        html += `
+          <div style="background: rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex: 1; margin-right: 14px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 12.5px; font-weight: 600; color: #fff;">${escapeHtml(r.name)}</span>
+                <span style="font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.12); color: #60cdff;">阈值: &lt; ${r.trigger_min_free_gb} GB</span>
+                ${r.require_idle ? '<span style="font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(245, 158, 11, 0.12); color: #fbbf24;">需空闲</span>' : ''}
+              </div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 3px;">
+                ${escapeHtml(r.description)}
+              </div>
+            </div>
+            <div>
+              <button class="btn ${btnClass}" style="${btnStyle}" onclick="toggleGuardRule('${escapeHtml(r.id)}', ${!isEn})">
+                <span>${btnText}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function renderGuardEvents(events) {
+      const listEl = document.getElementById('guardEventList');
+      const countEl = document.getElementById('guardEventCount');
+      if (!listEl) return;
+
+      if (!events || events.length === 0) {
+        listEl.innerHTML = '<span style="color: var(--text-tertiary);">系统环境健康，规则引擎待命中</span>';
+        if (countEl) countEl.textContent = '暂无自愈事件';
+        return;
+      }
+
+      if (countEl) countEl.textContent = `共记录 ${events.length} 次自愈动作`;
+
+      let html = '<div style="display: flex; flex-direction: column; gap: 4px;">';
+      events.slice().reverse().slice(0, 5).forEach(ev => {
+        html += `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 3px 0; border-bottom: 1px dashed rgba(255,255,255,0.04);">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span style="color: #34d399; font-weight: 600;">[自愈完成]</span>
+              <span style="color: #fff;">${escapeHtml(ev.rule_name)}:</span>
+              <span style="color: var(--text-secondary);">${escapeHtml(ev.message)}</span>
+            </div>
+            <span style="color: var(--text-tertiary); font-size: 10.5px;">${formatUnixTimestamp(ev.timestamp_secs)}</span>
+          </div>
+        `;
+      });
+      html += '</div>';
+      listEl.innerHTML = html;
+    }
+
+    async function toggleGuardRule(ruleId, newEnabled) {
+      try {
+        const res = await fetch('/api/guard/rule/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rule_id: ruleId, enabled: newEnabled })
+        });
+        const r = await res.json();
+        if (r.success) {
+          showToast(`自愈规则已${newEnabled ? '开启' : '关闭'}`);
+          loadIntelligentGuardStatus(true);
+        } else {
+          showToast(`切换规则失败: ${r.error || '系统异常'}`);
+        }
+      } catch (e) {
+        showToast(`操作异常: ${e.message}`);
+      }
+    }
+
+    async function triggerSelfHealingEvaluation() {
+      showToast('正在即时评估自愈策略与系统场景...');
+      try {
+        const res = await fetch('/api/guard/evaluate-now', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ drive: 'C:' })
+        });
+        const events = await res.json();
+        if (events && events.length > 0) {
+          showToast(`评估完成！成功触发并执行 ${events.length} 项自愈任务`);
+        } else {
+          showToast('评估完成：当前系统环境健康，未触发阈值或处于专注保护状态');
+        }
+        loadIntelligentGuardStatus(true);
+      } catch (e) {
+        showToast(`评估异常: ${e.message}`);
+      }
     }
 
     // High-Value Migration Presets (Pillar 1)

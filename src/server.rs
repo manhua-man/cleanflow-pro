@@ -83,6 +83,9 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
     let license_mgr = Arc::new(crate::licensing::LicenseManager::new());
     let license_mgr_clone = license_mgr.clone();
 
+    let guard_mgr = Arc::new(crate::intelligent_guard::IntelligentGuardManager::new());
+    let guard_mgr_clone = guard_mgr.clone();
+
     std::thread::spawn(move || {
         while running_clone.load(Ordering::SeqCst) {
             let mut request = match server.recv() {
@@ -757,6 +760,58 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                         send_json_response(request, err_json);
                     }
                 }
+            } else if url.starts_with("/api/guard/status") && method == Method::Get {
+                let drive = if url.contains("drive=") {
+                    url.split("drive=").nth(1).and_then(|s| s.split('&').next()).unwrap_or("C:")
+                } else {
+                    "C:"
+                };
+                let status = guard_mgr_clone.get_status(drive);
+                let json = serde_json::to_string(&status).unwrap_or_else(|_| "{}".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/guard/rule/toggle" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct ToggleRuleReq {
+                    rule_id: String,
+                    enabled: bool,
+                }
+
+                match serde_json::from_str::<ToggleRuleReq>(&content) {
+                    Ok(req) => {
+                        match guard_mgr_clone.toggle_rule(&req.rule_id, req.enabled) {
+                            Ok(_) => {
+                                let res_json = serde_json::json!({ "success": true }).to_string();
+                                send_json_response(request, res_json);
+                            }
+                            Err(e) => {
+                                let err_json = serde_json::json!({ "success": false, "error": e }).to_string();
+                                send_json_response(request, err_json);
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
+            } else if url == "/api/guard/evaluate-now" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct EvalReq {
+                    #[serde(default = "default_drive")]
+                    drive: String,
+                }
+                fn default_drive() -> String { "C:".to_string() }
+
+                let drive = serde_json::from_str::<EvalReq>(&content).map(|r| r.drive).unwrap_or_else(|_| "C:".to_string());
+                let events = guard_mgr_clone.evaluate_and_run_self_healing(&drive);
+                let json = serde_json::to_string(&events).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, json);
             } else if url == "/api/system/maintenance" && method == Method::Get {
                 let status = crate::system_tools::get_system_maintenance_status();
                 let json = serde_json::to_string(&status).unwrap_or_else(|_| "{}".to_string());

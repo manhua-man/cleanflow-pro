@@ -37,6 +37,7 @@ pub mod icon_extractor;
 pub mod tray;
 pub mod system_storage_audit;
 pub mod cloud_storage_audit;
+pub mod intelligent_guard;
 
 pub use launcher::*;
 pub use licensing::*;
@@ -48,6 +49,7 @@ pub use icon_extractor::*;
 pub use tray::*;
 pub use system_storage_audit::*;
 pub use cloud_storage_audit::*;
+pub use intelligent_guard::*;
 
 pub use cleaner::*;
 pub use disks::*;
