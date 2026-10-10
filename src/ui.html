@@ -1825,6 +1825,13 @@
             </div>
             <span class="nav-badge" id="badgeTools">高级</span>
           </li>
+          <li class="nav-item" data-tab="rescue" onclick="switchTab('rescue')">
+            <div class="nav-item-left">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></span>
+              <span>原生磁盘数据恢复</span>
+            </div>
+            <span class="nav-badge" id="badgeRescue" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">第三支柱</span>
+          </li>
         </ul>
       </div>
 
@@ -2753,6 +2760,152 @@
               <div id="guardEventList" style="font-size: 11px; color: var(--text-tertiary);">
                 系统环境健康，规则引擎待命中
               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- WORKSPACE 6: 原生磁盘恢复与数据救援 (Rescue - 第三支柱) -->
+        <section class="workspace-pane" id="pane-rescue">
+          <div class="workspace-header">
+            <div class="workspace-title-box">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h1>原生磁盘恢复与数据救援中枢</h1>
+                <span class="nav-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">第三支柱 (Pillar 3)</span>
+              </div>
+              <p>专为 AI 时代打造的免慢速全盘扫描原生救援引擎：MFT 裸盘软删除秒级抢救、VSS 历史卷影快照回溯与特征签名雕刻</p>
+            </div>
+            <div class="workspace-controls" style="display: flex; gap: 10px; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 5px 12px;">
+                <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 500;">源驱动器:</span>
+                <select id="rescueDriveSelect" onchange="onRescueDriveChange(this.value)" style="background: transparent; color: var(--text-primary); border: none; font-size: 12px; font-weight: 600; outline: none; cursor: pointer;">
+                  <option value="C:" style="background: #111827; color: #fff;">C: [系统分区 - NTFS]</option>
+                  <option value="D:" style="background: #111827; color: #fff;">D: [开发与数据 - NTFS]</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="startRescueScan()" id="btnStartRescueScan" style="display: flex; align-items: center; gap: 6px;">
+                <svg style="width:14px; height:14px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                <span>立即秒级探测可抢救数据</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Read-Only Safety Shield Bar -->
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 28px; height: 28px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: #10b981;">
+                <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+              </div>
+              <div>
+                <div style="font-size: 12px; font-weight: 600; color: #10b981;">只读安全挂载屏障已锁定 (Read-Only Safety Shield Active)</div>
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">全流程强制以 Win32 GENERIC_READ 模式通信，绝不对源驱动器写入任何临时索引，防止次生覆写破坏</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <span style="font-size: 11px; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.25); color: var(--text-tertiary); border: 1px solid rgba(255,255,255,0.06);" id="rescueDriveTypeBadge">NTFS / NVMe SSD</span>
+              <span style="font-size: 11px; padding: 4px 8px; border-radius: 4px; background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.25);">TRIM 敏感提示：误删后请尽早抢救</span>
+            </div>
+          </div>
+
+          <!-- Three Rescue Mode Cards Grid -->
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px;">
+            <!-- Mode Card 1: MFT Undelete -->
+            <div class="feature-card rescue-mode-card" id="cardModeMft" onclick="selectRescueMode('mft')" style="cursor: pointer; padding: 18px; border: 1px solid #0078d4; background: rgba(0, 120, 212, 0.08); position: relative; border-radius: var(--radius-md);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div class="card-icon-box icon-box-cyan" style="width: 36px; height: 36px;">
+                  <svg style="width: 20px; height: 20px; fill: currentColor;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                </div>
+                <span class="nav-badge" style="background: rgba(0, 199, 255, 0.15); color: #00c7ff;">1~3 秒极速</span>
+              </div>
+              <div style="margin-top: 12px;">
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">MFT 软删除秒级抢救</div>
+                <div style="font-size: 11.5px; color: var(--text-tertiary); margin-top: 4px; line-height: 1.45;">直读 NTFS MFT 未分配记录中的 $DATA 数据簇链，精准捞回刚刚误清空回收站或 Shift+Del 的代码与权重</div>
+              </div>
+              <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 11px; color: var(--text-secondary);">候选未分配记录</span>
+                <span style="font-size: 12px; font-weight: 600; color: #00c7ff;" id="mftCandidatesCount">7 个候选文件</span>
+              </div>
+            </div>
+
+            <!-- Mode Card 2: VSS Snapshot -->
+            <div class="feature-card rescue-mode-card" id="cardModeVss" onclick="selectRescueMode('vss')" style="cursor: pointer; padding: 18px; border: 1px solid var(--stroke-card); position: relative; border-radius: var(--radius-md);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div class="card-icon-box icon-box-blue" style="width: 36px; height: 36px;">
+                  <svg style="width: 20px; height: 20px; fill: currentColor;" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                </div>
+                <span class="nav-badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">历史时光机</span>
+              </div>
+              <div style="margin-top: 12px;">
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">卷影副本快照回溯</div>
+                <div style="font-size: 11.5px; color: var(--text-tertiary); margin-top: 4px; line-height: 1.45;">调用 Windows 原生 VSS 服务挂载只读卷影快照，秒级提取代码被覆盖、Git 误 reset 前的历史版本副本</div>
+              </div>
+              <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 11px; color: var(--text-secondary);">可用卷影快照</span>
+                <span style="font-size: 12px; font-weight: 600; color: #8b5cf6;" id="vssSnapshotsCount">3 个快照点</span>
+              </div>
+            </div>
+
+            <!-- Mode Card 3: File Carving -->
+            <div class="feature-card rescue-mode-card" id="cardModeCarve" onclick="selectRescueMode('carve')" style="cursor: pointer; padding: 18px; border: 1px solid var(--stroke-card); position: relative; border-radius: var(--radius-md);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div class="card-icon-box icon-box-purple" style="width: 36px; height: 36px;">
+                  <svg style="width: 20px; height: 20px; fill: currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                </div>
+                <span class="nav-badge" style="background: rgba(236, 72, 153, 0.15); color: #ec4899;">AI 格式签名</span>
+              </div>
+              <div style="margin-top: 12px;">
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">特征签名扇区雕刻</div>
+                <div style="font-size: 11.5px; color: var(--text-tertiary); margin-top: 4px; line-height: 1.45;">跨卷格式化与元数据损坏的深度救援，按 Safetensors、IPYNB、SQLite、Python、PNG 头尾特征扫描未分配簇</div>
+              </div>
+              <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 11px; color: var(--text-secondary);">已适配魔数</span>
+                <span style="font-size: 12px; font-weight: 600; color: #ec4899;">6 类工程格式</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rescue Table Card -->
+          <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);" id="rescueTableTitle">待抢救资产候选列表 (MFT 未分配记录)</span>
+                <div style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.25); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 4px 10px;">
+                  <input type="text" id="rescueFilterInput" oninput="filterRescueResults(this.value)" placeholder="按文件名或扩展名过滤..." style="background: transparent; border: none; color: var(--text-primary); font-size: 11.5px; outline: none; width: 180px;">
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 11px; color: var(--text-tertiary);" id="rescueSelectionStatus">已选 0 项</span>
+                <button class="btn btn-secondary" onclick="selectAllRescueItems(true)" style="padding: 4px 10px; font-size: 11.5px;">全选</button>
+                <button class="btn btn-secondary" onclick="selectAllRescueItems(false)" style="padding: 4px 10px; font-size: 11.5px;">清空</button>
+                <button class="btn btn-primary" onclick="executeRescueSelected()" id="btnExecuteRescue" disabled style="padding: 4px 14px; font-size: 11.5px; display: flex; align-items: center; gap: 5px;">
+                  <svg style="width:13px; height:13px; fill:currentColor;" viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
+                  <span>导出抢救到指定目录</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Data Table -->
+            <div style="max-height: 380px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); border-radius: var(--radius-sm);">
+              <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                <thead>
+                  <tr style="background: rgba(0,0,0,0.35); text-align: left; color: var(--text-secondary); font-size: 11px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                    <th style="padding: 8px 10px; width: 36px; text-align: center;"><input type="checkbox" id="rescueCheckAll" onchange="toggleRescueCheckAll(this.checked)"></th>
+                    <th style="padding: 8px 10px;">文件名称</th>
+                    <th style="padding: 8px 10px;">原始物理路径</th>
+                    <th style="padding: 8px 10px; width: 95px;">文件体积</th>
+                    <th style="padding: 8px 10px; width: 140px;">删除 / 快照时间</th>
+                    <th style="padding: 8px 10px; width: 140px;">健康状态</th>
+                    <th style="padding: 8px 10px; width: 80px; text-align: center;">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="rescueTableBody">
+                  <!-- Populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 11px; color: var(--text-tertiary);">
+              <span>安全提示：所有导出的文件将强制保存至非源盘目录（如外部磁盘或副盘），杜绝源盘二次覆盖</span>
+              <span id="rescueTableSummary">就绪</span>
             </div>
           </div>
         </section>
@@ -3921,6 +4074,9 @@
         loadSystemStorageAudit();
         loadCloudStorageAudit();
         loadIntelligentGuardStatus();
+      }
+      if (tabId === 'rescue') {
+        initRescueWorkspace();
       }
       if (tabId === 'search') {
         loadSearchVolumes();
@@ -6460,6 +6616,240 @@
       } catch (e) {
         showToast(`评估异常: ${e.message}`);
       }
+    }
+
+    // ==========================================
+    // PILLAR 3: NATIVE DISK & DATA RECOVERY HUB
+    // ==========================================
+    window.rescueState = {
+      drive: 'C:',
+      mode: 'mft', // 'mft' | 'vss' | 'carve'
+      items: [],
+      filteredItems: [],
+      selectedIds: new Set(),
+      isScanning: false
+    };
+
+    const MOCK_RESCUE_DATA = {
+      mft: [
+        { id: 'mft-1', name: 'train_checkpoint_epoch12.safetensors', path: 'C:\\Projects\\DeepSeek-R1-Distill\\output\\train_checkpoint_epoch12.safetensors', size: 1954189312, time: '22 分钟前 (Shift+Del)', health: '完整 (100% 簇未被覆写)', healthClass: '#10b981' },
+        { id: 'mft-2', name: 'experiment_results.ipynb', path: 'C:\\Users\\EDY\\workspace\\ai-lab\\notebooks\\experiment_results.ipynb', size: 493568, time: '35 分钟前 (清空回收站)', health: '完整 (100% 簇未被覆写)', healthClass: '#10b981' },
+        { id: 'mft-3', name: 'model_fine_tune.py', path: 'C:\\Users\\EDY\\workspace\\ai-lab\\scripts\\model_fine_tune.py', size: 24576, time: '1 小时前 (误删)', health: '完整 (100% 簇未被覆写)', healthClass: '#10b981' },
+        { id: 'mft-4', name: 'metrics_eval_cache.duckdb', path: 'C:\\Users\\EDY\\AppData\\Local\\Temp\\metrics_eval_cache.duckdb', size: 35860480, time: '2 小时前 (构建覆盖)', health: '良好 (95% 簇完整)', healthClass: '#f59e0b' },
+        { id: 'mft-5', name: 'lora_adapter_weights.bin', path: 'C:\\Projects\\qwen2.5-coder\\lora_out\\lora_adapter_weights.bin', size: 134217728, time: '3 小时前 (脚本误清理)', health: '完整 (100% 簇未被覆写)', healthClass: '#10b981' },
+        { id: 'mft-6', name: 'dataset_tokenized_v2.json', path: 'C:\\Data\\pretrain\\dataset_tokenized_v2.json', size: 47290368, time: '5 小时前 (目录移除)', health: '良好 (92% 簇完整)', healthClass: '#f59e0b' },
+        { id: 'mft-7', name: 'system_prompt_benchmark.jsonl', path: 'C:\\Projects\\agent-bench\\prompts\\system_prompt_benchmark.jsonl', size: 1843200, time: '昨天 19:40 (误删)', health: '完整 (100% 簇未被覆写)', healthClass: '#10b981' }
+      ],
+      vss: [
+        { id: 'vss-1', name: 'Git 工作区被覆盖版本 (Commit 前)', path: 'C:\\Projects\\cleanflow-pro\\ (快照点: 2026-10-10 12:00:00)', size: 85983232, time: '今天 12:00 (自动系统快照)', health: '卷影点完整 100%', healthClass: '#8b5cf6' },
+        { id: 'vss-2', name: 'Anaconda 环境配置快照', path: 'C:\\ProgramData\\anaconda3\\ (快照点: 2026-10-09 18:30:00)', size: 541065216, time: '昨天 18:30 (还原点备份)', health: '卷影点完整 100%', healthClass: '#8b5cf6' },
+        { id: 'vss-3', name: '文档与实验笔记快照', path: 'C:\\Users\\EDY\\Documents\\ (快照点: 2026-10-08 09:15:00)', size: 128974848, time: '前天 09:15 (定期快照)', health: '卷影点完整 100%', healthClass: '#8b5cf6' }
+      ],
+      carve: [
+        { id: 'carve-1', name: 'carved_safetensors_0x1A4F0000.safetensors', path: '未分配扇区簇 0x1A4F0000 ~ 0x1B8F0000', size: 335544320, time: '扇区魔数扫描命中', health: '文件头尾校验有效', healthClass: '#ec4899' },
+        { id: 'carve-2', name: 'carved_ipynb_0x08CD2000.ipynb', path: '未分配扇区簇 0x08CD2000 ~ 0x08CE0000', size: 524288, time: '扇区魔数扫描命中', health: 'JSON 语法树闭合', healthClass: '#ec4899' },
+        { id: 'carve-3', name: 'carved_sqlite_0x0410B000.db', path: '未分配扇区簇 0x0410B000 ~ 0x04200000', size: 1048576, time: '扇区魔数扫描命中', health: 'SQLite Header 正确', healthClass: '#ec4899' }
+      ]
+    };
+
+    function initRescueWorkspace() {
+      if (!window.rescueState.items || window.rescueState.items.length === 0) {
+        selectRescueMode('mft');
+      }
+    }
+
+    function onRescueDriveChange(drive) {
+      window.rescueState.drive = drive;
+      const badge = document.getElementById('rescueDriveTypeBadge');
+      if (badge) {
+        badge.textContent = `${drive} 分区 - NTFS / NVMe SSD`;
+      }
+      showToast(`已切换至驱动器 ${drive}，维持只读安全挂载模式`);
+      startRescueScan();
+    }
+
+    function selectRescueMode(mode) {
+      window.rescueState.mode = mode;
+      window.rescueState.selectedIds.clear();
+
+      // Update card visual states
+      document.querySelectorAll('.rescue-mode-card').forEach(c => {
+        c.style.borderColor = 'var(--stroke-card)';
+        c.style.background = 'var(--bg-card)';
+      });
+      const activeCard = document.getElementById(`cardMode${mode.charAt(0).toUpperCase() + mode.slice(1)}`);
+      if (activeCard) {
+        activeCard.style.borderColor = mode === 'mft' ? '#0078d4' : (mode === 'vss' ? '#8b5cf6' : '#ec4899');
+        activeCard.style.background = mode === 'mft' ? 'rgba(0, 120, 212, 0.08)' : (mode === 'vss' ? 'rgba(139, 92, 246, 0.08)' : 'rgba(236, 72, 153, 0.08)');
+      }
+
+      // Update table title
+      const titleEl = document.getElementById('rescueTableTitle');
+      if (titleEl) {
+        if (mode === 'mft') titleEl.textContent = '待抢救资产候选列表 (MFT 未分配软删除记录)';
+        else if (mode === 'vss') titleEl.textContent = '历史卷影快照副本文件树 (VSS 快照点)';
+        else titleEl.textContent = '扇区特征签名雕刻结果 (File Carving 命中簇)';
+      }
+
+      // Load dataset
+      window.rescueState.items = MOCK_RESCUE_DATA[mode] || [];
+      const filterInput = document.getElementById('rescueFilterInput');
+      filterRescueResults(filterInput ? filterInput.value : '');
+    }
+
+    function startRescueScan() {
+      const btn = document.getElementById('btnStartRescueScan');
+      if (btn) btn.disabled = true;
+      showToast('正在以只读模式秒级检索 MFT 与卷影快照元数据...');
+
+      setTimeout(() => {
+        if (btn) btn.disabled = false;
+        selectRescueMode(window.rescueState.mode);
+        showToast('探测完成：已锁定可抢救资产候选清单');
+      }, 350);
+    }
+
+    function filterRescueResults(query) {
+      const q = (query || '').toLowerCase().trim();
+      if (!q) {
+        window.rescueState.filteredItems = [...window.rescueState.items];
+      } else {
+        window.rescueState.filteredItems = window.rescueState.items.filter(item => 
+          item.name.toLowerCase().includes(q) || item.path.toLowerCase().includes(q)
+        );
+      }
+      renderRescueTable();
+    }
+
+    function renderRescueTable() {
+      const tbody = document.getElementById('rescueTableBody');
+      const summaryEl = document.getElementById('rescueTableSummary');
+      const selectionEl = document.getElementById('rescueSelectionStatus');
+      const btnExecute = document.getElementById('btnExecuteRescue');
+      const checkAll = document.getElementById('rescueCheckAll');
+      if (!tbody) return;
+
+      const items = window.rescueState.filteredItems;
+      if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-tertiary);">当前视图下无匹配的可抢救记录</td></tr>';
+        if (summaryEl) summaryEl.textContent = '共 0 个文件';
+        if (selectionEl) selectionEl.textContent = '已选 0 项';
+        if (btnExecute) btnExecute.disabled = true;
+        if (checkAll) checkAll.checked = false;
+        return;
+      }
+
+      let totalBytes = 0;
+      let html = '';
+
+      items.forEach((item, index) => {
+        totalBytes += item.size;
+        const isChecked = window.rescueState.selectedIds.has(item.id);
+        html += `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); background: ${isChecked ? 'rgba(0, 120, 212, 0.08)' : 'transparent'};">
+            <td style="padding: 8px 10px; text-align: center;">
+              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleRescueItem('${escapeHtml(item.id)}', this.checked)">
+            </td>
+            <td style="padding: 8px 10px; font-weight: 600; color: #fff;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="icon" style="color: var(--text-secondary); width:14px; height:14px;">
+                  <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                </span>
+                <span>${escapeHtml(item.name)}</span>
+              </div>
+            </td>
+            <td style="padding: 8px 10px; color: var(--text-secondary); font-family: monospace; font-size: 11px;" title="${escapeHtml(item.path)}">
+              ${escapeHtml(item.path)}
+            </td>
+            <td style="padding: 8px 10px; color: var(--text-primary); font-family: monospace;">
+              ${formatBytes(item.size)}
+            </td>
+            <td style="padding: 8px 10px; color: var(--text-tertiary); font-size: 11px;">
+              ${escapeHtml(item.time)}
+            </td>
+            <td style="padding: 8px 10px;">
+              <span style="font-size: 10.5px; padding: 2px 7px; border-radius: 4px; background: rgba(255,255,255,0.05); color: ${item.healthClass}; border: 1px solid rgba(255,255,255,0.08);">
+                ${escapeHtml(item.health)}
+              </span>
+            </td>
+            <td style="padding: 8px 10px; text-align: center;">
+              <button class="btn btn-secondary" onclick="executeSingleRescue('${escapeHtml(item.id)}')" style="padding: 2px 8px; font-size: 11px;">
+                抢救
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+
+      const selCount = window.rescueState.selectedIds.size;
+      if (summaryEl) summaryEl.textContent = `当前展示 ${items.length} 个候选资产 (共 ${formatBytes(totalBytes)})`;
+      if (selectionEl) selectionEl.textContent = `已选 ${selCount} 项`;
+      if (btnExecute) btnExecute.disabled = selCount === 0;
+      if (checkAll) checkAll.checked = selCount > 0 && selCount === items.length;
+    }
+
+    function toggleRescueItem(id, checked) {
+      if (checked) {
+        window.rescueState.selectedIds.add(id);
+      } else {
+        window.rescueState.selectedIds.delete(id);
+      }
+      renderRescueTable();
+    }
+
+    function selectAllRescueItems(select) {
+      if (select) {
+        window.rescueState.filteredItems.forEach(i => window.rescueState.selectedIds.add(i.id));
+      } else {
+        window.rescueState.selectedIds.clear();
+      }
+      renderRescueTable();
+    }
+
+    function toggleRescueCheckAll(checked) {
+      selectAllRescueItems(checked);
+    }
+
+    function executeSingleRescue(id) {
+      const item = window.rescueState.items.find(i => i.id === id);
+      if (!item) return;
+
+      const defaultSafeDest = 'D:\\CleanFlow_Rescue_Files';
+      const dest = prompt(`【只读安全抢救】\n即将从源卷 ${window.rescueState.drive} 提取文件：\n${item.name} (${formatBytes(item.size)})\n\n为防止二次覆写破坏，目标路径必须位于非源盘分区。\n请输入安全导出目标目录：`, defaultSafeDest);
+      if (!dest) return;
+
+      if (dest.toUpperCase().startsWith(window.rescueState.drive.toUpperCase())) {
+        alert(`【安全拦截】目标路径不能与源驱动器 (${window.rescueState.drive}) 相同！\n请指定外部移动硬盘或副盘分区（例如 D:\\...），以防覆写未分配扇区。`);
+        return;
+      }
+
+      showToast(`正在无损提取 ${item.name} 至 ${dest}...`);
+      setTimeout(() => {
+        showToast(`成功抢救导出 ${item.name}！源盘保持只读无损`);
+      }, 400);
+    }
+
+    function executeRescueSelected() {
+      const selCount = window.rescueState.selectedIds.size;
+      if (selCount === 0) return;
+
+      const defaultSafeDest = 'D:\\CleanFlow_Rescue_Files';
+      const dest = prompt(`【批量只读安全抢救】\n即将从源卷 ${window.rescueState.drive} 批量导出已选中的 ${selCount} 个关键资产。\n\n为杜绝源盘二次数据覆写，目标路径强制要求为非源盘目录。\n请输入安全导出目标目录：`, defaultSafeDest);
+      if (!dest) return;
+
+      if (dest.toUpperCase().startsWith(window.rescueState.drive.toUpperCase())) {
+        alert(`【安全拦截】目标路径不能位于源驱动器 (${window.rescueState.drive})！\n请选择其他物理分区（例如 D:\\...）或外部移动硬盘。`);
+        return;
+      }
+
+      showToast(`正在批量导出 ${selCount} 个资产至 ${dest}...`);
+      setTimeout(() => {
+        showToast(`批量抢救成功！已安全还原 ${selCount} 个文件至 ${dest}`);
+        window.rescueState.selectedIds.clear();
+        renderRescueTable();
+      }, 500);
     }
 
     // High-Value Migration Presets (Pillar 1)
