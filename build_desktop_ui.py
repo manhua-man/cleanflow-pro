@@ -1655,6 +1655,42 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       color: var(--text-tertiary);
     }
 
+    /* Filter Chips Styles (Pills) */
+    .spotlight-chips-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px 8px 14px;
+      overflow-x: auto;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.12);
+    }
+    .spotlight-chip {
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 120ms ease;
+      user-select: none;
+    }
+    .spotlight-chip:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .spotlight-chip.active {
+      background: #0078d4;
+      color: #ffffff;
+      border-color: #0099ff;
+      font-weight: 600;
+      box-shadow: 0 1px 4px rgba(0, 120, 212, 0.4);
+    }
+
     /* Action Runner Item Styles */
     .action-card {
       display: flex;
@@ -2206,6 +2242,19 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               <span class="badge-pill badge-neutral" style="font-size: 10px; cursor: pointer;" onclick="clearSearchInput()">清空</span>
             </div>
 
+            <!-- Consumer-Grade Type Filter Chips (Pills) -->
+            <div class="spotlight-chips-row" id="mainSearchChipsRow" style="margin-top: 10px; border-radius: var(--radius-sm); border: 1px solid var(--stroke-card); padding: 6px 12px; background: rgba(0,0,0,0.18);">
+              <span style="font-size: 11px; color: var(--text-tertiary); margin-right: 4px; display:flex; align-items:center;">类型过滤:</span>
+              <span class="spotlight-chip active" data-cat="all" onclick="selectMainSearchCategory('all')">全部</span>
+              <span class="spotlight-chip" data-cat="folder" onclick="selectMainSearchCategory('folder')">文件夹</span>
+              <span class="spotlight-chip" data-cat="doc" onclick="selectMainSearchCategory('doc')">文档</span>
+              <span class="spotlight-chip" data-cat="pic" onclick="selectMainSearchCategory('pic')">图片</span>
+              <span class="spotlight-chip" data-cat="video" onclick="selectMainSearchCategory('video')">视频</span>
+              <span class="spotlight-chip" data-cat="audio" onclick="selectMainSearchCategory('audio')">音频</span>
+              <span class="spotlight-chip" data-cat="archive" onclick="selectMainSearchCategory('archive')">压缩包</span>
+              <span class="spotlight-chip" data-cat="app" onclick="selectMainSearchCategory('app')">应用</span>
+            </div>
+
             <!-- Quick Filter Presets: File Search -->
             <div id="searchPresetsFiles" style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
               <span style="font-size: 11px; color: var(--text-tertiary); display: flex; align-items: center;">文件预设:</span>
@@ -2629,16 +2678,26 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     <div class="spotlight-bar" onclick="event.stopPropagation()">
       <div class="spotlight-input-row">
         <svg class="spotlight-search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-        <input type="text" id="spotlightInput" class="spotlight-input" placeholder="极简秒搜: 输入名称、grep:代码、sym:符号，按 Tab 动作，Esc 退出..." autocomplete="off" oninput="onSpotlightInput(this.value)" onkeydown="handleSpotlightKeydown(event)" />
+        <input type="text" id="spotlightInput" class="spotlight-input" placeholder="极简秒搜: 输入名称、拼音首字母(如jsq/wx)、grep:代码，↑↓翻历史，Tab动作..." autocomplete="off" oninput="onSpotlightInput(this.value)" onkeydown="handleSpotlightKeydown(event)" />
         <div class="spotlight-badges">
-          <span class="spotlight-kbd">双击 Ctrl / Alt+Space 呼出</span>
+          <span class="spotlight-kbd">双击 Ctrl / Alt+Space</span>
+          <span class="spotlight-kbd">↑↓ 历史/选定</span>
           <span class="spotlight-kbd">Tab 动作</span>
-          <span class="spotlight-kbd">Ctrl+G 跳转</span>
           <span class="spotlight-kbd" style="cursor:pointer;" onclick="closeSpotlight()">Esc</span>
         </div>
       </div>
+      <div class="spotlight-chips-row" id="spotlightChipsRow">
+        <span class="spotlight-chip active" data-cat="all" onclick="selectSpotlightCategory('all')">全部</span>
+        <span class="spotlight-chip" data-cat="folder" onclick="selectSpotlightCategory('folder')">文件夹</span>
+        <span class="spotlight-chip" data-cat="doc" onclick="selectSpotlightCategory('doc')">文档</span>
+        <span class="spotlight-chip" data-cat="pic" onclick="selectSpotlightCategory('pic')">图片</span>
+        <span class="spotlight-chip" data-cat="video" onclick="selectSpotlightCategory('video')">视频</span>
+        <span class="spotlight-chip" data-cat="audio" onclick="selectSpotlightCategory('audio')">音频</span>
+        <span class="spotlight-chip" data-cat="archive" onclick="selectSpotlightCategory('archive')">压缩包</span>
+        <span class="spotlight-chip" data-cat="app" onclick="selectSpotlightCategory('app')">应用</span>
+      </div>
       <div id="spotlightResultsContainer" class="spotlight-results">
-        <div style="padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 13px;">输入关键词即刻全盘毫秒检索 · 上下键选择 · 回车打开 · Tab 动作流水线</div>
+        <div style="padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 13px;">输入关键词或拼音首字母即刻全盘毫秒检索 · 上下键选择 · 回车打开 · Tab 动作流水线</div>
       </div>
       <div class="spotlight-footer">
         <span id="spotlightStatusText">CleanFlow Pro Spotlight (对齐 Listary 悬浮搜索与即搜即走架构)</span>
@@ -3484,6 +3543,23 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     }
 
     let searchDebounceTimer = null;
+    let mainSearchCurrentCategory = 'all';
+
+    function selectMainSearchCategory(cat) {
+      mainSearchCurrentCategory = cat;
+      const chips = document.querySelectorAll('#mainSearchChipsRow .spotlight-chip');
+      chips.forEach(c => {
+        if (c.getAttribute('data-cat') === cat) {
+          c.classList.add('active');
+        } else {
+          c.classList.remove('active');
+        }
+      });
+      const inp = document.getElementById('searchInputField');
+      const val = inp ? inp.value.trim() : '';
+      executeDiskSearch(val);
+    }
+
     function onSearchInput(val) {
       if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
       searchDebounceTimer = setTimeout(() => {
@@ -3496,6 +3572,12 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       if (inp) {
         inp.value = '';
         inp.focus();
+        mainSearchCurrentCategory = 'all';
+        const chips = document.querySelectorAll('#mainSearchChipsRow .spotlight-chip');
+        chips.forEach(c => {
+          if (c.getAttribute('data-cat') === 'all') c.classList.add('active');
+          else c.classList.remove('active');
+        });
         executeDiskSearch('');
       }
     }
@@ -3746,9 +3828,9 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         launcherContainer.innerHTML = '';
       }
 
-      if (!query) {
+      if (!query && mainSearchCurrentCategory === 'all') {
         currentSearchHits = [];
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 36px; color: var(--text-tertiary);">请输入检索词或点击上方预设，体验 ~1ms 极速检索与治理动作</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 36px; color: var(--text-tertiary);">请输入检索词、拼音首字母(如jsq/wx)或点击分类药丸/预设，体验 ~1ms 极速检索与治理动作</td></tr>';
         if (title) title.innerText = '检索结果 (0 项)';
         return;
       }
@@ -3764,9 +3846,13 @@ HTML_CONTENT = r'''<!DOCTYPE html>
 
       const t0 = performance.now();
       try {
-        const endpoint = isGrepMode 
+        let endpoint = isGrepMode 
           ? ('/api/search/grep?q=' + encodeURIComponent(effectiveQuery))
           : ('/api/search/query?q=' + encodeURIComponent(effectiveQuery));
+
+        if (!isGrepMode && mainSearchCurrentCategory && mainSearchCurrentCategory !== 'all') {
+          endpoint += (endpoint.includes('?') ? '&' : '?') + 'category=' + encodeURIComponent(mainSearchCurrentCategory);
+        }
 
         const res = await fetch(endpoint);
         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -5649,6 +5735,88 @@ HTML_CONTENT = r'''<!DOCTYPE html>
     let spotlightHits = [];
     let spotlightSelectedIndex = 0;
     let spotlightTimer = null;
+    let spotlightCurrentCategory = 'all';
+    let queryHistoryList = [];
+    let queryHistoryIndex = -1;
+    let spotlightIsShowingRecent = false;
+
+    async function loadSpotlightHistoryQueries() {
+      try {
+        const res = await fetch('/api/history/queries');
+        if (res.ok) {
+          queryHistoryList = await res.json();
+          queryHistoryIndex = -1;
+        }
+      } catch (e) {
+        console.warn('加载检索词历史失败:', e);
+      }
+    }
+
+    async function loadRecentSpotlightFiles() {
+      const container = document.getElementById('spotlightResultsContainer');
+      const statusText = document.getElementById('spotlightStatusText');
+      if (!container) return;
+      try {
+        const res = await fetch('/api/history/recent');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        let items = data || [];
+
+        if (spotlightCurrentCategory !== 'all') {
+          items = items.filter(it => {
+            const name = (it.file_name || it.path || '').toLowerCase();
+            const ext = name.includes('.') ? name.split('.').pop() : '';
+            if (spotlightCurrentCategory === 'folder') return it.is_dir;
+            if (spotlightCurrentCategory === 'doc') return ['txt', 'md', 'doc', 'docx', 'pdf', 'xlsx', 'xls', 'pptx', 'ppt', 'csv', 'json', 'yaml', 'toml', 'xml', 'log'].includes(ext);
+            if (spotlightCurrentCategory === 'pic') return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'ico', 'tiff', 'psd'].includes(ext);
+            if (spotlightCurrentCategory === 'video') return ['mp4', 'mkv', 'avi', 'mov', 'wmv', 'flv', 'webm', 'm4v'].includes(ext);
+            if (spotlightCurrentCategory === 'audio') return ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma'].includes(ext);
+            if (spotlightCurrentCategory === 'archive') return ['zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'xz', 'iso'].includes(ext);
+            if (spotlightCurrentCategory === 'app') return ['exe', 'msi', 'bat', 'cmd', 'ps1', 'lnk'].includes(ext);
+            return true;
+          });
+        }
+
+        spotlightHits = items.map(it => ({
+          name: it.file_name || it.path,
+          path: it.path,
+          is_dir: it.is_dir,
+          size_bytes: 0,
+          detail: `历史访问: ${it.access_count} 次 · ${it.accessed_at || '近期'}`,
+          is_recent: true
+        }));
+        spotlightSelectedIndex = 0;
+        spotlightIsShowingRecent = true;
+
+        if (statusText) {
+          statusText.innerText = items.length > 0 
+            ? `最近打开与历史访问 (${items.length} 项) · ↑↓ 翻看检索词历史，回车快速打开`
+            : '输入关键词或拼音首字母即刻全盘毫秒检索 · 上下键选择 · 回车打开 · Tab 动作流水线';
+        }
+        renderSpotlightHits();
+      } catch (e) {
+        console.warn('加载最近文件历史失败:', e);
+      }
+    }
+
+    function selectSpotlightCategory(cat) {
+      spotlightCurrentCategory = cat;
+      const chips = document.querySelectorAll('#spotlightChipsRow .spotlight-chip');
+      chips.forEach(c => {
+        if (c.getAttribute('data-cat') === cat) {
+          c.classList.add('active');
+        } else {
+          c.classList.remove('active');
+        }
+      });
+      const input = document.getElementById('spotlightInput');
+      const query = input ? input.value.trim() : '';
+      if (query) {
+        executeSpotlightSearch(query);
+      } else {
+        loadRecentSpotlightFiles();
+      }
+    }
 
     function openSpotlight() {
       const overlay = document.getElementById('spotlightOverlay');
@@ -5657,9 +5825,17 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       overlay.style.display = 'flex';
       input.value = '';
       input.focus();
+      spotlightCurrentCategory = 'all';
+      const chips = document.querySelectorAll('#spotlightChipsRow .spotlight-chip');
+      chips.forEach(c => {
+        if (c.getAttribute('data-cat') === 'all') c.classList.add('active');
+        else c.classList.remove('active');
+      });
       spotlightHits = [];
       spotlightSelectedIndex = 0;
-      renderSpotlightHits();
+      queryHistoryIndex = -1;
+      loadSpotlightHistoryQueries();
+      loadRecentSpotlightFiles();
     }
 
     function closeSpotlight() {
@@ -5677,11 +5853,11 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       if (spotlightTimer) clearTimeout(spotlightTimer);
       const query = val.trim();
       if (!query) {
-        spotlightHits = [];
-        spotlightSelectedIndex = 0;
-        renderSpotlightHits();
+        queryHistoryIndex = -1;
+        loadRecentSpotlightFiles();
         return;
       }
+      queryHistoryIndex = -1;
       spotlightTimer = setTimeout(() => {
         executeSpotlightSearch(query);
       }, 90);
@@ -5691,15 +5867,21 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       const container = document.getElementById('spotlightResultsContainer');
       const statusText = document.getElementById('spotlightStatusText');
       if (!container) return;
+      spotlightIsShowingRecent = false;
       try {
         const isGrep = query.startsWith('grep:') || query.startsWith('sym:');
         let effectiveQuery = query;
         if (!isGrep && !devNoiseShieldEnabled && !query.includes('shield:')) {
           effectiveQuery = query + ' shield:0';
         }
-        const endpoint = isGrep
+        let endpoint = isGrep
           ? ('/api/search/grep?q=' + encodeURIComponent(effectiveQuery))
           : ('/api/search/query?q=' + encodeURIComponent(effectiveQuery));
+
+        if (!isGrep && spotlightCurrentCategory && spotlightCurrentCategory !== 'all') {
+          endpoint += (endpoint.includes('?') ? '&' : '?') + 'category=' + encodeURIComponent(spotlightCurrentCategory);
+        }
+
         const res = await fetch(endpoint);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
@@ -5742,7 +5924,10 @@ HTML_CONTENT = r'''<!DOCTYPE html>
       const container = document.getElementById('spotlightResultsContainer');
       if (!container) return;
       if (spotlightHits.length === 0) {
-        container.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 13px;">输入关键词即刻全盘毫秒检索 · 上下键选择 · 回车打开 · Tab 动作流水线</div>`;
+        const emptyMsg = spotlightIsShowingRecent 
+          ? '暂无最近打开历史 · 输入关键词或拼音首字母即可全盘检索'
+          : '未找到匹配结果 (支持全拼、声母首字母如 jsq/wx, 1-edit 容错纠错)';
+        container.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 13px;">${emptyMsg}</div>`;
         return;
       }
       container.innerHTML = spotlightHits.map((h, idx) => {
@@ -5768,7 +5953,17 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         const iconSvg = h.is_dir
           ? '<svg style="width:16px;height:16px;fill:#ffb900;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>'
           : '<svg style="width:16px;height:16px;fill:#60cdff;" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
-        const sizeBadge = h.is_dir ? '<span class="badge-pill badge-neutral">目录</span>' : `<span style="font-size:11px; color:var(--text-tertiary);">${formatBytes(h.size_bytes || 0)}</span>`;
+        
+        let sizeBadge = '';
+        if (h.is_dir) {
+          sizeBadge = '<span class="badge-pill badge-neutral">目录</span>';
+        } else if (h.is_recent) {
+          sizeBadge = '<span class="badge-pill badge-neutral" style="font-size:10px;">历史</span>';
+        } else {
+          sizeBadge = `<span style="font-size:11px; color:var(--text-tertiary);">${formatBytes(h.size_bytes || 0)}</span>`;
+        }
+
+        const pathDisplay = h.is_recent ? `${h.detail} · ${h.path}` : h.path;
 
         return `
           <div class="spotlight-item ${isSelected ? 'selected' : ''}" onclick="selectAndExecuteSpotlightHit(${idx})">
@@ -5776,7 +5971,7 @@ HTML_CONTENT = r'''<!DOCTYPE html>
               ${iconSvg}
               <div style="display:flex; flex-direction:column; overflow:hidden;">
                 <div class="spotlight-item-name">${escapeHtml(h.name)}</div>
-                <div class="spotlight-item-path" title="${escapeHtml(h.path)}">${escapeHtml(h.path)}</div>
+                <div class="spotlight-item-path" title="${escapeHtml(pathDisplay)}">${escapeHtml(pathDisplay)}</div>
               </div>
             </div>
             <div class="spotlight-item-meta">
@@ -5798,22 +5993,60 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         closeSpotlight();
         return;
       }
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        if (spotlightHits.length > 0) {
-          spotlightSelectedIndex = (spotlightSelectedIndex + 1) % spotlightHits.length;
-          renderSpotlightHits();
-        }
-        return;
-      }
+
+      const input = document.getElementById('spotlightInput');
+      const val = input ? input.value : '';
+
+      // ArrowUp: 遍历历史搜索词 (当输入框为空或已处于历史翻看状态时) 或向上移动条目
       if (e.key === 'ArrowUp') {
         e.preventDefault();
+        if ((!val.trim() || queryHistoryIndex >= 0) && queryHistoryList.length > 0) {
+          if (queryHistoryIndex === -1) {
+            queryHistoryIndex = 0;
+          } else {
+            queryHistoryIndex = (queryHistoryIndex + 1) % queryHistoryList.length;
+          }
+          if (input) {
+            input.value = queryHistoryList[queryHistoryIndex];
+            executeSpotlightSearch(input.value);
+          }
+          return;
+        }
+
         if (spotlightHits.length > 0) {
           spotlightSelectedIndex = (spotlightSelectedIndex - 1 + spotlightHits.length) % spotlightHits.length;
           renderSpotlightHits();
         }
         return;
       }
+
+      // ArrowDown: 遍历较新历史搜索词 或向下移动条目
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (queryHistoryIndex >= 0 && queryHistoryList.length > 0) {
+          if (queryHistoryIndex > 0) {
+            queryHistoryIndex--;
+            if (input) {
+              input.value = queryHistoryList[queryHistoryIndex];
+              executeSpotlightSearch(input.value);
+            }
+          } else {
+            queryHistoryIndex = -1;
+            if (input) {
+              input.value = '';
+              loadRecentSpotlightFiles();
+            }
+          }
+          return;
+        }
+
+        if (spotlightHits.length > 0) {
+          spotlightSelectedIndex = (spotlightSelectedIndex + 1) % spotlightHits.length;
+          renderSpotlightHits();
+        }
+        return;
+      }
+
       if (e.key === 'Enter') {
         e.preventDefault();
         if (spotlightHits[spotlightSelectedIndex]) {
@@ -5848,6 +6081,13 @@ HTML_CONTENT = r'''<!DOCTYPE html>
         closeSpotlight();
         return;
       }
+      // 记录最近使用文件
+      fetch('/api/history/record-file', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: item.path })
+      }).catch(() => {});
+
       revealInExplorer(item.path);
       closeSpotlight();
     }

@@ -195,6 +195,7 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
 
                 match target_path {
                     Some(p) => {
+                        crate::history::get_global_history().record_file(&p);
                         let _ = reveal_in_explorer(&p);
                         send_json_response(request, r#"{"success": true}"#.to_string());
                     }
@@ -891,19 +892,21 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                 let res_json = serde_json::to_string(&vols).unwrap_or_else(|_| "[]".to_string());
                 send_json_response(request, res_json);
             } else if url.starts_with("/api/search/query") && method == Method::Get {
-                // Parse query from URL, e.g. /api/search/query?q=cagro.toml
+                // Parse query from URL, e.g. /api/search/query?q=cagro.toml&category=pic
                 let query_str = if let Some(pos) = url.find("?q=") {
                     let raw = &url[pos + 3..];
-                    // Split at next param & if any
                     let encoded = raw.split('&').next().unwrap_or(raw);
-                    // Simple URL decoding
-                    let decoded = match percent_decode_str(encoded) {
-                        Some(s) => s,
-                        None => encoded.to_string(),
-                    };
-                    decoded
+                    percent_decode_str(encoded).unwrap_or_else(|| encoded.to_string())
                 } else {
                     String::new()
+                };
+
+                let category_param = if let Some(pos) = url.find("category=") {
+                    let raw = &url[pos + 9..];
+                    let encoded = raw.split('&').next().unwrap_or(raw);
+                    percent_decode_str(encoded).or_else(|| Some(encoded.to_string()))
+                } else {
+                    None
                 };
 
                 static SEARCH_INDEX_CACHE: std::sync::OnceLock<std::sync::RwLock<Vec<crate::search_index::VolumeIndex>>> = std::sync::OnceLock::new();
@@ -911,7 +914,18 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                     std::sync::RwLock::new(crate::search_index::get_or_build_all_indexes(Some(4)))
                 });
 
-                let parsed_q = crate::search_engine::ParsedSearchQuery::parse(&query_str);
+                let mut parsed_q = crate::search_engine::ParsedSearchQuery::parse(&query_str);
+                if let Some(cat) = category_param {
+                    if !cat.is_empty() && cat != "all" {
+                        parsed_q.category = Some(cat);
+                    }
+                }
+
+                // Record valid query into history
+                if !query_str.trim().is_empty() && query_str.trim().len() >= 2 {
+                    crate::history::get_global_history().record_query(&query_str);
+                }
+
                 let launcher_hit = crate::launcher::detect_launcher_action(&query_str);
                 let hits = if let Ok(guard) = lock.read() {
                     crate::search_engine::execute_search(&guard, &parsed_q)
@@ -921,11 +935,42 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
 
                 let res_json = serde_json::json!({
                     "query": query_str,
+                    "category": parsed_q.category,
                     "total_hits": hits.len(),
                     "hits": hits,
                     "launcher_hit": launcher_hit,
                 }).to_string();
                 send_json_response(request, res_json);
+            } else if url == "/api/history/recent" && method == Method::Get {
+                let recent = crate::history::get_global_history().get_recent_files(30);
+                let res_json = serde_json::to_string(&recent).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, res_json);
+            } else if url == "/api/history/queries" && method == Method::Get {
+                let queries = crate::history::get_global_history().get_recent_queries(20);
+                let res_json = serde_json::to_string(&queries).unwrap_or_else(|_| "[]".to_string());
+                send_json_response(request, res_json);
+            } else if url == "/api/history/record-file" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+                #[derive(serde::Deserialize)]
+                struct RecFileReq { path: String }
+                if let Ok(req) = serde_json::from_str::<RecFileReq>(&content) {
+                    crate::history::get_global_history().record_file(&req.path);
+                    send_json_response(request, r#"{"success": true}"#.to_string());
+                } else {
+                    send_json_response(request, r#"{"success": false}"#.to_string());
+                }
+            } else if url == "/api/history/record-query" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+                #[derive(serde::Deserialize)]
+                struct RecQueryReq { query: String }
+                if let Ok(req) = serde_json::from_str::<RecQueryReq>(&content) {
+                    crate::history::get_global_history().record_query(&req.query);
+                    send_json_response(request, r#"{"success": true}"#.to_string());
+                } else {
+                    send_json_response(request, r#"{"success": false}"#.to_string());
+                }
             } else if url.starts_with("/api/search/grep") && method == Method::Get {
                 let mut query_str = if let Some(pos) = url.find("?q=") {
                     let raw = &url[pos + 3..];
@@ -1029,6 +1074,7 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
 
                 match serde_json::from_str::<ActionReq>(&content) {
                     Ok(req) => {
+                        crate::history::get_global_history().record_file(&req.target_path);
                         let res = crate::action_runner::execute_action(&req.action_id, &req.target_path);
                         let json = serde_json::to_string(&res).unwrap_or_else(|_| "{}".to_string());
                         send_json_response(request, json);

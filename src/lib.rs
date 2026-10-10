@@ -29,9 +29,13 @@ pub mod hotkey_manager;
 pub mod daemon_service;
 pub mod launcher;
 pub mod licensing;
+pub mod pinyin_matcher;
+pub mod history;
 
 pub use launcher::*;
 pub use licensing::*;
+pub use pinyin_matcher::*;
+pub use history::*;
 
 pub use cleaner::*;
 pub use disks::*;

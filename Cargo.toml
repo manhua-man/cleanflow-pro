@@ -16,6 +16,7 @@ regex = "1.11"
 tiny_http = "0.12"
 blake3 = { version = "1.5", features = ["rayon"] }
 hex = "0.4.3"
+pinyin = "0.11.0"
 
 [dev-dependencies]
 md-5 = "0.11.0"

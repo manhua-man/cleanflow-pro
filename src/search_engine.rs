@@ -1,4 +1,4 @@
-use crate::fuzzy_matcher::{score_fuzzy_match, MatchQuality};
+use crate::fuzzy_matcher::MatchQuality;
 use crate::search_index::VolumeIndex;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -17,6 +17,7 @@ pub struct ParsedSearchQuery {
     // Pro Features: RegEx and Noise Shielding
     pub regex_pattern: Option<String>,
     pub shield_noise: bool,
+    pub category: Option<String>,
 }
 
 impl ParsedSearchQuery {
@@ -31,6 +32,7 @@ impl ParsedSearchQuery {
         let mut only_files = false;
         let mut regex_pattern = None;
         let mut shield_noise = true; // Enabled by default
+        let mut category = None;
         let limit = 50;
 
         for part in trimmed.split_whitespace() {
@@ -49,8 +51,41 @@ impl ParsedSearchQuery {
                 min_size = parse_size_str(&part[6..]);
             } else if lower.starts_with("size:<") {
                 max_size = parse_size_str(&part[6..]);
+            } else if lower.starts_with("category:") || lower.starts_with("cat:") {
+                let cat = if lower.starts_with("category:") { &lower[9..] } else { &lower[4..] };
+                category = Some(cat.to_string());
+            } else if lower.starts_with("pic:") || lower.starts_with("picture:") {
+                category = Some("pic".to_string());
+                let rest = if lower.starts_with("pic:") { &part[4..] } else { &part[8..] };
+                if !rest.is_empty() { terms.push(rest.to_string()); }
+            } else if lower.starts_with("doc:") || lower.starts_with("document:") {
+                category = Some("doc".to_string());
+                let rest = if lower.starts_with("doc:") { &part[4..] } else { &part[9..] };
+                if !rest.is_empty() { terms.push(rest.to_string()); }
+            } else if lower.starts_with("video:") {
+                category = Some("video".to_string());
+                let rest = &part[6..];
+                if !rest.is_empty() { terms.push(rest.to_string()); }
+            } else if lower.starts_with("audio:") || lower.starts_with("music:") {
+                category = Some("audio".to_string());
+                let rest = if lower.starts_with("audio:") { &part[6..] } else { &part[6..] };
+                if !rest.is_empty() { terms.push(rest.to_string()); }
+            } else if lower.starts_with("folder:") || lower.starts_with("dir:") {
+                category = Some("folder".to_string());
+                only_dirs = true;
+                let rest = if lower.starts_with("folder:") { &part[7..] } else { &part[4..] };
+                if !rest.is_empty() { terms.push(rest.to_string()); }
+            } else if lower.starts_with("archive:") || lower.starts_with("zip:") {
+                category = Some("archive".to_string());
+                let rest = if lower.starts_with("archive:") { &part[8..] } else { &part[4..] };
+                if !rest.is_empty() { terms.push(rest.to_string()); }
+            } else if lower.starts_with("app:") || lower.starts_with("exe:") {
+                category = Some("app".to_string());
+                let rest = if lower.starts_with("app:") { &part[4..] } else { &part[4..] };
+                if !rest.is_empty() { terms.push(rest.to_string()); }
             } else if lower == "type:dir" || lower == "kind:dir" || lower == "kind:folder" {
                 only_dirs = true;
+                category = Some("folder".to_string());
             } else if lower == "type:file" || lower == "kind:file" {
                 only_files = true;
             } else {
@@ -70,7 +105,53 @@ impl ParsedSearchQuery {
             limit,
             regex_pattern,
             shield_noise,
+            category,
         }
+    }
+}
+
+pub fn matches_category(name: &str, is_dir: bool, category: &str) -> bool {
+    let lower_cat = category.to_lowercase();
+    match lower_cat.as_str() {
+        "all" => true,
+        "folder" | "dir" => is_dir,
+        "doc" | "document" => {
+            if is_dir { return false; }
+            let lower = name.to_lowercase();
+            const DOC_EXTS: &[&str] = &["doc", "docx", "pdf", "txt", "xlsx", "xls", "pptx", "ppt", "md", "csv", "rtf", "epub"];
+            DOC_EXTS.iter().any(|ext| lower.ends_with(&format!(".{}", ext)))
+        }
+        "pic" | "picture" | "image" => {
+            if is_dir { return false; }
+            let lower = name.to_lowercase();
+            const PIC_EXTS: &[&str] = &["png", "jpg", "jpeg", "gif", "bmp", "webp", "svg", "ico", "psd", "ai", "tiff", "raw"];
+            PIC_EXTS.iter().any(|ext| lower.ends_with(&format!(".{}", ext)))
+        }
+        "video" => {
+            if is_dir { return false; }
+            let lower = name.to_lowercase();
+            const VIDEO_EXTS: &[&str] = &["mp4", "mkv", "avi", "mov", "wmv", "flv", "rmvb", "webm", "m4v"];
+            VIDEO_EXTS.iter().any(|ext| lower.ends_with(&format!(".{}", ext)))
+        }
+        "audio" | "music" => {
+            if is_dir { return false; }
+            let lower = name.to_lowercase();
+            const AUDIO_EXTS: &[&str] = &["mp3", "wav", "flac", "aac", "m4a", "ogg", "wma"];
+            AUDIO_EXTS.iter().any(|ext| lower.ends_with(&format!(".{}", ext)))
+        }
+        "archive" | "zip" => {
+            if is_dir { return false; }
+            let lower = name.to_lowercase();
+            const ARCHIVE_EXTS: &[&str] = &["zip", "rar", "7z", "tar", "gz", "bz2", "iso"];
+            ARCHIVE_EXTS.iter().any(|ext| lower.ends_with(&format!(".{}", ext)))
+        }
+        "app" | "exe" => {
+            if is_dir { return false; }
+            let lower = name.to_lowercase();
+            const APP_EXTS: &[&str] = &["exe", "lnk", "bat", "cmd", "msi"];
+            APP_EXTS.iter().any(|ext| lower.ends_with(&format!(".{}", ext)))
+        }
+        _ => true,
     }
 }
 
@@ -174,6 +255,13 @@ pub fn execute_search(
                         return None;
                     }
 
+                    // 3.5. Category macro constraints (Filter Chips)
+                    if let Some(ref cat) = query.category {
+                        if !matches_category(&entry.name, entry.is_dir, cat) {
+                            return None;
+                        }
+                    }
+
                     // 4. Size constraints
                     if let Some(min_s) = query.min_size {
                         if entry.size_bytes < min_s {
@@ -200,7 +288,7 @@ pub fn execute_search(
                         }
                     }
 
-                    // 7. Query term matching & Priority Boost
+                    // 7. Query term matching & Priority Boost (Pinyin Aware)
                     let (best_quality, mut total_score) = if query.terms.is_empty() {
                         if compiled_regex.is_some() {
                             (MatchQuality::Exact, 120)
@@ -212,10 +300,10 @@ pub fn execute_search(
                         let mut sum_score = 0;
 
                         for term in &query.terms {
-                            let match_res = score_fuzzy_match(&entry.name, term);
+                            let match_res = crate::pinyin_matcher::score_pinyin_aware_match(&entry.name, term);
                             if match_res.quality == MatchQuality::None {
                                 // If base name doesn't match, check full path
-                                let path_match = score_fuzzy_match(&entry.path, term);
+                                let path_match = crate::pinyin_matcher::score_pinyin_aware_match(&entry.path, term);
                                 if path_match.quality == MatchQuality::None {
                                     return None;
                                 }

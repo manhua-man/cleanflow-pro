@@ -19,11 +19,11 @@
 | :---: | :--- | :--- | :---: | :--- | :---: | :--- |
 | 1 | 检索与索引 | 1.1 NTFS MFT 裸设备流式解析 | [已吸收落地] | src/mft_scanner.rs (`read_volume_mft_stream`) | 免费版 | 纯 Rust 绕过 Win32 API 直读裸卷，1-3ms 检索数十万节点并重建路径树 |
 | 2 | 检索与索引 | 1.2 USN Journal 增量监听 | [部分吸收] | src/usn_scanner.rs (`enum_usn_giant_files`) | Pro版 | 已实现 USN 大文件流式枚举，后台常驻实时变更监听线程正在补齐 |
-| 3 | 检索与索引 | 1.3 汉字拼音与声母全拼检索 | [未吸收] | 尚未内置拼音字库 (规划中) | 免费版 | 当前仅支持英文/汉字字面量/子序列，输入 jsq 尚无法搜出计算器，第一优先级待办 |
+| 3 | 检索与索引 | 1.3 汉字拼音与声母全拼检索 | [已吸收落地] | src/pinyin_matcher.rs, src/search_engine.rs | 免费版 | 内置 pinyin 拼音影子索引，支持声母缩写(如 jsq 搜计算器、wx 搜微信)与全拼秒搜 |
 | 4 | 检索与索引 | 1.4 字符非连续模糊子序列匹配 | [已吸收落地] | src/fuzzy_matcher.rs (`fuzzy_match`) | 免费版 | 支持跳跃字符匹配，按连续命中长度与词首边界加权评分 |
 | 5 | 检索与索引 | 1.5 系统保护与敏感目录默认排除 | [已吸收落地] | src/search_engine.rs (`is_dev_noise_path`) | 免费版 | 内置屏蔽 $Recycle.Bin, System Volume Information, pagefile.sys 等 |
 | 6 | 检索与索引 | 1.6 专有工程目录索引加权 | [已吸收落地] | src/search_engine.rs (`is_high_priority_path`) | Pro版 | 自动识别工程工作区目录并赋予 +25 分置顶加权，超越原版需手动配置 |
-| 7 | 检索与索引 | 1.7 动态类型前缀过滤器 (folder:, pic:) | [部分吸收] | src/search_engine.rs (`extension_filter`) | 免费版 | 后端支持按扩展名识别过滤，前端界面尚未做类似 Listary 的药丸标签按钮 |
+| 7 | 检索与索引 | 1.7 动态类型前缀过滤器 (folder:, pic:) | [已吸收落地] | src/search_engine.rs, generate_consumer_ui.py | 免费版 | 前端原生集成 Fluent 药丸过滤按钮([全部][文件夹][文档][图片][视频][音频][压缩包][应用])，后端高效过滤 |
 | 8 | 唤醒与交互 | 2.1 双击 Ctrl 底层键盘钩子唤出 | [已吸收落地] | src/hotkey_manager.rs (`double_ctrl_hook_proc`) | Pro版 | Win32 WH_KEYBOARD_LL 钩子，计算两次 Ctrl 按下间隔 <=350ms 呼出 Spotlight |
 | 9 | 唤醒与交互 | 2.2 Win32 标准全局热键 (Alt+Space) | [已吸收落地] | src/hotkey_manager.rs (`RegisterHotKey`) | 免费版 | Windows 原生全局热键常驻监听，与双击 Ctrl 并存保障唤醒 |
 | 10 | 唤醒与交互 | 2.3 资源管理器视口空白处双击唤出 | [主动舍弃] | 无 (工程取舍) | - | 长期挂接 WH_MOUSE_LL 鼠标低级钩子会导致高回报率电竞鼠标微卡掉帧，主动放弃 |
@@ -49,9 +49,9 @@
 | 30 | 网络直达 | 6.1 URL 模板替换引擎 | [已吸收落地] | src/launcher.rs | 免费/Pro | 支持 https://.../search?q={query} 格式定义与参数注入 |
 | 31 | 网络直达 | 6.2 预置搜索引擎与开发者生态直达 | [已吸收落地] | src/launcher.rs | 免费/Pro | 免费版开放 bd, bing, gg；Pro 版开放 gh, cargo, npm, so, py, docker |
 | 32 | 网络直达 | 6.3 默认浏览器原生无损唤起 | [已吸收落地] | src/launcher.rs | 免费版 | Win32 ShellExecuteW(0, "open", url) 直接调用默认浏览器打开 |
-| 33 | 收藏与历史 | 7.1 最近打开文件历史记录 | [未吸收] | 尚未开发 | 免费版 | 目前尚未维护全局最近打开历史记录表 |
+| 33 | 收藏与历史 | 7.1 最近打开文件历史记录 | [已吸收落地] | src/history.rs, src/server.rs, generate_consumer_ui.py | 免费版 | 全局持久化维护最近打开记录，Spotlight 空查询状态直接展示常用文件历史快捷启动 |
 | 34 | 收藏与历史 | 7.2 目录收藏夹管理与短别名 | [未吸收] | 尚未开发 | Pro版 | 目前尚未开发用户手动将目录加星标并设置别名的功能 |
-| 35 | 收藏与历史 | 7.3 检索词历史记忆 (上下键翻看) | [未吸收] | 尚未开发 | 免费版 | 目前在空白搜索框按上下键尚未支持切换历史检索词 |
+| 35 | 收藏与历史 | 7.3 检索词历史记忆 (上下键翻看) | [已吸收落地] | src/history.rs, src/server.rs, generate_consumer_ui.py | 免费版 | 搜索框与 Spotlight 支持上下方向键无缝翻看历史检索词，回车即搜 |
 | 36 | 系统集成 | 8.1 便携免安装配置存储 (Portable Mode) | [已吸收落地] | src/licensing.rs | 免费版 | 数据与授权文件均保存在工作区同级目录，无冗余注册表依赖 |
 | 37 | 系统集成 | 8.2 开机静默自启与托盘驻留 | [部分吸收] | src/server.rs | 免费版 | 支持后台运行服务，系统托盘图标模块正在接入 |
 | 38 | 商业底座 | 8.3 商业授权激活与 7 天体验流转 | [已吸收落地] | src/licensing.rs (`LicenseManager`) | 免费/Pro | Blake3 设备指纹，7 天无限制体验，Ed25519 离线激活码校验 |
@@ -110,9 +110,9 @@
 ================================================================================
 
 1. Listary 原版特性 (共 38 项)
-   [已吸收落地] : 18 项 (47.4%) -> 核心检索、双击Ctrl、Quick Switch、动作宏、启动器等
-   [部分吸收]   :  6 项 (15.8%) -> USN日志、动态过滤药丸、自定义动作GUI、属性面板等
-   [未吸收]     : 11 项 (28.9%) -> 汉字拼音检索(高优)、收藏夹、历史记录、TC/DOpus适配等
+   [已吸收落地] : 22 项 (57.9%) -> 核心检索、拼音全拼/声母、分类药丸、历史记忆流、双击Ctrl、Quick Switch、动作宏、启动器等
+   [部分吸收]   :  5 项 (13.2%) -> USN日志、自定义动作GUI、属性面板、系统托盘等
+   [未吸收]     :  8 项 (21.1%) -> 目录收藏夹、TC/DOpus适配、鼠标中键滚轮等
    [主动舍弃]   :  3 项 ( 7.9%) -> 鼠标空白双击钩子、Explorer DLL注入、手写复杂宏
 
 2. fsearch 原版特性 (共 26 项)
