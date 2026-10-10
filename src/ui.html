@@ -2170,7 +2170,7 @@
               <div style="display: flex; gap: 12px; align-items: flex-end;">
                 <div style="flex: 2;">
                   <label style="font-size: 11.5px; color: var(--text-secondary); display: block; margin-bottom: 5px;">排查目标路径</label>
-                  <input type="text" id="dupScanPathInput" value="C:\\Users\\EDY\\Downloads" style="width: 100%; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 6px 10px; color: #fff; font-size: 12px; outline: none; font-family: var(--font-mono);">
+                  <input type="text" id="dupScanPathInput" value="" placeholder="正在自动加载用户下载目录..." style="width: 100%; background: var(--fill-subtle); border: 1px solid var(--stroke-card); border-radius: var(--radius-sm); padding: 6px 10px; color: #fff; font-size: 12px; outline: none; font-family: var(--font-mono);">
                 </div>
                 <div style="flex: 1;">
                   <label style="font-size: 11.5px; color: var(--text-secondary); display: block; margin-bottom: 5px;">最小文件阈值</label>
@@ -3057,7 +3057,7 @@
         <div>
           <label style="font-size:11.5px; color:var(--text-secondary); display:block; margin-bottom:4px;">源目录绝对路径 (C: 盘)</label>
           <div style="display:flex; gap:6px;">
-            <input type="text" id="customMigrateSource" placeholder="例如: C:\Users\EDY\.ollama\models" style="flex:1; background:var(--fill-subtle); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:6px 10px; color:#fff; font-size:12px; outline:none; font-family:var(--font-mono);" oninput="onMigrateSourceInput()">
+            <input type="text" id="customMigrateSource" placeholder="例如: %USERPROFILE%\.ollama\models 或直接点击上方预设" style="flex:1; background:var(--fill-subtle); border:1px solid var(--stroke-card); border-radius:var(--radius-sm); padding:6px 10px; color:#fff; font-size:12px; outline:none; font-family:var(--font-mono);" oninput="onMigrateSourceInput()">
             <button class="btn btn-secondary" style="padding:4px 10px; font-size:11px;" onclick="analyzeCustomMigrationPath()">检测体积</button>
           </div>
         </div>
@@ -6630,7 +6630,7 @@
       isScanning: false
     };
 
-    const MOCK_RESCUE_DATA = {
+    window.MOCK_RESCUE_DATA = {
       mft: [
         { id: 'mft-1', name: 'train_checkpoint_epoch12.safetensors', path: 'C:\\Projects\\DeepSeek-R1-Distill\\output\\train_checkpoint_epoch12.safetensors', size: 1954189312, time: '22 分钟前 (Shift+Del)', health: '完整 (100% 簇未被覆写)', healthClass: '#10b981' },
         { id: 'mft-2', name: 'experiment_results.ipynb', path: 'C:\\Users\\EDY\\workspace\\ai-lab\\notebooks\\experiment_results.ipynb', size: 493568, time: '35 分钟前 (清空回收站)', health: '完整 (100% 簇未被覆写)', healthClass: '#10b981' },
@@ -6853,7 +6853,7 @@
     }
 
     // High-Value Migration Presets (Pillar 1)
-    const MIGRATION_PRESETS = [
+    let MIGRATION_PRESETS = [
       { name: 'Ollama 本地模型', path: 'C:\\Users\\EDY\\.ollama\\models', note: 'AI 核心资产' },
       { name: 'HuggingFace 权重', path: 'C:\\Users\\EDY\\.cache\\huggingface\\hub', note: 'AI 缓存' },
       { name: 'PyTorch Hub 模型', path: 'C:\\Users\\EDY\\.cache\\torch\\hub', note: 'AI 权重' },
@@ -8702,8 +8702,53 @@
       }
     }
 
+    async function loadSystemPaths() {
+      try {
+        const res = await fetch('/api/system/paths');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.downloads) {
+          const dupInput = document.getElementById('dupScanPathInput');
+          if (dupInput) dupInput.value = data.downloads;
+        }
+        if (data.user_profile) {
+          const srcInput = document.getElementById('customMigrateSource');
+          if (srcInput) srcInput.placeholder = `例如: ${data.user_profile}\\.ollama\\models 或直接点击上方预设`;
+
+          if (Array.isArray(MIGRATION_PRESETS) && MIGRATION_PRESETS.length >= 8) {
+            MIGRATION_PRESETS[0].path = `${data.user_profile}\\.ollama\\models`;
+            MIGRATION_PRESETS[1].path = `${data.user_profile}\\.cache\\huggingface\\hub`;
+            MIGRATION_PRESETS[2].path = `${data.user_profile}\\.cache\\torch\\hub`;
+            if (data.documents) {
+              MIGRATION_PRESETS[6].path = `${data.documents}\\WeChat Files`;
+            }
+            if (data.local_app_data) {
+              MIGRATION_PRESETS[7].path = `${data.local_app_data}\\Android\\Sdk`;
+            }
+            renderMigrationPresets();
+          }
+
+          if (window.MOCK_RESCUE_DATA) {
+            Object.values(window.MOCK_RESCUE_DATA).forEach(list => {
+              list.forEach(item => {
+                if (typeof item.path === 'string') {
+                  item.path = item.path.replace(/C:\\Users\\EDY/g, data.user_profile);
+                }
+              });
+            });
+            if (window.rescueState && window.rescueState.mode) {
+              selectRescueMode(window.rescueState.mode);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load system paths', e);
+      }
+    }
+
     // Init
     window.addEventListener('DOMContentLoaded', () => {
+      loadSystemPaths();
       refreshDisks();
       runScan();
       loadActiveJunctions();

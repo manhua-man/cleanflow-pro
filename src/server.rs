@@ -812,6 +812,22 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                 let events = guard_mgr_clone.evaluate_and_run_self_healing(&drive);
                 let json = serde_json::to_string(&events).unwrap_or_else(|_| "[]".to_string());
                 send_json_response(request, json);
+            } else if url == "/api/system/paths" && method == Method::Get {
+                let user_profile = std::env::var("USERPROFILE").unwrap_or_else(|_| "C:\\Users\\Default".to_string());
+                let username = std::env::var("USERNAME").unwrap_or_else(|_| "User".to_string());
+                let downloads = format!("{}\\Downloads", user_profile);
+                let documents = format!("{}\\Documents", user_profile);
+                let local_app_data = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| format!("{}\\AppData\\Local", user_profile));
+                let app_data = std::env::var("APPDATA").unwrap_or_else(|_| format!("{}\\AppData\\Roaming", user_profile));
+                let json = serde_json::json!({
+                    "user_profile": user_profile,
+                    "username": username,
+                    "downloads": downloads,
+                    "documents": documents,
+                    "local_app_data": local_app_data,
+                    "app_data": app_data,
+                }).to_string();
+                send_json_response(request, json);
             } else if url == "/api/system/maintenance" && method == Method::Get {
                 let status = crate::system_tools::get_system_maintenance_status();
                 let json = serde_json::to_string(&status).unwrap_or_else(|_| "{}".to_string());
@@ -1724,5 +1740,16 @@ fn percent_decode_str(input: &str) -> Option<String> {
         }
     }
     String::from_utf8(bytes).ok()
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_system_paths_query() {
+        let user_profile = std::env::var("USERPROFILE").unwrap_or_else(|_| "C:\\Users\\Default".to_string());
+        let downloads = format!("{}\\Downloads", user_profile);
+        assert!(!user_profile.is_empty());
+        assert!(downloads.ends_with("Downloads"));
+    }
 }
 
