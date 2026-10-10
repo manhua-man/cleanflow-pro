@@ -31,7 +31,7 @@
   }
   ```
 - **匹配执行逻辑**：
-  在 [src/fuzzy_matcher.rs](file:///C:/Users/EDY/.gemini/antigravity/scratch/devcleaner/src/fuzzy_matcher.rs) 中：
+  在 [src/fuzzy_matcher.rs](../../src/fuzzy_matcher.rs) 中：
   1. 优先执行原始名称字符匹配；
   2. 若未命中且输入为全 ASCII 字母，则在 `pinyin_initials`（声母缩写）与 `pinyin_full`（全拼）上并行跑模糊匹配；
   3. 声母精确对齐赋予额外加权得分，确保输入 `jsq` 时 `计算器.exe` 稳居第一位。
@@ -41,7 +41,7 @@
 ### 2.2 可视化类型过滤药丸 (Visual Filter Chips)
 
 #### 分类定义与扩展名宏映射表
-后端在 [src/search_engine.rs](file:///C:/Users/EDY/.gemini/antigravity/scratch/devcleaner/src/search_engine.rs) 建立工业级扩展名映射表：
+后端在 [src/search_engine.rs](../../src/search_engine.rs) 建立工业级扩展名映射表：
 
 | 药丸标识 (Chip Key) | 中文标签 | 判定逻辑 / 涵盖扩展名集合 |
 | :--- | :--- | :--- |

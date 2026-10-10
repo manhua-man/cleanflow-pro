@@ -16,6 +16,15 @@ CleanFlow Pro 是一款基于 Rust 原生内核打造的高性能、工业级 Wi
 
 ---
 
+## 开发者与架构文档导航
+
+- **协作法则与安全守则 (Tier 2 法)**: [CLAUDE.md](CLAUDE.md)
+- **系统单源真值与模块地图 (Tier 2 事)**: [AGENTS.md](AGENTS.md)
+- **全域架构与业务文档总控 (Tier 3)**: [docs/README.md](docs/README.md)
+- **演进路线图与前沿规划**: [ROADMAP.md](ROADMAP.md)
+
+---
+
 ## 架构概览与技术拓扑
 
 ```mermaid

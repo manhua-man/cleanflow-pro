@@ -1,7 +1,7 @@
 # CleanFlow 全量功能清单吸收与落地审计总表 (Master Feature Absorption Audit Report)
 
 本文档针对 Listary（原版 38 项特性）与 fsearch（原版 26 项特性）提供逐项 1 对 1 的工程吸收审计。
-所有状态严格基于当前代码仓库（commit: 890d371）真实实现情况标注，绝无夸大。
+所有状态严格基于当前代码仓库（Commit: 949a665，Release: v0.4.5）真实实现情况标注，绝无夸大。
 
 ---
 
