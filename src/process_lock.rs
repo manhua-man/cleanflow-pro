@@ -12,7 +12,13 @@ pub struct ProcessLockInfo {
 
 fn get_running_processes_map() -> HashMap<String, u32> {
     let mut map = HashMap::new();
-    if let Ok(output) = Command::new("tasklist").args(["/FO", "CSV", "/NH"]).output() {
+    let mut cmd = Command::new("tasklist");
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000);
+    }
+    if let Ok(output) = cmd.args(["/FO", "CSV", "/NH"]).output() {
         let text = String::from_utf8_lossy(&output.stdout);
         for line in text.lines() {
             let line = line.trim();
@@ -104,7 +110,13 @@ pub fn kill_process_by_name(proc_name: &str) -> Result<()> {
         format!("{}.exe", proc_name)
     };
 
-    let status = Command::new("taskkill")
+    let mut cmd = Command::new("taskkill");
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000);
+    }
+    let status = cmd
         .args(["/F", "/IM", &clean_name])
         .status()?;
 

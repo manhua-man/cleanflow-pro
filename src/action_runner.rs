@@ -731,8 +731,9 @@ impl CustomActionManager {
             }
         }
 
+        let parsed_args = split_command_args(&expanded_args);
         let res = Command::new(&expanded_program)
-            .args(expanded_args.split_whitespace())
+            .args(&parsed_args)
             .spawn();
 
         match res {
@@ -740,6 +741,29 @@ impl CustomActionManager {
             Err(e) => Err(format!("执行自定义动作异常: {}", e)),
         }
     }
+}
+
+pub fn split_command_args(input: &str) -> Vec<String> {
+    let mut args = Vec::new();
+    let mut current = String::new();
+    let mut in_quotes = false;
+
+    for c in input.chars() {
+        if c == '"' {
+            in_quotes = !in_quotes;
+        } else if c.is_whitespace() && !in_quotes {
+            if !current.is_empty() {
+                args.push(current);
+                current = String::new();
+            }
+        } else {
+            current.push(c);
+        }
+    }
+    if !current.is_empty() {
+        args.push(current);
+    }
+    args
 }
 
 static GLOBAL_CUSTOM_ACTIONS: std::sync::OnceLock<std::sync::RwLock<CustomActionManager>> = std::sync::OnceLock::new();
@@ -933,5 +957,16 @@ mod tests {
         let res = execute_action("properties", "C:\\nonexistent_dummy_file_for_unit_test.xyz");
         assert!(!res.success);
         assert!(res.message.contains("目标路径不存在"));
+    }
+
+    #[test]
+    fn test_split_command_args() {
+        let args = split_command_args("\"C:\\Program Files\\App\\file.txt\" --name \"My Project\" --debug");
+        assert_eq!(args, vec![
+            "C:\\Program Files\\App\\file.txt".to_string(),
+            "--name".to_string(),
+            "My Project".to_string(),
+            "--debug".to_string(),
+        ]);
     }
 }

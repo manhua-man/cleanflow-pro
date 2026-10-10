@@ -38,7 +38,10 @@ impl TrayService {
 pub fn is_autostart_enabled() -> bool {
     #[cfg(windows)]
     {
-        let output = Command::new("reg")
+        use std::os::windows::process::CommandExt;
+        let mut cmd = Command::new("reg");
+        cmd.creation_flags(0x08000000);
+        let output = cmd
             .args([
                 "query",
                 "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
@@ -61,13 +64,16 @@ pub fn is_autostart_enabled() -> bool {
 pub fn set_autostart_enabled(enable: bool) -> Result<bool, String> {
     #[cfg(windows)]
     {
+        use std::os::windows::process::CommandExt;
         if enable {
             let exe_path = std::env::current_exe()
                 .map_err(|e| format!("获取自身执行路径失败: {}", e))?;
             let exe_str = exe_path.to_string_lossy();
             let val = format!("\"{}\" --silent", exe_str);
 
-            let status = Command::new("reg")
+            let mut cmd = Command::new("reg");
+            cmd.creation_flags(0x08000000);
+            let status = cmd
                 .args([
                     "add",
                     "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
@@ -88,7 +94,9 @@ pub fn set_autostart_enabled(enable: bool) -> Result<bool, String> {
                 Err("注册表写入命令返回错误".to_string())
             }
         } else {
-            let status = Command::new("reg")
+            let mut cmd = Command::new("reg");
+            cmd.creation_flags(0x08000000);
+            let status = cmd
                 .args([
                     "delete",
                     "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
@@ -178,6 +186,7 @@ mod ffi {
     pub const WM_RBUTTONUP: isize = 0x0205;
     pub const WM_DESTROY: u32 = 0x0002;
 
+    pub const WM_NULL: u32 = 0x0000;
     pub const TPM_BOTTOMALIGN: u32 = 0x0020;
     pub const TPM_RIGHTALIGN: u32 = 0x0008;
     pub const TPM_RETURNCMD: u32 = 0x0100;
@@ -230,6 +239,7 @@ mod ffi {
             h_wnd: isize,
             lptpm: *mut std::ffi::c_void,
         ) -> i32;
+        pub fn PostMessageW(h_wnd: isize, msg: u32, w_param: usize, l_param: isize) -> i32;
         pub fn GetMessageW(
             lp_msg: *mut Msg,
             h_wnd: isize,
@@ -293,6 +303,7 @@ unsafe extern "system" fn tray_window_proc(
                     std::ptr::null_mut(),
                 );
                 ffi::DestroyMenu(hmenu);
+                ffi::PostMessageW(hwnd, ffi::WM_NULL, 0, 0);
 
                 match cmd {
                     1001 => {
@@ -309,6 +320,12 @@ unsafe extern "system" fn tray_window_proc(
                         let _ = set_autostart_enabled(!cur);
                     }
                     1004 => {
+                        let mut nid: ffi::NotifyIconDataW = std::mem::zeroed();
+                        nid.cb_size = std::mem::size_of::<ffi::NotifyIconDataW>() as u32;
+                        nid.h_wnd = hwnd;
+                        nid.u_id = 1;
+                        ffi::Shell_NotifyIconW(ffi::NIM_DELETE, &mut nid);
+                        ffi::DestroyWindow(hwnd);
                         std::process::exit(0);
                     }
                     _ => {}

@@ -127,9 +127,17 @@ fn to_wide_null(s: &str) -> Vec<u16> {
     OsStr::new(s).encode_wide().chain(std::iter::once(0)).collect()
 }
 
+pub fn format_volume_device_path(drive_letter: &str) -> String {
+    let clean = drive_letter.trim_end_matches(['\\', '/']);
+    if clean.ends_with(':') {
+        format!("\\\\.\\{}", clean)
+    } else {
+        format!("\\\\.\\{}:", clean)
+    }
+}
+
 pub fn check_usn_journal_status(drive_letter: &str) -> (bool, bool, Option<UsnJournalDataV0>) {
-    let clean_drive = drive_letter.trim_end_matches('\\').trim_end_matches('/');
-    let device_path = format!("\\\\.\\{}", clean_drive);
+    let device_path = format_volume_device_path(drive_letter);
     let wide_path = to_wide_null(&device_path);
 
     let h_volume = unsafe {
@@ -274,8 +282,7 @@ pub fn read_usn_journal_changes(
     journal_id: u64,
     max_records: usize,
 ) -> Result<(i64, Vec<UsnChangeItem>), String> {
-    let clean_drive = drive_letter.trim_end_matches(['\\', '/']);
-    let device_path = format!("\\\\.\\{}", clean_drive);
+    let device_path = format_volume_device_path(drive_letter);
     let wide_path = to_wide_null(&device_path);
 
     let h_volume = unsafe {
@@ -502,5 +509,13 @@ mod tests {
         };
         assert_eq!(item.change_type, UsnChangeType::Created);
         assert_eq!(item.file_name, "test.txt");
+    }
+
+    #[test]
+    fn test_format_volume_device_path() {
+        assert_eq!(format_volume_device_path("C"), "\\\\.\\C:");
+        assert_eq!(format_volume_device_path("C:"), "\\\\.\\C:");
+        assert_eq!(format_volume_device_path("C:\\"), "\\\\.\\C:");
+        assert_eq!(format_volume_device_path("D:/"), "\\\\.\\D:");
     }
 }

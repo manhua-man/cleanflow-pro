@@ -19,6 +19,7 @@ pub struct BuiltinExclusion {
     pub description: String,
 }
 
+#[derive(Debug, Clone)]
 pub struct ExclusionManager {
     store_path: PathBuf,
     rules: Vec<ExclusionRule>,

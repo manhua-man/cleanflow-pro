@@ -461,7 +461,14 @@ pub fn create_ntfs_junction<P: AsRef<Path>, Q: AsRef<Path>>(source: P, destinati
     let src = source.as_ref().to_str().context("源路径转字符串失败")?;
     let dst = destination.as_ref().to_str().context("目标路径转字符串失败")?;
 
-    let output = Command::new("cmd")
+    let mut cmd = Command::new("cmd");
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000);
+    }
+
+    let output = cmd
         .args(["/C", "mklink", "/J", src, dst])
         .output()
         .context("执行系统 cmd mklink 失败")?;

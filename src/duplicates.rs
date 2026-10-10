@@ -66,7 +66,7 @@ pub fn scan_duplicate_files(target_dir: &str, min_size_bytes: u64) -> Vec<Duplic
             if entry.file_type.is_file() {
                 if let Ok(meta) = entry.metadata() {
                     let sz = meta.len();
-                    if sz >= min_size_bytes {
+                    if sz > 0 && sz >= min_size_bytes {
                         size_map.entry(sz).or_default().push(entry.path().to_string_lossy().to_string());
                     }
                 }

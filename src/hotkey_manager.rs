@@ -13,6 +13,8 @@ extern "system" {
     fn GetMessageW(lpMsg: *mut Msg, hWnd: isize, wMsgFilterMin: u32, wMsgFilterMax: u32) -> i32;
     fn TranslateMessage(lpMsg: *const Msg) -> i32;
     fn DispatchMessageW(lpMsg: *const Msg) -> isize;
+    fn PostThreadMessageW(idThread: u32, Msg: u32, wParam: usize, lParam: isize) -> i32;
+    fn GetCurrentThreadId() -> u32;
 }
 
 type HookProc = unsafe extern "system" fn(code: i32, w_param: usize, l_param: isize) -> isize;
@@ -128,12 +130,14 @@ unsafe extern "system" fn low_level_keyboard_proc(
 
 pub struct HotkeyService {
     is_running: Arc<AtomicBool>,
+    thread_id: Arc<std::sync::atomic::AtomicU32>,
 }
 
 impl HotkeyService {
     pub fn new() -> Self {
         Self {
             is_running: Arc::new(AtomicBool::new(false)),
+            thread_id: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }
     }
 
@@ -152,8 +156,15 @@ impl HotkeyService {
         }
 
         let running_flag = self.is_running.clone();
+        let tid_holder = self.thread_id.clone();
 
         thread::spawn(move || {
+            #[cfg(windows)]
+            {
+                let tid = unsafe { GetCurrentThreadId() };
+                tid_holder.store(tid, Ordering::SeqCst);
+            }
+
             // 1. Install Win32 WH_KEYBOARD_LL hook for Listary signature Double-Ctrl
             let hook = unsafe {
                 SetWindowsHookExW(
@@ -228,6 +239,13 @@ impl HotkeyService {
 
     pub fn stop(&self) {
         self.is_running.store(false, Ordering::SeqCst);
+        let tid = self.thread_id.swap(0, Ordering::SeqCst);
+        if tid != 0 {
+            #[cfg(windows)]
+            unsafe {
+                PostThreadMessageW(tid, WM_QUIT, 0, 0);
+            }
+        }
     }
 }
 

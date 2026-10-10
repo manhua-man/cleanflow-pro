@@ -318,7 +318,7 @@ pub fn reconstruct_paths(
                 hit_cached = Some(cached_path.clone());
                 break;
             }
-            if parent_frn == curr_frn || parent_frn == 0 {
+            if parent_frn == curr_frn || parent_frn == 0 || (parent_frn & 0x0000FFFFFFFFFFFF) == 5 {
                 break;
             }
             curr_frn = parent_frn;

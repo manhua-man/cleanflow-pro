@@ -20,6 +20,30 @@ pub struct ParsedSearchQuery {
     pub category: Option<String>,
 }
 
+pub fn tokenize_query_string(input: &str) -> Vec<String> {
+    let mut tokens = Vec::new();
+    let mut current = String::new();
+    let mut in_quotes = false;
+
+    for c in input.chars() {
+        if c == '"' {
+            in_quotes = !in_quotes;
+            current.push(c);
+        } else if c.is_whitespace() && !in_quotes {
+            if !current.is_empty() {
+                tokens.push(current);
+                current = String::new();
+            }
+        } else {
+            current.push(c);
+        }
+    }
+    if !current.is_empty() {
+        tokens.push(current);
+    }
+    tokens
+}
+
 impl ParsedSearchQuery {
     pub fn parse(input: &str) -> Self {
         let trimmed = input.trim();
@@ -35,7 +59,7 @@ impl ParsedSearchQuery {
         let mut category = None;
         let mut limit = 200;
 
-        for part in trimmed.split_whitespace() {
+        for part in tokenize_query_string(trimmed) {
             let lower = part.to_lowercase();
             if lower.starts_with("in:") {
                 let path = part[3..].trim_matches('"').to_string();
@@ -115,7 +139,10 @@ impl ParsedSearchQuery {
                     limit = n.clamp(1, 10000);
                 }
             } else {
-                terms.push(part.to_string());
+                let clean_term = part.trim_matches('"').to_string();
+                if !clean_term.is_empty() {
+                    terms.push(clean_term);
+                }
             }
         }
 
@@ -247,6 +274,23 @@ pub fn execute_search(
         .as_ref()
         .and_then(|p| regex::RegexBuilder::new(p).case_insensitive(true).build().ok());
 
+    let excl_rules = crate::exclusions::get_global_exclusion_manager()
+        .read()
+        .ok()
+        .map(|guard| guard.clone());
+
+    let (fav_map, all_favs) = if let Ok(fav_guard) = crate::favorites::get_global_favorites().read() {
+        let all = fav_guard.list_all();
+        let mut map = std::collections::HashMap::new();
+        for f in &all {
+            let norm = f.path.trim_end_matches(['\\', '/']).to_lowercase();
+            map.insert(norm, f.alias.clone());
+        }
+        (map, all)
+    } else {
+        (std::collections::HashMap::new(), Vec::new())
+    };
+
     let mut all_hits: Vec<SearchResultHit> = indexes
         .par_iter()
         .flat_map(|vol_idx| {
@@ -270,8 +314,8 @@ pub fn execute_search(
                     }
 
                     // 1.5 Custom user exclusions filter (fsearch 5.1 & 5.2 parity)
-                    if let Ok(excl_mgr) = crate::exclusions::get_global_exclusion_manager().read() {
-                        if excl_mgr.matches_path(&entry.path) {
+                    if let Some(ref excl) = excl_rules {
+                        if excl.matches_path(&entry.path) {
                             return None;
                         }
                     }
@@ -364,11 +408,9 @@ pub fn execute_search(
                     }
 
                     // Favorite Folder Enrichment & Priority Boost
-                    let (is_fav, fav_alias) = if let Ok(fav_guard) = crate::favorites::get_global_favorites().read() {
-                        let norm = entry.path.trim_end_matches(['\\', '/']).to_lowercase();
-                        fav_guard.list_all().into_iter().find(|f| f.path.trim_end_matches(['\\', '/']).to_lowercase() == norm)
-                            .map(|f| (true, f.alias))
-                            .unwrap_or((false, None))
+                    let norm = entry.path.trim_end_matches(['\\', '/']).to_lowercase();
+                    let (is_fav, fav_alias) = if let Some(alias_opt) = fav_map.get(&norm) {
+                        (true, alias_opt.clone())
                     } else {
                         (false, None)
                     };
@@ -402,26 +444,24 @@ pub fn execute_search(
         .collect();
 
     // Direct Favorite Alias Injection: If user typed an alias, guarantee favorite appears at top
-    if let Ok(fav_guard) = crate::favorites::get_global_favorites().read() {
-        for term in &query.terms {
-            let clean_t = if term.starts_with("fav:") { &term[4..] } else { term.as_str() };
-            if let Some(fav) = fav_guard.get_by_alias(clean_t) {
-                if !all_hits.iter().any(|h| h.path.eq_ignore_ascii_case(&fav.path)) {
-                    all_hits.push(SearchResultHit {
-                        name: fav.name.clone(),
-                        path: fav.path.clone(),
-                        size_bytes: 0,
-                        is_dir: true,
-                        modified_timestamp: 0,
-                        score: 350,
-                        match_quality: MatchQuality::Exact,
-                        can_junction_migrate: true,
-                        can_block_clone: false,
-                        can_check_lock: false,
-                        is_favorite: true,
-                        favorite_alias: fav.alias.clone(),
-                    });
-                }
+    for term in &query.terms {
+        let clean_t = if term.starts_with("fav:") { &term[4..] } else { term.as_str() };
+        if let Some(fav) = all_favs.iter().find(|f| f.alias.as_deref().map(|a| a.eq_ignore_ascii_case(clean_t)).unwrap_or(false)) {
+            if !all_hits.iter().any(|h| h.path.eq_ignore_ascii_case(&fav.path)) {
+                all_hits.push(SearchResultHit {
+                    name: fav.name.clone(),
+                    path: fav.path.clone(),
+                    size_bytes: 0,
+                    is_dir: true,
+                    modified_timestamp: 0,
+                    score: 350,
+                    match_quality: MatchQuality::Exact,
+                    can_junction_migrate: true,
+                    can_block_clone: false,
+                    can_check_lock: false,
+                    is_favorite: true,
+                    favorite_alias: fav.alias.clone(),
+                });
             }
         }
     }
@@ -551,5 +591,13 @@ mod tests {
 
         let q6 = ParsedSearchQuery::parse("music count:1000");
         assert_eq!(q6.limit, 1000);
+    }
+
+    #[test]
+    fn test_quote_aware_query_parsing() {
+        let q = ParsedSearchQuery::parse("in:\"C:\\Program Files\" \"visual studio code\" ext:exe");
+        assert_eq!(q.in_directory, Some("C:\\Program Files".to_string()));
+        assert_eq!(q.terms, vec!["visual studio code".to_string()]);
+        assert_eq!(q.extension, Some("exe".to_string()));
     }
 }

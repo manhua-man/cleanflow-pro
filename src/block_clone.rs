@@ -11,6 +11,8 @@ const GENERIC_WRITE: u32 = 0x40000000;
 const FILE_SHARE_READ: u32 = 0x00000001;
 const FILE_SHARE_WRITE: u32 = 0x00000002;
 const OPEN_EXISTING: u32 = 3;
+const OPEN_ALWAYS: u32 = 4;
+const FILE_BEGIN: u32 = 0;
 const FILE_ATTRIBUTE_NORMAL: u32 = 0x00000080;
 const INVALID_HANDLE_VALUE: isize = -1;
 
@@ -44,6 +46,15 @@ extern "system" {
         dwFlagsAndAttributes: u32,
         hTemplateFile: isize,
     ) -> isize;
+
+    fn SetFilePointerEx(
+        hFile: isize,
+        liDistanceToMove: i64,
+        lpNewFilePointer: *mut i64,
+        dwMoveMethod: u32,
+    ) -> i32;
+
+    fn SetEndOfFile(hFile: isize) -> i32;
 
     fn DeviceIoControl(
         hDevice: isize,
@@ -137,6 +148,15 @@ pub fn clone_file_extents<P: AsRef<Path>, Q: AsRef<Path>>(
     source_path: P,
     target_path: Q,
 ) -> Result<u64, String> {
+    let src_root = get_volume_root(source_path.as_ref());
+    let tgt_root = get_volume_root(target_path.as_ref());
+    if !src_root.eq_ignore_ascii_case(&tgt_root) {
+        return Err(format!(
+            "ReFS 块克隆要求源与目标在同一卷驱动器内 (源卷: {}, 目标卷: {})",
+            src_root, tgt_root
+        ));
+    }
+
     let src_meta = std::fs::metadata(source_path.as_ref())
         .map_err(|e| format!("Failed to read source metadata: {}", e))?;
     let file_len = src_meta.len();
@@ -167,7 +187,7 @@ pub fn clone_file_extents<P: AsRef<Path>, Q: AsRef<Path>>(
             GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ,
             std::ptr::null_mut(),
-            OPEN_EXISTING,
+            OPEN_ALWAYS,
             FILE_ATTRIBUTE_NORMAL,
             0,
         )
@@ -177,6 +197,13 @@ pub fn clone_file_extents<P: AsRef<Path>, Q: AsRef<Path>>(
         unsafe { CloseHandle(h_src) };
         let err = unsafe { GetLastError() };
         return Err(format!("Failed to open target file with GENERIC_WRITE, error code: {}", err));
+    }
+
+    // Pre-allocate target file size to match source file length
+    unsafe {
+        SetFilePointerEx(h_tgt, file_len as i64, std::ptr::null_mut(), FILE_BEGIN);
+        SetEndOfFile(h_tgt);
+        SetFilePointerEx(h_tgt, 0, std::ptr::null_mut(), FILE_BEGIN);
     }
 
     let params = DuplicateExtentsData {
@@ -236,5 +263,13 @@ mod tests {
             assert!(!status.supports_block_cloning);
             assert_eq!(status.mode_recommended, "ntfs_copy_clean");
         }
+    }
+
+    #[test]
+    fn test_clone_cross_volume_preflight() {
+        let res = clone_file_extents("C:\\dummy_src.txt", "D:\\dummy_tgt.txt");
+        assert!(res.is_err());
+        let err = res.err().unwrap();
+        assert!(err.contains("同一卷驱动器"));
     }
 }

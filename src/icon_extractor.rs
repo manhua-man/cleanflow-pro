@@ -49,6 +49,17 @@ mod ffi {
     pub const DIB_RGB_COLORS: u32 = 0;
     pub const BI_RGB: u32 = 0;
 
+    #[repr(C)]
+    pub struct Bitmap {
+        pub bm_type: i32,
+        pub bm_width: i32,
+        pub bm_height: i32,
+        pub bm_width_bytes: i32,
+        pub bm_planes: u16,
+        pub bm_bits_pixel: u16,
+        pub bm_bits: *mut std::ffi::c_void,
+    }
+
     #[link(name = "shell32")]
     extern "system" {
         pub fn SHGetFileInfoW(
@@ -71,6 +82,11 @@ mod ffi {
     #[link(name = "gdi32")]
     extern "system" {
         pub fn DeleteObject(ho: isize) -> i32;
+        pub fn GetObjectW(
+            hgdiobj: isize,
+            cb_buffer: i32,
+            lpv_object: *mut std::ffi::c_void,
+        ) -> i32;
         pub fn GetDIBits(
             hdc: isize,
             hbm: isize,
@@ -205,8 +221,26 @@ fn extract_native_icon_png(path_or_ext: &str) -> Option<Vec<u8>> {
         }
 
         let hdc = ffi::GetDC(0);
-        let width = 16;
-        let height = 16;
+        let mut width = 16;
+        let mut height = 16;
+
+        let mut bmp: ffi::Bitmap = std::mem::zeroed();
+        if ffi::GetObjectW(
+            hbm,
+            std::mem::size_of::<ffi::Bitmap>() as i32,
+            &mut bmp as *mut _ as *mut std::ffi::c_void,
+        ) > 0 {
+            if bmp.bm_width > 0 && bmp.bm_height > 0 {
+                width = bmp.bm_width.clamp(16, 256);
+                let raw_h = if icon_info.hbm_color == 0 {
+                    bmp.bm_height / 2
+                } else {
+                    bmp.bm_height
+                };
+                height = raw_h.clamp(16, 256);
+            }
+        }
+
         let mut bmi: ffi::BitmapInfo = std::mem::zeroed();
         bmi.bmi_header.bi_size = std::mem::size_of::<ffi::BitmapInfoHeader>() as u32;
         bmi.bmi_header.bi_width = width;
