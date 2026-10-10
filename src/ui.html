@@ -2582,6 +2582,89 @@
                 正在执行驱动存储池全量穿透扫描与哈希版本对齐...
               </div>
             </div>
+          <!-- Cloud Storage Cache Optimizer Section -->
+          <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 18px; margin-top: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 16px;">
+              <div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size: 14px; font-weight: 600; color: #fff;">云端同步盘离线缓存治理向导</span>
+                  <span class="nav-badge" style="background: rgba(0, 199, 255, 0.15); color: #00c7ff; border: 1px solid rgba(0, 199, 255, 0.3);">Cloud Filter (cldapi)</span>
+                </div>
+                <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 4px;">
+                  排查 OneDrive / iCloud / 网盘等同步目录，基于 Windows 原生 Cloud Filter 将本地占用文件安全脱水 (Dehydrate)，云端数据绝对完好
+                </div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="loadCloudStorageAudit(true)">
+                  <span>重新扫描云盘</span>
+                </button>
+                <button class="btn btn-primary" id="btnBatchEvictCloud" style="padding: 4px 12px; font-size: 11px;" onclick="batchEvictCloudFiles()">
+                  <span>一键脱机释放非活跃缓存</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 3 Summary Metrics Cards -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+              <!-- Metric 1: Detected Cloud Drives -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size: 11px; color: var(--text-tertiary); font-weight: 500;">已侦测云同步盘</span>
+                  <span id="cloudDrivesBadge" style="font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: #60a5fa;">检测中</span>
+                </div>
+                <div style="margin-top: 6px; display:flex; align-items:baseline; gap:6px;">
+                  <span style="font-size: 18px; font-weight: 700; color: #fff;" id="cloudDriveName">-</span>
+                  <span style="font-size: 11px; color: var(--text-secondary);" id="cloudLogicalTotal">0 B</span>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-tertiary); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="cloudDriveRootPath">
+                  未发现同步根目录
+                </div>
+              </div>
+
+              <!-- Metric 2: Local Physical Consumption -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size: 11px; color: var(--text-tertiary); font-weight: 500;">本地物理磁盘真实占用</span>
+                  <span id="cloudPhysicalBadge" style="font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(245, 158, 11, 0.15); color: #fbbf24;">已下载</span>
+                </div>
+                <div style="margin-top: 6px; display:flex; align-items:baseline; gap:6px;">
+                  <span style="font-size: 18px; font-weight: 700; color: #fff;" id="cloudPhysicalSize">0 B</span>
+                  <span style="font-size: 11px; color: var(--text-secondary);" id="cloudOnlineOnlySize">纯云端: 0 B</span>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-tertiary); margin-top: 4px;">
+                  实际占据本地硬盘扇区的离线文件
+                </div>
+              </div>
+
+              <!-- Metric 3: Reclaimable On-Demand -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size: 11px; color: var(--text-tertiary); font-weight: 500;">可安全脱机释放</span>
+                  <span id="cloudReclaimBadge" style="font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); color: #34d399;">建议脱机</span>
+                </div>
+                <div style="margin-top: 6px; display:flex; align-items:baseline; gap:6px;">
+                  <span style="font-size: 18px; font-weight: 700; color: #fff;" id="cloudReclaimSize">0 B</span>
+                  <span style="font-size: 11px; color: var(--text-secondary);" id="cloudReclaimCount">0 个文件</span>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-tertiary); margin-top: 4px;">
+                  脱机后转为仅联机占位，不损云端
+                </div>
+              </div>
+            </div>
+
+            <!-- Evictable Files Table -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+              <span style="font-size: 12px; font-weight: 600; color: #fff;">长期未用 / 高物理占用候选脱机大文件</span>
+              <div style="font-size: 11px; color: var(--text-tertiary);" id="cloudFileListSummary">
+                共检测到 0 个候选文件
+              </div>
+            </div>
+
+            <div id="cloudFileListContainer" style="max-height: 280px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm);">
+              <div style="padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 11.5px;">
+                正在探测云端同步盘及检索按需文件占位状态...
+              </div>
+            </div>
           </div>
         </section>
 
@@ -3747,6 +3830,7 @@
         loadDockerStatus();
         loadActiveJunctions();
         loadSystemStorageAudit();
+        loadCloudStorageAudit();
       }
       if (tabId === 'search') {
         loadSearchVolumes();
@@ -5861,6 +5945,202 @@
               loadSystemStorageAudit(true);
             } else {
               showToast(`调优失败: ${result.error || '需要管理员权限'}`);
+            }
+          } catch (e) {
+            showToast(`操作异常: ${e.message}`);
+          }
+        }
+      );
+    }
+
+    // ==========================================
+    // Cloud Storage Cache Optimizer (cldapi)
+    // ==========================================
+    window.currentCloudReport = null;
+
+    async function loadCloudStorageAudit(forceRefresh = false) {
+      const container = document.getElementById('cloudFileListContainer');
+      if (!container) return;
+
+      if (!window.currentCloudReport || forceRefresh) {
+        container.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 11.5px;">正在探测 OneDrive / iCloud 同步盘并检索按需文件占位状态...</div>';
+        try {
+          const res = await fetch('/api/cloud-storage/audit');
+          const data = await res.json();
+          window.currentCloudReport = data;
+        } catch (e) {
+          container.innerHTML = `<div style="padding: 24px; text-align: center; color: #f87171; font-size: 11.5px;">云盘诊断加载失败: ${escapeHtml(e.message)}</div>`;
+          return;
+        }
+      }
+
+      const report = window.currentCloudReport;
+      if (!report) return;
+
+      // Update Summary Cards
+      const drivesBadge = document.getElementById('cloudDrivesBadge');
+      const driveName = document.getElementById('cloudDriveName');
+      const logicalTotal = document.getElementById('cloudLogicalTotal');
+      const driveRootPath = document.getElementById('cloudDriveRootPath');
+
+      if (report.drives && report.drives.length > 0) {
+        const first = report.drives[0];
+        if (driveName) driveName.textContent = first.provider || '已同步';
+        if (logicalTotal) logicalTotal.textContent = `总容量: ${formatBytes(report.total_logical_bytes || 0)}`;
+        if (driveRootPath) driveRootPath.textContent = first.root_path || '-';
+        if (drivesBadge) {
+          drivesBadge.textContent = `${report.drives.length} 个同步盘`;
+          drivesBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+          drivesBadge.style.color = '#34d399';
+        }
+      } else {
+        if (driveName) driveName.textContent = '未发现';
+        if (logicalTotal) logicalTotal.textContent = '0 B';
+        if (driveRootPath) driveRootPath.textContent = '未检索到活动云盘';
+        if (drivesBadge) {
+          drivesBadge.textContent = '无同步盘';
+          drivesBadge.style.background = 'rgba(255, 255, 255, 0.08)';
+          drivesBadge.style.color = 'var(--text-tertiary)';
+        }
+      }
+
+      const physicalBadge = document.getElementById('cloudPhysicalBadge');
+      const physicalSize = document.getElementById('cloudPhysicalSize');
+      const onlineOnlySize = document.getElementById('cloudOnlineOnlySize');
+      if (physicalBadge && physicalSize && onlineOnlySize) {
+        physicalSize.textContent = formatBytes(report.total_physical_bytes || 0);
+        onlineOnlySize.textContent = `纯云端: ${formatBytes(report.total_online_only_bytes || 0)}`;
+      }
+
+      const reclaimBadge = document.getElementById('cloudReclaimBadge');
+      const reclaimSize = document.getElementById('cloudReclaimSize');
+      const reclaimCount = document.getElementById('cloudReclaimCount');
+      if (reclaimBadge && reclaimSize && reclaimCount) {
+        reclaimSize.textContent = formatBytes(report.total_reclaimable_bytes || 0);
+        const count = (report.evictable_files || []).length;
+        reclaimCount.textContent = `${count} 个可脱机文件`;
+        if (report.total_reclaimable_bytes > 0) {
+          reclaimBadge.textContent = '可瘦身';
+          reclaimBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+          reclaimBadge.style.color = '#34d399';
+        } else {
+          reclaimBadge.textContent = '极净状态';
+          reclaimBadge.style.background = 'rgba(59, 130, 246, 0.15)';
+          reclaimBadge.style.color = '#60a5fa';
+        }
+      }
+
+      renderCloudAuditTable();
+    }
+
+    function renderCloudAuditTable() {
+      const container = document.getElementById('cloudFileListContainer');
+      const summary = document.getElementById('cloudFileListSummary');
+      if (!container || !window.currentCloudReport) return;
+
+      const files = window.currentCloudReport.evictable_files || [];
+      if (summary) {
+        summary.textContent = `共检测到 ${files.length} 个候选脱机大文件`;
+      }
+
+      if (files.length === 0) {
+        container.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 11.5px;">太棒了！云同步盘中未检测到长期未用的冗余本地缓存文件。</div>';
+        return;
+      }
+
+      let html = '<table class="data-grid" style="font-size: 11.5px; width: 100%;"><thead><tr>';
+      html += '<th>文件名与相对路径</th>';
+      html += '<th style="width: 100px; text-align: right;">逻辑体积</th>';
+      html += '<th style="width: 100px; text-align: right;">本地物理占用</th>';
+      html += '<th style="width: 120px; text-align: center;">未活跃天数</th>';
+      html += '<th style="width: 110px; text-align: center;">存储状态</th>';
+      html += '<th style="width: 130px; text-align: center;">安全操作</th>';
+      html += '</tr></thead><tbody>';
+
+      files.forEach(f => {
+        const logStr = formatBytes(f.logical_size || 0);
+        const physStr = formatBytes(f.physical_size || 0);
+        const days = f.days_inactive ? `${f.days_inactive} 天前` : '近期';
+        const isPhysHigh = f.physical_size >= 10 * 1024 * 1024;
+
+        html += `
+          <tr>
+            <td>
+              <div style="font-weight: 600; color: #fff; font-family: var(--font-mono);">${escapeHtml(f.file_name)}</div>
+              <div style="font-size: 10.5px; color: var(--text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px;" title="${escapeHtml(f.path)}">${escapeHtml(f.relative_path)}</div>
+            </td>
+            <td style="text-align: right; font-family: var(--font-mono); color: var(--text-secondary);">${logStr}</td>
+            <td style="text-align: right; font-family: var(--font-mono); font-weight: 600; color: ${isPhysHigh ? '#fbbf24' : '#fff'};">${physStr}</td>
+            <td style="text-align: center; color: var(--text-tertiary);">${escapeHtml(days)}</td>
+            <td style="text-align: center;">
+              <span style="padding: 2px 6px; border-radius: 4px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 10.5px;">本地已下载</span>
+            </td>
+            <td style="text-align: center;">
+              <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="executeEvictCloudFile('${escapeJsString(f.path)}')">
+                <span>脱机释放 (不删云端)</span>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    async function executeEvictCloudFile(filePath) {
+      openConfirmModal(
+        '安全脱机释放空间',
+        `即将通过 Windows Cloud Filter 对文件 ${filePath} 执行脱水操作。仅清空本地硬盘物理扇区（释放空间），文件元数据与云端文件 100% 完好无损，随时可双击重新按需下载。确认继续吗？`,
+        async () => {
+          try {
+            const res = await fetch('/api/cloud-storage/evict', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ path: filePath })
+            });
+            const result = await res.json();
+            if (result.success) {
+              showToast(`成功脱机释放本地空间 ${formatBytes(result.bytes_freed || 0)}，云端文件安全无损`);
+              loadCloudStorageAudit(true);
+            } else {
+              showToast(`脱机失败: ${result.error || '文件可能被程序独占打开'}`);
+            }
+          } catch (e) {
+            showToast(`操作异常: ${e.message}`);
+          }
+        }
+      );
+    }
+
+    async function batchEvictCloudFiles() {
+      if (!window.currentCloudReport) return;
+      const files = window.currentCloudReport.evictable_files || [];
+      if (files.length === 0) {
+        showToast('当前没有需要脱机释放的云盘缓存文件');
+        return;
+      }
+
+      const totalSize = formatBytes(window.currentCloudReport.total_reclaimable_bytes || 0);
+      const paths = files.map(f => f.path);
+
+      openConfirmModal(
+        '批量安全脱机释放',
+        `共检测到 ${files.length} 个长期未用且本地占空间的云同步文件（预计可腾退本地磁盘 ${totalSize}）。将逐个转换为纯云端占位符，不删除云端任何数据。确认继续吗？`,
+        async () => {
+          showToast(`开始安全脱机 ${files.length} 个文件...`);
+          try {
+            const res = await fetch('/api/cloud-storage/batch-evict', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ paths: paths })
+            });
+            const r = await res.json();
+            if (r.success) {
+              showToast(`批量脱机完成！成功腾退本地磁盘空间 ${formatBytes(r.total_freed || 0)}`);
+              loadCloudStorageAudit(true);
+            } else {
+              showToast(`批量处理失败: ${r.error || '系统异常'}`);
             }
           } catch (e) {
             showToast(`操作异常: ${e.message}`);

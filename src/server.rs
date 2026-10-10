@@ -701,6 +701,62 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                         send_json_response(request, err_json);
                     }
                 }
+            } else if url == "/api/cloud-storage/audit" && method == Method::Get {
+                let report = crate::cloud_storage_audit::run_cloud_storage_audit();
+                let json = serde_json::to_string(&report).unwrap_or_else(|_| "{}".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/cloud-storage/evict" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct EvictReq {
+                    path: String,
+                }
+
+                match serde_json::from_str::<EvictReq>(&content) {
+                    Ok(req) => {
+                        match crate::cloud_storage_audit::evict_single_cloud_file(&req.path) {
+                            Ok(freed) => {
+                                let res_json = serde_json::json!({ "success": true, "bytes_freed": freed }).to_string();
+                                send_json_response(request, res_json);
+                            }
+                            Err(e) => {
+                                let err_json = serde_json::json!({ "success": false, "error": e }).to_string();
+                                send_json_response(request, err_json);
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
+            } else if url == "/api/cloud-storage/batch-evict" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct BatchEvictReq {
+                    paths: Vec<String>,
+                }
+
+                match serde_json::from_str::<BatchEvictReq>(&content) {
+                    Ok(req) => {
+                        let (evicted_count, total_freed, errors) = crate::cloud_storage_audit::batch_evict_cloud_files(&req.paths);
+                        let res_json = serde_json::json!({
+                            "success": true,
+                            "evicted_count": evicted_count,
+                            "total_freed": total_freed,
+                            "errors": errors
+                        }).to_string();
+                        send_json_response(request, res_json);
+                    }
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
             } else if url == "/api/system/maintenance" && method == Method::Get {
                 let status = crate::system_tools::get_system_maintenance_status();
                 let json = serde_json::to_string(&status).unwrap_or_else(|_| "{}".to_string());
