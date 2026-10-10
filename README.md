@@ -3,15 +3,16 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20(x64)-0078d4.svg)](#)
 [![Rust](https://img.shields.io/badge/Rust-2021%20Edition-dea584.svg)](https://www.rust-lang.org/)
-[![Release](https://img.shields.io/badge/Release-v0.4.0-success.svg)](#)
-[![Tests](https://img.shields.io/badge/Tests-78%2F78%20Passing-brightgreen.svg)](#)
+[![Release](https://img.shields.io/badge/Release-v0.4.5-success.svg)](#)
+[![Tests](https://img.shields.io/badge/Tests-90%2F90%20Passing-brightgreen.svg)](#)
 [![Zero-Emoji](https://img.shields.io/badge/Style-Zero%20Emoji-blueviolet.svg)](#)
 
-CleanFlow Pro 是一款基于 Rust 原生内核打造的高性能、工业级 Windows 桌面软件。软件采用原生单文件便携式绿色架构（二进制体积仅 ~9.8 MB，解压即用），完全零外部运行时依赖（无需 Node.js / Python / WebView2 运行时），深度融合 Windows 11 Fluent Design 与 Nordic Mica 深色玻璃拟态视觉规范。
+CleanFlow Pro 是一款基于 Rust 原生内核打造的高性能、工业级 Windows 桌面软件。软件采用原生单文件便携式绿色架构（二进制体积仅 ~9.6 MB，解压即用），完全零外部运行时依赖（无需 Node.js / Python / WebView2 运行时），深度融合 Windows 11 Fluent Design 与 Nordic Mica 深色玻璃拟态视觉规范。
 
-产品拥有两大业务支柱：
-1. **工业级磁盘空间资产治理引擎**：对标 CCleaner / WizTree / DaisyDisk，提供系统冗余专清、交互式全盘 Treemap 树图、NTFS 事务型跨盘搬家 (Junction)、ReFS 写时复制去重 (Block Clone)、注册表无损备份回滚及 SQLite 物理收缩；
-2. **毫秒级全盘桌面搜索与启动中枢**：全面深度吸收 Listary Pro 与 fsearch 核心体验，提供基于 NTFS USN/MFT 的底层极速检索、多音字与双字母复合声母 (zh/ch/sh) 智能拼音检索引擎、类型过滤胶囊标签、虚拟视口 60fps 极速滚动、双击 Ctrl / Alt+Space Spotlight 全局悬浮窗、文件对话框快速跳转 (Quick Switch) 及智能动作中枢。
+产品拥有三大业务支柱：
+1. **工业级磁盘空间资产治理引擎**：对标 CCleaner / WizTree / DaisyDisk，提供系统冗余专清、交互式全盘 Treemap 树图、NTFS 事务型跨盘搬家 (Junction)、ReFS 写时复制去重 (Block Clone)、注册表无损备份回滚、SQLite 物理收缩、Windows 驱动存储池安全清理、系统休眠与保留存储调优、以及基于微软官方 Cloud Filter (`cldapi.dll`) 的云端同步盘离线缓存脱水释放；
+2. **毫秒级全盘桌面搜索与启动中枢**：全面深度吸收 Listary Pro 与 fsearch 核心体验，提供基于 NTFS USN/MFT 的底层极速检索、多音字与双字母复合声母 (zh/ch/sh) 智能拼音检索引擎、类型过滤胶囊标签、虚拟视口 60fps 极速滚动、双击 Ctrl / Alt+Space Spotlight 全局悬浮窗、文件对话框快速跳转 (Quick Switch) 及智能动作中枢；
+3. **智能空间护航与自愈规则引擎**：集成 Win32 原生全屏独占与游戏免打扰感知、键鼠空闲低优先级调度、时序空间消耗斜率 (Burn-rate) 预测与耗尽倒计时预警、以及低容量自适应自愈规则引擎。
 
 ---
 
@@ -36,6 +37,9 @@ graph TD
         RegEngine["注册表死链探测与备份回滚"]
         JunctionEngine["NTFS Reparse Point 软链接虚拟化"]
         VacuumEngine["winsqlite3 动态调用与 Freelist 整理"]
+        StorageAuditEngine["驱动存储池与系统休眠诊断 (pnputil / powercfg)"]
+        CloudEngine["云端同步盘脱水治理 (cldapi.dll 原生脱水)"]
+        GuardEngine["智能空间护航引擎 (全屏避让 / 时序预测 / 自愈)"]
         SearchEngine["USN/MFT 毫秒检索引擎 + Trigram 缓存"]
         PinyinEngine["ToPinyinMulti 多音字与复合声母归一化匹配器"]
         ActionEngine["智能动作中枢 (宏模板展开 & 权限提权)"]
@@ -46,8 +50,8 @@ graph TD
     subgraph OS_Kernel["Windows 操作系统底层"]
         Win32_FS["NTFS / ReFS 文件系统 (USN, MFT, Block Clone)"]
         Win32_Reg["Windows 注册表 (HKCU / HKLM)"]
-        Win32_Shell["Win32 Shell32 / Shell_NotifyIcon / HotKey"]
-        Win32_API["Restart Manager / winsqlite3.dll"]
+        Win32_Shell["Win32 Shell32 / Shell_NotifyIcon / HotKey / SHQueryUserNotificationState"]
+        Win32_API["Restart Manager / winsqlite3.dll / cldapi.dll / PnPUtil"]
     end
 
     W1 --> Scanner
@@ -57,6 +61,9 @@ graph TD
     W3 --> RegEngine
     W4 --> JunctionEngine
     W4 --> VacuumEngine
+    W4 --> StorageAuditEngine
+    W4 --> CloudEngine
+    W4 --> GuardEngine
     W5 --> SearchEngine
     W5 --> PinyinEngine
     W5 --> IconEngine
@@ -69,6 +76,9 @@ graph TD
     RegEngine --> Win32_Reg
     JunctionEngine --> Win32_FS
     VacuumEngine --> Win32_API
+    StorageAuditEngine --> Win32_API
+    CloudEngine --> Win32_API
+    GuardEngine --> Win32_Shell
     SearchEngine --> Win32_FS
     TrayEngine --> Win32_Shell
     IconEngine --> Win32_Shell
@@ -117,6 +127,19 @@ graph TD
   - 副本文件在文件系统视图中依然完整存在，物理磁盘只占用一份数据，修改时自动触发写时复制 (CoW)。
 - **数据库碎片物理压缩 (SQLite VACUUM)**：
   - 动态加载系统原生 `winsqlite3.dll`，整理 Cursor / IDE 的 `state.vscdb` 等膨胀数据库中的 Freelist 空闲游离页。
+- **Windows 驱动存储池安全清理 (DriverStore)**：
+  - 穿透调用 `pnputil /enum-drivers` 深度枚举已注册 OEM 驱动，精准映射 `C:\Windows\System32\DriverStore\FileRepository` 真实物理目录尺寸；
+  - 驱动多版本智能分组归一化比对算法，自动标定被新版本替换的陈旧冗余驱动（实测识别 1.34 GB+ 历史 Intel/Realtek 驱动）；
+  - 严格校验 `oem*.inf` 命名规范，通过 Windows 官方受保护管道执行卸载，坚决不进行粗暴物理文件删除，确保硬件引导安全。
+- **系统休眠与保留存储空间调优 (Hibernation & Reserved Storage)**：
+  - 穿透检测 `C:\hiberfil.sys` 实际占用与休眠状态；
+  - 提供 `powercfg /hibernate` 三档模式向导（完全关闭释放、开启精简快速启动、恢复完整休眠）；
+  - 读取注册表 `ReserveManager` 键值，高精度诊断 Windows 11 保留存储状态（约 6.5 GB），提供安全 DISM 调优指引。
+- **云端同步盘离线缓存脱水释放 (Cloud Storage Dehydration)**：
+  - 自动探测多源云盘本地同步根目录（OneDrive 个人/商业版、iCloud、坚果云、百度网盘、阿里云盘等）；
+  - 基于 Win32 `GetCompressedFileSizeW` 穿透比对逻辑名义大小与实际物理分配大小，精准识别“已下载物理缓存”与“纯云端占位符”；
+  - 动态链接微软官方 Cloud Filter 库 (`cldapi.dll`)，调用 `CfDehydratePlaceholder` 与 `CfSetPinState` 原生脱水本地物理簇，回退支持系统级 `attrib.exe +U -P`；
+  - **云端数据绝对安全底线**：严禁调用任何物理删除指令，脱水后本地物理扇区归零，仅保留轻量占位符，云端数据 100% 完好无损。
 
 ---
 
@@ -173,6 +196,29 @@ graph TD
 
 ---
 
+### 支柱三：智能空间护航与自愈规则引擎 (Intelligent Guard & Self-Healing)
+
+#### 1. Win32 全屏独占与游戏免打扰感知 (Full-screen & Gaming Suppression)
+- 调用 Win32 原生 `SHQueryUserNotificationState` 深度感知用户全屏应用、DirectX/Vulkan 独占游戏（`QUNS_RUNNING_D3D_FULL_SCREEN`）及 PPT 演示放映状态；
+- 在用户游戏、观影或演示时段自动静默所有弹窗通知并延迟执行繁重维护任务，实现绝对零打扰。
+
+#### 2. 键鼠空闲调度 (Idle Detection)
+- 基于 Win32 `GetLastInputInfo` 毫秒级计算系统真实键鼠空闲时长；
+- 仅在用户离席超过安全阈值（默认 5 分钟）时才触发后台低优先级治理任务，工作时零卡顿无感伴随。
+
+#### 3. 时序空间消耗斜率 (Burn-rate) 预测与预警
+- 采用滑动窗口时序算法，动态拟合各驱动器可用空间变化曲线与消耗速率（MB/min）；
+- 突发空间吞噬（如构建爆炸、日志雪崩、虚拟机膨胀）时自动触发预警并推算耗尽倒计时，告别 C 盘爆满红条措手不及。
+
+#### 4. 轻量本地自愈规则引擎 (Local Self-Healing Engine)
+- 内置三大安全自愈管道：
+  - **紧急低容量回收站清空**：当系统分区可用空间低于危险阈值时自动清空回收站安全兜底；
+  - **空闲时系统临时垃圾收缩**：系统空闲时自动静默清理超过 7 天未修改的 `%TEMP%` 孤立文件；
+  - **超期云盘缓存自动脱水**：自动扫描并脱水超过 90 天未访问的云端大文件，回退为纯云端占位符；
+- 规则具备冷却时间防御与全屏避让拦截，纯本地执行，无任何静默网络通信。
+
+---
+
 ## 物理机实测治理与检索指标
 
 在实际 Windows 11 x64 开发机上的全量实测数据：
@@ -184,8 +230,9 @@ graph TD
 | **虚拟视口渲染滚动** | 1,000 条搜索结果列表 | **60 fps** 惯性平滑滚动，内存占用保持平稳 | 消除原生网页卡顿与 DOM 膨胀 |
 | **目录跨盘迁移 (Junction)** | 15.8 GB 真实开发/AI 资产 | 耗时 42 秒（robocopy /MT:16 /J），秒级建立联接 | 零报错，原应用透明访问 |
 | **注册表扫描与备份** | 20,000+ 系统注册表键值 | 耗时 0.9 秒，自动生成带时间戳标准 `.reg` 备份 | 100% 无损原生回滚支持 |
-| **单文件发布体积** | Release 二进制 | **9.82 MB**（无须安装，解压即用） | 远小于 Electron 类软件 (150MB+) |
-| **自动化测试覆盖** | 核心逻辑覆盖率 | **78 / 78** 项单元测试 100% 通过 | 零 Warning，100% 绝对零 Emoji |
+| **驱动存储池废弃包诊断** | 扫描 `pnputil` 与 `FileRepository` | 耗时 **0.3 秒**，安全匹配 1.34 GB+ 历史旧显卡/蓝牙驱动 | 优于第三方粗暴物理删除 |
+| **单文件发布体积** | Release 二进制 | **9.67 MB**（无须安装，解压即用） | 远小于 Electron 类软件 (150MB+) |
+| **自动化测试覆盖** | 核心逻辑覆盖率 | **90 / 90** 项单元测试 100% 通过 | 零 Warning，100% 绝对零 Emoji |
 
 ---
 
@@ -197,7 +244,7 @@ graph TD
 
 ### 快速启动与测试
 ```powershell
-# 1. 运行全量 78 项自动化测试套件
+# 1. 运行全量 90 项自动化测试套件
 cargo test
 
 # 2. 编译生产级高优化单文件可执行文件
