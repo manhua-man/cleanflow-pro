@@ -66,7 +66,27 @@
 
 ---
 
-## 支柱三：智能空间护航与自愈规则引擎 (Intelligent Guard)
+## 支柱三：原生磁盘恢复与数据救援中枢 (Disk & Data Recovery Hub)
+
+面向 AI 时代的高频数据丢失（代码误清空、模型权重误删、Git 误 reset、构建缓存误伤），提供原生高效的灾难抢救通道：
+
+### 1. NTFS MFT 裸盘软删除秒级抢救 (MFT Undelete)
+- 直接复用 `mft_scanner` 的底层裸盘流，解析未分配记录中的 `$FILE_NAME` 与 `$DATA` 属性；
+- 1~3 秒内列出最近误删文件并提取物理数据运行簇链 (Data Run)，免漫长全盘扫描。
+
+### 2. Windows 卷影副本快照回溯 (Volume Shadow Copy / VSS)
+- 调用 Windows 底层 VSS 接口列出历史快照与系统还原点；
+- 将卷影副本挂载为只读符号设备，秒级提取被意外覆盖的文件历史版本。
+
+### 3. AI 与工程特征头签名雕刻 (File Carving)
+- 针对跨卷格式化或 MFT 损坏灾难，扫描未分配簇，按 Magic Bytes 雕刻恢复 Python/Notebook/Safetensors/JSON/SQLite/PNG 等核心资产。
+
+### 4. 只读安全挂载屏障
+- 恢复全流程强制以 `GENERIC_READ` 模式只读挂接，绝不在源盘写入任何文件，杜绝二次数据覆盖。
+
+---
+
+## 全天候智能空间护航与自愈守护底座 (Intelligent Guard & Daemon)
 
 ### 1. 全屏独占与游戏免打扰感知
 - 调用 Win32 `SHQueryUserNotificationState`，在用户处于全屏应用、DirectX 独占游戏或 PPT 演示放映时自动静默所有弹窗通知。

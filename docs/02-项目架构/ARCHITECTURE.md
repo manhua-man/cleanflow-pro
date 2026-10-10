@@ -29,7 +29,8 @@ graph TD
     subgraph Core_Engines["3. Rust 高性能核心引擎层"]
         StorageEngine["磁盘空间治理引擎 (jwalk / WinApp2 / Junction / BlockClone / VACUUM)"]
         SearchEngine["USN/MFT 毫秒秒搜引擎 (Trigram / Pinyin / Fuzzy)"]
-        GuardEngine["智能空间护航引擎 (全屏避让 / 时序预测 / 自愈规则)"]
+        RecoveryEngine["磁盘恢复与数据救援引擎 (MFT Undelete / VSS 快照 / File Carving)"]
+        GuardEngine["智能空间护航与自愈底座 (全屏避让 / 时序预测 / 自愈规则)"]
         ActionEngine["智能动作中枢 (宏展开 / Runas 提权)"]
         TrayEngine["Win32 托盘消息循环与自启控制"]
     end
@@ -38,7 +39,7 @@ graph TD
         NTFS_Driver["NTFS / ReFS (MFT, USN Journal, Reparse Point, FSCTL)"]
         Shell32["Shell32 (Shell_NotifyIcon, SHGetFileInfo, SHQueryUserNotificationState)"]
         Win32_Base["Kernel32 / User32 (WH_KEYBOARD_LL, RegisterHotKey, GetLastInputInfo)"]
-        System_DLLs["系统动态库 (winsqlite3.dll, cldapi.dll, pnputil.exe)"]
+        System_DLLs["系统动态库 (winsqlite3.dll, cldapi.dll, pnputil.exe, vssapi.dll)"]
     end
 
     UI_Layer --> Service_Bridge
@@ -50,7 +51,7 @@ graph TD
 
 ## 2. 核心子系统与关键设计
 
-### 2.1 磁盘空间治理子系统 (Storage Governance)
+### 2.1 支柱一：磁盘空间资产治理子系统 (Storage Governance)
 - **多线程扫描与并发控制**：基于 `jwalk` 与 `rayon` 实现非阻塞的高并发目录树遍历，利用三级分水岭算法（体积 -> 16KB 头部特征散列 -> BLAKE3 全量并发树状散列）快速识别重复文件。
 - **NTFS Junction 跨盘热搬迁**：基于 Windows 原生 Reparse Point (`mklink /J`) 技术与 robocopy 多线程无缓存传输，迁移前调用 Win32 `Restart Manager` 与进程锁探测 (`process_lock.rs`)，确保零写入冲突。
 - **云端同步盘原生脱水 (`cloud_storage_audit.rs`)**：
@@ -60,7 +61,7 @@ graph TD
   - 调用 `pnputil /enum-drivers` 穿透枚举，正则匹配 `C:\Windows\System32\DriverStore\FileRepository` 物理尺寸；
   - 多版本分组归一化比对，通过受保护管道安全卸载，严禁物理硬删。
 
-### 2.2 毫秒全盘搜索子系统 (Search & Launcher)
+### 2.2 支柱二：毫秒全盘搜索子系统 (Search & Launcher)
 - **底层裸盘读取**：通过 `DeviceIoControl` 直接与 NTFS 卷通信，绕过 Win32 高层文件系统 API，在 1~3ms 内枚举百万级文件元数据并重构完整路径树。
 - **增量 USN 监听**：常驻后台管道监听 USN 变更日志，毫秒级响应文件的创建、重命名与删除。
 - **多音字与双字母声母拼音引擎 (`pinyin_matcher.rs`)**：
@@ -69,7 +70,18 @@ graph TD
 - **对话框穿透跳转 (`quick_switch.rs`)**：
   - 嗅探前台活动窗口中的 `#32770` 标准文件对话框，将当前选中路径秒级注入 `Edit` 或 `ComboBox` 控件。
 
-### 2.3 智能护航与自愈子系统 (Intelligent Guard)
+### 2.3 支柱三：原生磁盘恢复与数据救援子系统 (Disk & Data Recovery)
+- **MFT 裸盘软删除秒级抢救**：
+  - 直接复用 `mft_scanner` 的裸盘读取流，检查记录头的 `FILE_RECORD_SEGMENT_IN_USE` 标志（值为 0 即为已删除记录）；
+  - 提取未被覆写的数据运行簇链 (Data Run)，在 1~3 秒内精准列出近期被误删的工程代码、模型权重与文档并一键还原。
+- **Windows 卷影副本快照回溯 (Volume Shadow Copy / VSS)**：
+  - 调用 Windows 原生 VSS 服务枚举历史卷影副本，将快照挂载为只读符号设备，秒级提取被意外覆盖的文件历史版本。
+- **特定工程文件签名雕刻 (File Carving)**：
+  - 针对极端分区损坏或格式化场景，通过文件特征头 (Magic Header) 直接在未分配簇中定位并恢复 Python/Notebook/Safetensors/JSON/SQLite 资产。
+- **只读防二次破坏屏障**：
+  - 恢复全过程强制以 `GENERIC_READ` 模式只读挂接，绝不在源盘写入任何临时文件。
+
+### 2.4 全天候智能护航与自愈守护底座 (Intelligent Guard & Daemon)
 - **全屏与游戏免打扰感知**：
   - 调用 Win32 `SHQueryUserNotificationState`，在用户处于全屏独占、DirectX 游戏或 PPT 演示放映时自动静默所有弹窗通知。
 - **键鼠空闲调度**：

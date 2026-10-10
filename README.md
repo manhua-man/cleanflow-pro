@@ -9,10 +9,11 @@
 
 CleanFlow Pro 是一款基于 Rust 原生内核打造的高性能、工业级 Windows 桌面软件。软件采用原生单文件便携式绿色架构（二进制体积仅 ~9.6 MB，解压即用），完全零外部运行时依赖（无需 Node.js / Python / WebView2 运行时），深度融合 Windows 11 Fluent Design 与 Nordic Mica 深色玻璃拟态视觉规范。
 
-产品拥有三大业务支柱：
-1. **工业级磁盘空间资产治理引擎**：对标 CCleaner / WizTree / DaisyDisk，提供系统冗余专清、交互式全盘 Treemap 树图、NTFS 事务型跨盘搬家 (Junction)、ReFS 写时复制去重 (Block Clone)、注册表无损备份回滚、SQLite 物理收缩、Windows 驱动存储池安全清理、系统休眠与保留存储调优、以及基于微软官方 Cloud Filter (`cldapi.dll`) 的云端同步盘离线缓存脱水释放；
-2. **毫秒级全盘桌面搜索与启动中枢**：全面深度吸收 Listary Pro 与 fsearch 核心体验，提供基于 NTFS USN/MFT 的底层极速检索、多音字与双字母复合声母 (zh/ch/sh) 智能拼音检索引擎、类型过滤胶囊标签、虚拟视口 60fps 极速滚动、双击 Ctrl / Alt+Space Spotlight 全局悬浮窗、文件对话框快速跳转 (Quick Switch) 及智能动作中枢；
-3. **智能空间护航与自愈规则引擎**：集成 Win32 原生全屏独占与游戏免打扰感知、键鼠空闲低优先级调度、时序空间消耗斜率 (Burn-rate) 预测与耗尽倒计时预警、以及低容量自适应自愈规则引擎。
+产品拥有三大业务支柱与全天候守护底座：
+1. **工业级磁盘空间资产治理引擎 (Storage Governance)**：对标 CCleaner / WizTree / DaisyDisk，提供系统冗余专清、交互式全盘 Treemap 树图、NTFS 事务型跨盘搬家 (Junction)、ReFS 写时复制去重 (Block Clone)、注册表无损备份回滚、SQLite 物理收缩、Windows 驱动存储池安全清理、系统休眠与保留存储调优、以及基于微软官方 Cloud Filter (`cldapi.dll`) 的云端同步盘离线缓存脱水释放；
+2. **毫秒级全盘桌面搜索与启动中枢 (Search & Launcher)**：全面深度吸收 Listary Pro 与 fsearch 核心体验，提供基于 NTFS USN/MFT 的底层极速检索、多音字与双字母复合声母 (zh/ch/sh) 智能拼音检索引擎、类型过滤胶囊标签、虚拟视口 60fps 极速滚动、双击 Ctrl / Alt+Space Spotlight 全局悬浮窗、文件对话框快速跳转 (Quick Switch) 及智能动作中枢；
+3. **原生磁盘恢复与数据救援中枢 (Disk & Data Recovery)**：面向 AI 时代的开发代码、模型权重与海量生成物抢救，基于 NTFS MFT 裸盘软删除记录瞬时抢救 (Undelete)、Windows 卷影副本 (VSS) 历史快照提取、特定格式特征头签名雕刻 (File Carving) 与只读无损防二次破坏安全机制；
+- **全天候智能空间护航与自愈底座 (Intelligent Guard & Daemon)**：集成 Win32 原生全屏独占与游戏免打扰感知、键鼠空闲低优先级调度、时序空间消耗斜率 (Burn-rate) 预测与耗尽倒计时预警、以及低容量自适应自愈规则引擎。
 
 ---
 
@@ -205,7 +206,30 @@ graph TD
 
 ---
 
-### 支柱三：智能空间护航与自愈规则引擎 (Intelligent Guard & Self-Healing)
+### 支柱三：原生磁盘恢复与数据救援中枢 (Disk & Data Recovery Hub)
+
+面向 AI 时代的高频数据丢失痛点（模型权重误删、微调数据覆盖、代码误重置、构建清理误伤），基于纯 Rust 原生底层实现免扫描极速恢复与历史版本回溯：
+
+#### 1. NTFS MFT 裸盘软删除秒级抢救 (MFT Undelete)
+- 直接复用 `mft_scanner` 裸盘流式直读通道，解析 MFT Record 内部的 `FILE_RECORD_SEGMENT_IN_USE` 标志（未分配状态）；
+- 毫秒级提取刚被删除但尚未被新数据覆写的记录，解析 `$FILE_NAME` 与 `$DATA` 属性的数据运行列表 (Data Run)；
+- 颠覆传统数据恢复软件漫长的全盘扇区扫描，1~3 秒内精准列出近期被误删的工程代码、文档与大文件并一键无损抢救。
+
+#### 2. Windows 原生卷影副本与历史快照提取 (Volume Shadow Copy / VSS)
+- 穿透调用 Windows 底层 VSS 卷影快照服务，安全枚举各驱动器的历史系统还原点与磁盘快照；
+- 支持将历史快照点无损挂接为只读符号设备，即使本地文件已被覆盖或 Git 发生误操作，亦能精准抽取几小时或几天前的历史版本副本。
+
+#### 3. 常见 AI/工程特征头签名雕刻式恢复 (File Carving by Magic Bytes)
+- 针对 MFT 元数据已损坏或跨卷格式化的极端灾难场景，构建零依赖的扇区级特征码雕刻引擎；
+- 针对 AI 时代主流工程格式预置 Magic Header 识别（Python 脚本、Jupyter Notebook `.ipynb`、JSON、PNG/WebP、SQLite/DuckDB、Safetensors 权重与 ZIP 压缩包）。
+
+#### 4. 只读安全挂载与防二次破坏屏障 (Read-Only Safety Shield)
+- 遵循数据恢复最高安全准则，所有恢复操作以只读（`GENERIC_READ` 与 `FILE_SHARE_READ | FILE_SHARE_WRITE`）模式挂接卷设备；
+- 严禁向待恢复的源驱动器写入任何恢复目标文件或临时索引，彻底杜绝数据二次覆写破坏。
+
+---
+
+### 全天候智能空间护航与自愈底座 (Intelligent Guard & Daemon)
 
 #### 1. Win32 全屏独占与游戏免打扰感知 (Full-screen & Gaming Suppression)
 - 调用 Win32 原生 `SHQueryUserNotificationState` 深度感知用户全屏应用、DirectX/Vulkan 独占游戏（`QUNS_RUNNING_D3D_FULL_SCREEN`）及 PPT 演示放映状态；

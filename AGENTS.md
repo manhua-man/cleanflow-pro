@@ -89,7 +89,10 @@ cargo build --release
 - [src/favorites.rs](src/favorites.rs): 常用目录加星收藏与短别名快速直达。
 - [src/icon_extractor.rs](src/icon_extractor.rs): Win32 `SHGetFileInfoW` 原生文件关联图标提取与高 DPI 自适应。
 
-### 3.4 支柱三：智能空间护航与自愈规则引擎
+### 3.4 支柱三：原生磁盘恢复与数据救援中枢 (规划演进中)
+- 核心演进模块：`mft_undelete` (MFT 未分配记录解析与软删除抢救)、`vss_snapshot` (卷影副本快照挂接与历史版本回溯)、`file_carver` (AI 与工程特征签名雕刻)。
+
+### 3.5 全天候智能空间护航与自愈底座
 - [src/intelligent_guard.rs](src/intelligent_guard.rs): Win32 `SHQueryUserNotificationState` 全屏/游戏免打扰感知、`GetLastInputInfo` 键鼠空闲调度、时序空间消耗斜率 (Burn-rate) 预测与轻量本地自愈规则引擎。
 
 ---

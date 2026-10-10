@@ -28,13 +28,21 @@
 
 ## 2. v0.5.0 及后续前沿演进规划 (Frontier Roadmap)
 
-### 2.1 WSL2 / Hyper-V 虚拟硬盘 (.vhdx) 空间精简 (Virtual Disk Compaction)
+### 2.1 支柱三核心：原生磁盘恢复与数据救援中枢 (Disk & Data Recovery Hub)
+- **痛点分析**：在 AI 时代，开发者、算法工程师与创作者高频处理海量模型权重 (`.safetensors`、`.bin`)、训练数据集、Jupyter Notebook 实验与自动生成的代码资产。误清空回收站、Git reset 覆盖、误删大文件往往造成致命损失。市面上传统恢复工具动辄数小时慢速全盘扫描且收费昂贵。
+- **技术突破规划**：
+  - **MFT 裸盘软删除秒级抢救 (MFT Undelete)**：复用 CleanFlow 原生裸盘直读通道，解析未分配 MFT 记录 (`IN_USE == 0`)，秒级提取未覆盖的簇链 (Data Run)，1~3 秒内列出近期误删文件并一键无损抢救；
+  - **Windows 原生卷影副本快照回溯 (Volume Shadow Copy / VSS)**：穿透调用 VSS 服务挂载只读快照点，秒级抽取代码或文档被误覆盖前的历史版本副本；
+  - **AI 与工程特征签名雕刻 (File Carving)**：针对极端分区损坏，按 Magic Bytes 雕刻抢救 Python/Notebook/JSON/SQLite/PNG/Safetensors 资产；
+  - **只读防二次覆写安全屏障**：全流程强制以只读模式挂接，杜绝二次数据覆盖。
+
+### 2.2 WSL2 / Hyper-V 虚拟硬盘 (.vhdx) 空间精简 (Virtual Disk Compaction)
 - **痛点分析**：开发者长期使用 WSL2 Ubuntu 或 Docker Desktop 后，虚拟磁盘 `ext4.vhdx` 会不断膨胀至数十 GB，即便在 Linux 内删除文件，Windows 物理宿主机上的 `.vhdx` 文件也不会自动缩小。
 - **技术突破规划**：
   - 扫描开发者的虚拟磁盘空洞与孤立 `.vhdx` 映射；
   - 集成安全的离线 `Compact-VHD` 物理游离页收缩向导，在保证虚拟镜像完整性的前提下瞬间释放数十 GB 宿主机空间。
 
-### 2.2 高级搜索交互与虚拟数据表格体验 (fsearch 极致对齐)
+### 2.3 高级搜索交互与虚拟数据表格体验 (fsearch 极致对齐)
 - **痛点分析**：目前搜索结果列表支持正逆序排序，但在复杂工程检索场景下，用户期望多列任意排序与列宽调整。
 - **技术突破规划**：
   - 纯 Rust / 极致轻量的前端虚拟数据表格，支持按多列（名称、路径、扩展名、大小、修改时间）平滑排序；
