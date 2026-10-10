@@ -641,6 +641,66 @@ pub fn start_server(preferred_port: u16) -> (u16, Arc<AtomicBool>) {
                         send_json_response(request, err_json);
                     }
                 }
+            } else if url == "/api/system/storage-audit" && method == Method::Get {
+                let report = crate::system_storage_audit::run_system_storage_audit();
+                let json = serde_json::to_string(&report).unwrap_or_else(|_| "{}".to_string());
+                send_json_response(request, json);
+            } else if url == "/api/system/storage-audit/driver/delete" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct DeleteDriverReq {
+                    published_name: String,
+                    #[serde(default)]
+                    force: bool,
+                }
+
+                match serde_json::from_str::<DeleteDriverReq>(&content) {
+                    Ok(req) => {
+                        match crate::system_storage_audit::delete_driver_package(&req.published_name, req.force) {
+                            Ok(msg) => {
+                                let res_json = serde_json::json!({ "success": true, "message": msg }).to_string();
+                                send_json_response(request, res_json);
+                            }
+                            Err(e) => {
+                                let err_json = serde_json::json!({ "success": false, "error": e }).to_string();
+                                send_json_response(request, err_json);
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
+            } else if url == "/api/system/storage-audit/hibernation/set" && method == Method::Post {
+                let mut content = String::new();
+                let _ = request.as_reader().read_to_string(&mut content);
+
+                #[derive(serde::Deserialize)]
+                struct SetHibernationReq {
+                    mode: String,
+                }
+
+                match serde_json::from_str::<SetHibernationReq>(&content) {
+                    Ok(req) => {
+                        match crate::system_storage_audit::set_hibernation_mode(&req.mode) {
+                            Ok(msg) => {
+                                let res_json = serde_json::json!({ "success": true, "message": msg }).to_string();
+                                send_json_response(request, res_json);
+                            }
+                            Err(e) => {
+                                let err_json = serde_json::json!({ "success": false, "error": e }).to_string();
+                                send_json_response(request, err_json);
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        let err_json = format!(r#"{{"success": false, "error": "{}"}}"#, e);
+                        send_json_response(request, err_json);
+                    }
+                }
             } else if url == "/api/system/maintenance" && method == Method::Get {
                 let status = crate::system_tools::get_system_maintenance_status();
                 let json = serde_json::to_string(&status).unwrap_or_else(|_| "{}".to_string());

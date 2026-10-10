@@ -35,6 +35,7 @@ pub mod favorites;
 pub mod exclusions;
 pub mod icon_extractor;
 pub mod tray;
+pub mod system_storage_audit;
 
 pub use launcher::*;
 pub use licensing::*;
@@ -44,6 +45,7 @@ pub use favorites::*;
 pub use exclusions::*;
 pub use icon_extractor::*;
 pub use tray::*;
+pub use system_storage_audit::*;
 
 pub use cleaner::*;
 pub use disks::*;

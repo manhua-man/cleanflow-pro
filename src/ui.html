@@ -2491,6 +2491,97 @@
             <div id="toolsJunctionList" style="font-size: 11.5px; color: var(--text-secondary);">
               正在检测系统活跃符号链接...
             </div>
+          <!-- Deep System Storage Audit & Optimization Section -->
+          <div style="background: var(--bg-card); border: 1px solid var(--stroke-card); border-radius: var(--radius-md); padding: 18px; margin-top: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 16px;">
+              <div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size: 14px; font-weight: 600; color: #fff;">系统底层存储诊断与深度优化向导</span>
+                  <span class="nav-badge" style="background: rgba(192, 132, 252, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3);">DriverStore & Hiberfil</span>
+                </div>
+                <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 4px;">
+                  排查 Windows 驱动存储池历史冗余包、系统休眠文件与保留存储，基于官方 pnputil 与 powercfg 安全调优
+                </div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="loadSystemStorageAudit(true)">
+                  <span>重新诊断</span>
+                </button>
+                <button class="btn btn-primary" id="btnBatchCleanDrivers" style="padding: 4px 12px; font-size: 11px;" onclick="batchDeleteOutdatedDrivers()">
+                  <span>一键清理废弃驱动</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 3 Summary Metrics Cards -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+              <!-- Metric 1: DriverStore -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size: 11px; color: var(--text-tertiary); font-weight: 500;">驱动存储池废弃冗余</span>
+                  <span id="auditDriverBadge" style="font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(239, 68, 68, 0.15); color: #f87171;">待诊断</span>
+                </div>
+                <div style="margin-top: 6px; display:flex; align-items:baseline; gap:6px;">
+                  <span style="font-size: 18px; font-weight: 700; color: #fff;" id="auditDriverSize">0 B</span>
+                  <span style="font-size: 11px; color: var(--text-secondary);" id="auditDriverCount">0 个旧包</span>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-tertiary); margin-top: 4px;">
+                  被新版本取代的孤立 OEM 驱动
+                </div>
+              </div>
+
+              <!-- Metric 2: Hibernation -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size: 11px; color: var(--text-tertiary); font-weight: 500;">系统休眠 (hiberfil.sys)</span>
+                  <span id="auditHiberBadge" style="font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: #60a5fa;">检测中</span>
+                </div>
+                <div style="margin-top: 6px; display:flex; align-items:baseline; gap:6px;">
+                  <span style="font-size: 18px; font-weight: 700; color: #fff;" id="auditHiberSize">0 B</span>
+                  <span style="font-size: 11px; color: var(--text-secondary);" id="auditHiberState">未激活</span>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-tertiary); margin-top: 4px; display:flex; gap:6px;">
+                  <a href="javascript:void(0)" onclick="setHibernationMode('off')" style="color:#f87171; text-decoration:none;">关闭释放</a>
+                  <span>|</span>
+                  <a href="javascript:void(0)" onclick="setHibernationMode('reduced')" style="color:#fbbf24; text-decoration:none;">精简快速启动</a>
+                  <span>|</span>
+                  <a href="javascript:void(0)" onclick="setHibernationMode('full')" style="color:#60cdff; text-decoration:none;">开启完整</a>
+                </div>
+              </div>
+
+              <!-- Metric 3: Reserved Storage -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size: 11px; color: var(--text-tertiary); font-weight: 500;">系统保留存储 (Reserved)</span>
+                  <span id="auditReserveBadge" style="font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); color: #34d399;">正常保护</span>
+                </div>
+                <div style="margin-top: 6px; display:flex; align-items:baseline; gap:6px;">
+                  <span style="font-size: 18px; font-weight: 700; color: #fff;" id="auditReserveSize">~7.00 GB</span>
+                  <span style="font-size: 11px; color: var(--text-secondary);">系统更新预留</span>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-tertiary); margin-top: 4px;">
+                  可经 DISM 调优为系统盘腾退空间
+                </div>
+              </div>
+            </div>
+
+            <!-- DriverStore Packages Filter & Table -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+              <div style="display:flex; gap:6px;">
+                <span class="spotlight-chip active" data-filter="outdated" onclick="filterDriverAudit('outdated')">仅看废弃旧版本</span>
+                <span class="spotlight-chip" data-filter="all" onclick="filterDriverAudit('all')">全量驱动包</span>
+                <span class="spotlight-chip" data-filter="latest" onclick="filterDriverAudit('latest')">仅看生效最新版</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-tertiary);" id="auditDriverListSummary">
+                共检索到 0 个驱动包
+              </div>
+            </div>
+
+            <div id="auditDriverListContainer" style="max-height: 280px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm);">
+              <div style="padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 11.5px;">
+                正在执行驱动存储池全量穿透扫描与哈希版本对齐...
+              </div>
+            </div>
           </div>
         </section>
 
@@ -3655,6 +3746,7 @@
       if (tabId === 'tools') {
         loadDockerStatus();
         loadActiveJunctions();
+        loadSystemStorageAudit();
       }
       if (tabId === 'search') {
         loadSearchVolumes();
@@ -5524,6 +5616,257 @@
         String(d.getHours()).padStart(2, '0') + ':' +
         String(d.getMinutes()).padStart(2, '0') + ':' +
         String(d.getSeconds()).padStart(2, '0');
+    }
+
+    // ==========================================
+    // System Storage Audit & Optimization
+    // ==========================================
+    let storageAuditFilter = 'outdated';
+    window.currentStorageAuditReport = null;
+
+    async function loadSystemStorageAudit(forceRefresh = false) {
+      const container = document.getElementById('auditDriverListContainer');
+      if (!container) return;
+
+      if (!window.currentStorageAuditReport || forceRefresh) {
+        container.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 11.5px;">正在深入枚举系统驱动包 (pnputil) 与比对版本尺寸...</div>';
+        try {
+          const res = await fetch('/api/system/storage-audit');
+          const data = await res.json();
+          window.currentStorageAuditReport = data;
+        } catch (e) {
+          container.innerHTML = `<div style="padding: 24px; text-align: center; color: #f87171; font-size: 11.5px;">诊断加载失败: ${escapeHtml(e.message)}</div>`;
+          return;
+        }
+      }
+
+      const report = window.currentStorageAuditReport;
+      if (!report) return;
+
+      // Update Summary Cards
+      const driverBadge = document.getElementById('auditDriverBadge');
+      const driverSize = document.getElementById('auditDriverSize');
+      const driverCount = document.getElementById('auditDriverCount');
+      if (driverBadge && driverSize && driverCount) {
+        driverSize.textContent = formatBytes(report.outdated_driver_store_bytes || 0);
+        driverCount.textContent = `${report.outdated_driver_count || 0} 个可释放包`;
+        if ((report.outdated_driver_count || 0) > 0) {
+          driverBadge.textContent = '可优化';
+          driverBadge.style.background = 'rgba(239, 68, 68, 0.15)';
+          driverBadge.style.color = '#f87171';
+        } else {
+          driverBadge.textContent = '极净状态';
+          driverBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+          driverBadge.style.color = '#34d399';
+        }
+      }
+
+      const hiberBadge = document.getElementById('auditHiberBadge');
+      const hiberSize = document.getElementById('auditHiberSize');
+      const hiberState = document.getElementById('auditHiberState');
+      if (hiberBadge && hiberSize && hiberState) {
+        const h = report.hibernation || {};
+        hiberSize.textContent = h.size_formatted || formatBytes(h.size_bytes || 0);
+        if (h.enabled) {
+          hiberState.textContent = '已占用空间';
+          hiberBadge.textContent = '已开启';
+          hiberBadge.style.background = 'rgba(245, 158, 11, 0.15)';
+          hiberBadge.style.color = '#fbbf24';
+        } else {
+          hiberState.textContent = '未占用空间';
+          hiberBadge.textContent = '已释放';
+          hiberBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+          hiberBadge.style.color = '#34d399';
+        }
+      }
+
+      const reserveBadge = document.getElementById('auditReserveBadge');
+      const reserveSize = document.getElementById('auditReserveSize');
+      if (reserveBadge && reserveSize) {
+        const r = report.reserved_storage || {};
+        reserveSize.textContent = r.total_formatted || '~7.00 GB';
+        if (r.enabled) {
+          reserveBadge.textContent = '保护预留中';
+        } else {
+          reserveBadge.textContent = '未预留';
+        }
+      }
+
+      renderDriverAuditTable();
+    }
+
+    function filterDriverAudit(filterType) {
+      storageAuditFilter = filterType;
+      document.querySelectorAll('#pane-tools .spotlight-chip').forEach(el => {
+        if (el.dataset.filter === filterType) {
+          el.classList.add('active');
+        } else if (el.dataset.filter) {
+          el.classList.remove('active');
+        }
+      });
+      renderDriverAuditTable();
+    }
+
+    function renderDriverAuditTable() {
+      const container = document.getElementById('auditDriverListContainer');
+      const summary = document.getElementById('auditDriverListSummary');
+      if (!container || !window.currentStorageAuditReport) return;
+
+      const allDrivers = window.currentStorageAuditReport.driver_packages || [];
+      let filtered = allDrivers;
+      if (storageAuditFilter === 'outdated') {
+        filtered = allDrivers.filter(d => d.is_outdated);
+      } else if (storageAuditFilter === 'latest') {
+        filtered = allDrivers.filter(d => d.is_latest);
+      }
+
+      if (summary) {
+        summary.textContent = `当前展示 ${filtered.length} / 共 ${allDrivers.length} 个驱动包`;
+      }
+
+      if (filtered.length === 0) {
+        const emptyMsg = storageAuditFilter === 'outdated' 
+          ? '太棒了！系统中未发现被取代的历史废弃驱动包，驱动存储池非常健康。'
+          : '未找到符合条件的驱动包。';
+        container.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-tertiary); font-size: 11.5px;">${emptyMsg}</div>`;
+        return;
+      }
+
+      let html = '<table class="data-grid" style="font-size: 11.5px; width: 100%;"><thead><tr>';
+      html += '<th style="width: 100px;">发布名称</th>';
+      html += '<th style="width: 140px;">原始名称</th>';
+      html += '<th>设备分类 / 提供商</th>';
+      html += '<th style="width: 170px;">版本与日期</th>';
+      html += '<th style="width: 90px; text-align: right;">占用体积</th>';
+      html += '<th style="width: 110px; text-align: center;">状态建议</th>';
+      html += '<th style="width: 80px; text-align: center;">操作</th>';
+      html += '</tr></thead><tbody>';
+
+      filtered.forEach(d => {
+        const sizeStr = formatBytes(d.size_bytes || 0);
+        const isOut = d.is_outdated;
+        const statusBadge = isOut 
+          ? `<span style="padding: 2px 6px; border-radius: 4px; background: rgba(239, 68, 68, 0.15); color: #f87171; font-size: 10.5px;">可安全清理</span>`
+          : `<span style="padding: 2px 6px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 10.5px;">当前主版本</span>`;
+
+        const actionBtn = isOut
+          ? `<button class="btn btn-danger" style="padding: 2px 8px; font-size: 11px;" onclick="executeDeleteDriver('${escapeHtml(d.published_name)}')">移除</button>`
+          : `<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px; opacity: 0.5;" disabled title="受保护的当前最新版本">保护</button>`;
+
+        html += `
+          <tr style="${isOut ? 'background: rgba(239, 68, 68, 0.03);' : ''}">
+            <td style="font-family: var(--font-mono); font-weight: 600; color: #fff;">${escapeHtml(d.published_name)}</td>
+            <td style="font-family: var(--font-mono); color: #60cdff;">${escapeHtml(d.original_name)}</td>
+            <td>
+              <div style="font-weight: 500; color: #fff;">${escapeHtml(d.class_name || '通用设备')}</div>
+              <div style="font-size: 10.5px; color: var(--text-tertiary);">${escapeHtml(d.provider || '未知')}</div>
+            </td>
+            <td>
+              <div style="font-family: var(--font-mono); color: #e2e8f0;">${escapeHtml(d.driver_version || '-')}</div>
+              <div style="font-size: 10.5px; color: var(--text-tertiary);">${escapeHtml(d.driver_date || '-')}</div>
+            </td>
+            <td style="text-align: right; font-family: var(--font-mono); font-weight: 600; color: ${d.size_bytes > 50*1024*1024 ? '#fbbf24' : 'var(--text-secondary)'};">${sizeStr}</td>
+            <td style="text-align: center;">${statusBadge}</td>
+            <td style="text-align: center;">${actionBtn}</td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    async function executeDeleteDriver(publishedName) {
+      openConfirmModal(
+        '安全移除驱动包',
+        `即将通过 Windows pnputil 安全卸载并移除驱动包 ${publishedName}。该驱动已有更新的版本在使用，确认继续吗？`,
+        async () => {
+          try {
+            const res = await fetch('/api/system/storage-audit/driver/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ published_name: publishedName, force: false })
+            });
+            const result = await res.json();
+            if (result.success) {
+              showToast(`驱动包 ${publishedName} 已成功移除`);
+              loadSystemStorageAudit(true);
+            } else {
+              showToast(`移除失败: ${result.error || '驱动可能正在被硬件占有'}`);
+            }
+          } catch (e) {
+            showToast(`操作异常: ${e.message}`);
+          }
+        }
+      );
+    }
+
+    async function batchDeleteOutdatedDrivers() {
+      if (!window.currentStorageAuditReport) return;
+      const outdated = (window.currentStorageAuditReport.driver_packages || []).filter(d => d.is_outdated);
+      if (outdated.length === 0) {
+        showToast('当前系统中没有需要清理的废弃旧驱动包');
+        return;
+      }
+
+      const totalSize = formatBytes(window.currentStorageAuditReport.outdated_driver_store_bytes || 0);
+      openConfirmModal(
+        '批量安全清理废弃旧驱动',
+        `共检测到 ${outdated.length} 个已被更新版本取代的历史驱动包（预计可回收空间 ${totalSize}）。将通过官方 pnputil 逐个安全卸载，保留当前正在运行的最新版本。确认开始吗？`,
+        async () => {
+          let successCount = 0;
+          let failCount = 0;
+          showToast(`开始安全清理 ${outdated.length} 个废弃驱动包...`);
+
+          for (const d of outdated) {
+            try {
+              const res = await fetch('/api/system/storage-audit/driver/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ published_name: d.published_name, force: false })
+              });
+              const r = await res.json();
+              if (r.success) successCount++;
+              else failCount++;
+            } catch (e) {
+              failCount++;
+            }
+          }
+
+          showToast(`清理完成！成功移除 ${successCount} 个旧驱动${failCount > 0 ? `，${failCount} 个因硬件占用保留` : ''}`);
+          loadSystemStorageAudit(true);
+        }
+      );
+    }
+
+    async function setHibernationMode(mode) {
+      let desc = '';
+      if (mode === 'off') desc = '彻底关闭休眠并将 hiberfil.sys 物理删除，回收全部磁盘占用空间。';
+      else if (mode === 'reduced') desc = '将休眠切换为精简模式（仅保留 Windows 快速启动，文件体积减半）。';
+      else if (mode === 'full') desc = '恢复标准完整休眠模式。';
+
+      openConfirmModal(
+        '系统休眠调优',
+        `即将执行 powercfg 命令：${desc} 确认应用此设置吗？`,
+        async () => {
+          try {
+            const res = await fetch('/api/system/storage-audit/hibernation/set', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ mode: mode })
+            });
+            const result = await res.json();
+            if (result.success) {
+              showToast(result.message || '休眠模式调优完成');
+              loadSystemStorageAudit(true);
+            } else {
+              showToast(`调优失败: ${result.error || '需要管理员权限'}`);
+            }
+          } catch (e) {
+            showToast(`操作异常: ${e.message}`);
+          }
+        }
+      );
     }
 
     // High-Value Migration Presets (Pillar 1)
